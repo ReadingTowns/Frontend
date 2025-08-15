@@ -24,6 +24,19 @@ npm run start    # Start the production server
 npm run lint     # Run ESLint
 ```
 
+### Testing
+```bash
+# Unit Testing
+npm run test            # Run Jest unit tests
+npm run test:watch      # Run Jest in watch mode
+npm run test:coverage   # Run Jest with coverage report
+
+# E2E Testing
+npm run test:e2e        # Run Playwright E2E tests (all browsers)
+npm run test:ui         # Run Playwright with UI mode
+npx playwright test --project=chromium --reporter=list  # Quick test (Chrome only, CLI output)
+```
+
 ## Architecture
 
 ### Technology Stack
@@ -32,12 +45,30 @@ npm run lint     # Run ESLint
 - **Styling**: Tailwind CSS v4 with PostCSS
 - **Font**: Geist font family (Sans and Mono variants)
 - **Linting**: ESLint 9 with Next.js configuration
+- **State Management**: TanStack Query v5 for server state
+- **Authentication**: OAuth2 (Google, Kakao) with cookie-based token management
+- **Testing**: Jest + React Testing Library + Playwright + MSW
 
 ### Project Structure
 - `/src/app/` - App Router pages and layouts
   - `layout.tsx` - Root layout with font configuration
   - `page.tsx` - Home page component
+  - `login/page.tsx` - Login page with social authentication
   - `globals.css` - Global styles with Tailwind directives
+- `/src/components/` - Reusable UI components
+  - `auth/SocialLoginButtons.tsx` - Google/Kakao login buttons
+- `/src/hooks/` - Custom React hooks
+  - `useAuth.ts` - Authentication state management
+- `/src/lib/` - Utility functions and configurations
+  - `queryClient.ts` - TanStack Query client setup
+- `/src/mocks/` - MSW API mocking
+  - `handlers.ts` - Mock API handlers
+  - `server.ts` - Mock server setup
+- `/src/__tests__/` - Test files
+  - `app/` - Unit tests for pages
+  - `components/` - Component tests
+- `/__tests__/e2e/` - Playwright E2E tests
+  - `auth.spec.ts` - Authentication flow tests
 - `/public/` - Static assets (SVG icons)
 - TypeScript configuration uses strict mode with path alias `@/*` mapping to `./src/*`
 
@@ -45,6 +76,9 @@ npm run lint     # Run ESLint
 - **TypeScript**: Strict mode enabled, using bundler module resolution
 - **ESLint**: Configured with Next.js core-web-vitals and TypeScript rules
 - **Tailwind CSS**: Version 4 with PostCSS plugin architecture
+- **Jest**: Configured with next/jest for Next.js integration
+- **Playwright**: Multi-browser testing with MCP integration support
+- **MSW**: API mocking for development and testing
 
 ## Layout Design
 - **Mobile-first fixed width**: 430px max-width for all devices
@@ -96,6 +130,107 @@ After MCP setup, the following browser automation tools are available:
    - Test different viewport sizes (375x812, 768x1024, 1920x1080)
    - Capture screenshots for visual verification
    - Verify 430px max-width constraint on all devices
+
+## 인증 시스템 구현 현황
+
+### OAuth2 소셜 로그인
+현재 Google과 Kakao 소셜 로그인이 구현되어 있습니다.
+
+#### 구현된 컴포넌트
+- **로그인 페이지** (`/src/app/login/page.tsx`): 메인 로그인 UI
+- **소셜 로그인 버튼** (`/src/components/auth/SocialLoginButtons.tsx`): Google/Kakao 버튼 컴포넌트
+- **인증 훅** (`/src/hooks/useAuth.ts`): TanStack Query 기반 인증 상태 관리
+
+#### OAuth2 엔드포인트
+```typescript
+// Google 로그인
+window.location.assign('/oauth2/authorization/google')
+
+// Kakao 로그인
+window.location.assign('/oauth2/authorization/kakao')
+```
+
+#### 토큰 관리
+- **액세스 토큰**: 쿠키 기반 저장 (`access_token`)
+- **리프레시 토큰**: 쿠키 기반 저장 (`refresh_token`)
+- **TanStack Query**: 서버 상태 관리 및 캐싱
+
+### 구현 완료 상태
+- ✅ 로그인 페이지 UI (반응형 디자인 포함)
+- ✅ Google/Kakao 소셜 로그인 버튼
+- ✅ TanStack Query 설정 및 인증 훅
+- ✅ Unit 테스트 (Jest + React Testing Library)
+- ✅ E2E 테스트 (Playwright + MCP 통합)
+- 🔄 MSW API 모킹 설정 (진행 중)
+
+## 테스트 환경 설정
+
+### Unit Testing (Jest + React Testing Library)
+```bash
+# 설정 파일
+jest.config.js          # Jest 설정 (next/jest 사용)
+src/setupTests.ts       # Jest 환경 설정
+
+# 테스트 실행
+npm run test            # 모든 단위 테스트 실행
+npm run test:watch      # Watch 모드
+npm run test:coverage   # 커버리지 리포트
+```
+
+**주요 테스트 파일:**
+- `src/__tests__/app/login/page.test.tsx` - 로그인 페이지 컴포넌트 테스트
+- `src/__tests__/components/auth/SocialLoginButtons.test.tsx` - 소셜 로그인 버튼 테스트
+
+### E2E Testing (Playwright)
+```bash
+# 설정 파일
+playwright.config.ts    # Playwright 설정
+
+# 테스트 실행
+npm run test:e2e        # 모든 브라우저에서 E2E 테스트
+npx playwright test --project=chromium --reporter=list  # Chrome만, CLI 결과
+npm run test:ui         # UI 모드로 테스트
+```
+
+**테스트 브라우저:**
+- Desktop: Chrome, Firefox, Safari, Edge
+- Mobile: Chrome (Pixel 5), Safari (iPhone 12)
+
+**주요 테스트 시나리오** (`__tests__/e2e/auth.spec.ts`):
+1. 로그인 페이지 기본 요소 표시 확인
+2. 반응형 레이아웃 테스트 (모바일, 태블릿, 데스크톱)
+3. 소셜 로그인 버튼 스타일 검증
+4. OAuth 리다이렉트 기능 테스트
+
+### MCP Playwright 통합
+MCP를 통해 브라우저 자동화가 가능합니다:
+
+```bash
+# MCP 설치 및 설정
+claude mcp add playwright -- npx -y @playwright/mcp@latest
+
+# 사용 가능한 MCP 도구
+mcp__playwright__browser_navigate     # URL 이동
+mcp__playwright__browser_resize       # 뷰포트 크기 변경
+mcp__playwright__browser_take_screenshot  # 스크린샷 촬영
+mcp__playwright__browser_click        # 요소 클릭
+mcp__playwright__browser_evaluate     # JavaScript 실행
+```
+
+### API Mocking (MSW)
+Mock Service Worker를 사용한 API 모킹 설정:
+
+```bash
+# MSW 설정 파일
+src/mocks/handlers.ts   # API 핸들러 정의
+src/mocks/server.ts     # Mock 서버 설정
+```
+
+**주요 모킹 엔드포인트:**
+- `/oauth2/authorization/google` - Google OAuth 시뮬레이션
+- `/oauth2/authorization/kakao` - Kakao OAuth 시뮬레이션
+- `/api/auth/me` - 사용자 정보 조회
+- `/api/auth/logout` - 로그아웃
 
 ## 프로젝트 기능 명세서
 
