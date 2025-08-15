@@ -27,6 +27,7 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('start')
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isNicknameValid, setIsNicknameValid] = useState(false)
 
   const handleBackButton = () => {
     switch (currentStep) {
@@ -113,7 +114,7 @@ export default function OnboardingPage() {
       case 'phone':
         return !!onboardingData.phoneNumber
       case 'profile':
-        return !!onboardingData.nickname
+        return !!onboardingData.nickname && isNicknameValid
       case 'location':
         return !!(onboardingData.latitude && onboardingData.longitude)
       case 'preferences':
@@ -166,6 +167,7 @@ export default function OnboardingPage() {
             onProfileImageChange={profileImage =>
               setOnboardingData(prev => ({ ...prev, profileImage }))
             }
+            onNicknameValidationChange={setIsNicknameValid}
             onBack={handleBackButton}
           />
         )
