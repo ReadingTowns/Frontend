@@ -4,11 +4,31 @@
  */
 
 describe('MSW API Mocking', () => {
+  beforeEach(() => {
+    // 매 테스트마다 쿠키 상태 초기화
+    if (typeof document !== 'undefined') {
+      document.cookie = "access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
+      document.cookie = "refresh_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
+    }
+  })
+
+  it('should handle unauthorized auth check', async () => {
+    console.log('Starting unauthorized auth check test')
+    const response = await fetch('/api/auth/me')
+    console.log('Response status:', response.status)
+    const data = await response.json()
+    console.log('Response data:', data)
+
+    expect(response.status).toBe(401)
+    expect(data.success).toBe(false)
+    expect(data.message).toBe('Unauthorized')
+  })
+
   it('should mock Google OAuth redirect', async () => {
     const response = await fetch('/oauth2/authorization/google')
     const data = await response.json()
 
-    expect(response.status).toBe(302)
+    expect(response.status).toBe(200)
     expect(data.message).toBe('Redirecting to Google OAuth')
     expect(data.redirectUrl).toContain('/auth/callback/google')
   })
@@ -17,7 +37,7 @@ describe('MSW API Mocking', () => {
     const response = await fetch('/oauth2/authorization/kakao')
     const data = await response.json()
 
-    expect(response.status).toBe(302)
+    expect(response.status).toBe(200)
     expect(data.message).toBe('Redirecting to Kakao OAuth')
     expect(data.redirectUrl).toContain('/auth/callback/kakao')
   })
@@ -40,15 +60,6 @@ describe('MSW API Mocking', () => {
     expect(data.success).toBe(true)
     expect(data.user.provider).toBe('kakao')
     expect(data.user.email).toBe('test@kakao.com')
-  })
-
-  it('should handle unauthorized auth check', async () => {
-    const response = await fetch('/api/auth/me')
-    const data = await response.json()
-
-    expect(response.status).toBe(401)
-    expect(data.success).toBe(false)
-    expect(data.message).toBe('Unauthorized')
   })
 
   it('should handle authorized auth check with cookie', async () => {

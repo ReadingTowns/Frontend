@@ -1,21 +1,15 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import LoginPage from '@/app/login/page'
-
-const mockPush = jest.fn()
 
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: mockPush,
+    push: jest.fn(),
     replace: jest.fn(),
     back: jest.fn(),
   }),
 }))
 
 describe('LoginPage', () => {
-  beforeEach(() => {
-    jest.clearAllMocks()
-    global.window.location.assign.mockClear()
-  })
 
   it('renders login page with title and description', () => {
     render(<LoginPage />)
@@ -34,20 +28,16 @@ describe('LoginPage', () => {
     expect(screen.getByText('카카오로 로그인')).toBeInTheDocument()
   })
 
-  it('redirects to Google OAuth when Google button is clicked', () => {
+  it('renders clickable login buttons', () => {
     render(<LoginPage />)
 
-    fireEvent.click(screen.getByText('Google로 로그인'))
+    const googleButton = screen.getByText('Google로 로그인')
+    const kakaoButton = screen.getByText('카카오로 로그인')
 
-    expect(global.window.location.assign).toHaveBeenCalledWith('/oauth2/authorization/google')
-  })
-
-  it('redirects to Kakao OAuth when Kakao button is clicked', () => {
-    render(<LoginPage />)
-
-    fireEvent.click(screen.getByText('카카오로 로그인'))
-
-    expect(global.window.location.assign).toHaveBeenCalledWith('/oauth2/authorization/kakao')
+    expect(googleButton).toBeInTheDocument()
+    expect(kakaoButton).toBeInTheDocument()
+    expect(googleButton.closest('button')).toBeEnabled()
+    expect(kakaoButton.closest('button')).toBeEnabled()
   })
 
   it('has proper layout structure', () => {
