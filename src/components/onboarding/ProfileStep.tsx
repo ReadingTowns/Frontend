@@ -5,6 +5,7 @@ export default function ProfileStep({
   nickname,
   profileImage,
   onNicknameChange,
+  onProfileImageChange,
   onNicknameValidationChange,
   onBack,
 }: ProfileStepProps) {
@@ -59,6 +60,33 @@ export default function ProfileStep({
     setLocalNickname(nickname)
     setLocalProfileImage(profileImage)
   }, [nickname, profileImage])
+
+  // 기본 프로필 로드
+  useEffect(() => {
+    const loadDefaultProfile = async () => {
+      // 이미 값이 있다면 API 호출하지 않음
+      if (nickname || profileImage) return
+
+      try {
+        const response = await fetch(
+          '/api/v1/members/onboarding/default-profile'
+        )
+        const data = await response.json()
+
+        if (data.result) {
+          setLocalNickname(data.result.defaultUsername)
+          setLocalProfileImage(data.result.defaultProfileImage)
+          // 부모 컴포넌트에 기본값 전달
+          onNicknameChange(data.result.defaultUsername)
+          onProfileImageChange(data.result.defaultProfileImage)
+        }
+      } catch (error) {
+        console.error('기본 프로필 로드 실패:', error)
+      }
+    }
+
+    loadDefaultProfile()
+  }, [])
 
   const handleNicknameChange = (newNickname: string) => {
     setLocalNickname(newNickname)
