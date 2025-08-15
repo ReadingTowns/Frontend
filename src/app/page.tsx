@@ -1,4 +1,45 @@
+'use client'
+
+import { useAuth } from '@/hooks/useAuth'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
 export default function Home() {
+  const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
+
+  // 미인증 사용자는 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!isAuthenticated && !isLoading) {
+      router.push('/login')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  // 로딩 중일 때
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mx-auto mb-4"></div>
+          <p className="text-gray-500">로딩 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 미인증 사용자는 리다이렉트 중이므로 로딩 화면 표시
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mx-auto mb-4"></div>
+          <p className="text-gray-500">로그인 페이지로 이동 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 인증된 사용자 - 대시보드
   return (
     <div className="min-h-screen py-8">
       {/* Header */}

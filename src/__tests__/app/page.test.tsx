@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactNode } from 'react'
-import LoginPage from '@/app/login/page'
+import Home from '@/app/page'
 import { server } from '@/mocks/server'
 import { http, HttpResponse } from 'msw'
 
@@ -36,7 +36,7 @@ const createWrapper = () => {
   return TestWrapper
 }
 
-describe('Login Page', () => {
+describe('Home Page (Dashboard)', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     mockPush.mockClear()
@@ -47,19 +47,25 @@ describe('Login Page', () => {
     server.use(
       http.get('/api/auth/me', async () => {
         await new Promise(resolve => setTimeout(resolve, 100))
-        return HttpResponse.json(
-          { success: false, message: 'Unauthorized' },
-          { status: 401 }
-        )
+        return HttpResponse.json({
+          success: true,
+          user: {
+            id: '1',
+            email: 'test@example.com',
+            name: 'Test User',
+            provider: 'google',
+            isAuthenticated: true
+          }
+        })
       })
     )
 
-    render(<LoginPage />, { wrapper: createWrapper() })
+    render(<Home />, { wrapper: createWrapper() })
 
     expect(screen.getByText('로딩 중...')).toBeInTheDocument()
   })
 
-  it('renders login screen when user is not authenticated', async () => {
+  it('redirects to login when user is not authenticated', async () => {
     // MSW 핸들러 추가 - 인증되지 않은 상태
     server.use(
       http.get('/api/auth/me', () => {
@@ -70,19 +76,32 @@ describe('Login Page', () => {
       })
     )
 
-    render(<LoginPage />, { wrapper: createWrapper() })
+    render(<Home />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(screen.getByText('리딩타운')).toBeInTheDocument()
-      expect(screen.getByText('책으로 이웃과 연결되는 공간')).toBeInTheDocument()
-      expect(screen.getByText('로그인하여 리딩타운의 모든 서비스를 이용하세요')).toBeInTheDocument()
+      expect(mockPush).toHaveBeenCalledWith('/login')
     })
-
-    expect(screen.getByText('Google로 로그인')).toBeInTheDocument()
-    expect(screen.getByText('카카오로 로그인')).toBeInTheDocument()
   })
 
-  it('redirects to dashboard when user is authenticated', async () => {
+  it('shows redirect message when unauthenticated user is being redirected', async () => {
+    // MSW 핸들러 추가 - 인증되지 않은 상태
+    server.use(
+      http.get('/api/auth/me', () => {
+        return HttpResponse.json(
+          { success: false, message: 'Unauthorized' },
+          { status: 401 }
+        )
+      })
+    )
+
+    render(<Home />, { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(screen.getByText('로그인 페이지로 이동 중...')).toBeInTheDocument()
+    })
+  })
+
+  it('renders dashboard when user is authenticated', async () => {
     // MSW 핸들러 추가 - 인증된 상태
     server.use(
       http.get('/api/auth/me', () => {
@@ -99,14 +118,21 @@ describe('Login Page', () => {
       })
     )
 
-    render(<LoginPage />, { wrapper: createWrapper() })
+    render(<Home />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/')
+      expect(screen.getByText('리딩 타운')).toBeInTheDocument()
+      expect(screen.getByText('책으로 연결되는 우리 동네')).toBeInTheDocument()
     })
+
+    // 대시보드 섹션들 확인
+    expect(screen.getByText('현재 교환')).toBeInTheDocument()
+    expect(screen.getByText('추천 이웃')).toBeInTheDocument()
+    expect(screen.getByText('오늘의 추천 도서')).toBeInTheDocument()
+    expect(screen.getByText('빠른 실행')).toBeInTheDocument()
   })
 
-  it('shows redirect message when authenticated user is being redirected', async () => {
+  it('dashboard has proper layout structure', async () => {
     // MSW 핸들러 추가 - 인증된 상태
     server.use(
       http.get('/api/auth/me', () => {
@@ -123,37 +149,19 @@ describe('Login Page', () => {
       })
     )
 
-    render(<LoginPage />, { wrapper: createWrapper() })
+    render(<Home />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(screen.getByText('대시보드로 이동 중...')).toBeInTheDocument()
-    })
-  })
-
-  it('login buttons have proper layout structure', async () => {
-    // MSW 핸들러 추가 - 인증되지 않은 상태
-    server.use(
-      http.get('/api/auth/me', () => {
-        return HttpResponse.json(
-          { success: false, message: 'Unauthorized' },
-          { status: 401 }
-        )
-      })
-    )
-
-    render(<LoginPage />, { wrapper: createWrapper() })
-
-    await waitFor(() => {
-      expect(screen.getByText('리딩타운')).toBeInTheDocument()
+      expect(screen.getByText('리딩 타운')).toBeInTheDocument()
     })
 
-    const titleContainer = screen.getByText('리딩타운').closest('div')
-    expect(titleContainer).toHaveClass('text-center', 'space-y-4')
+    // 헤더가 올바른 구조를 가지는지 확인
+    const header = screen.getByRole('banner')
+    expect(header).toBeInTheDocument()
+    expect(header).toHaveClass('mb-8')
 
-    const buttonContainer = screen
-      .getByText('Google로 로그인')
-      .closest('button')
-      ?.parentElement
-    expect(buttonContainer).toHaveClass('w-full', 'max-w-sm', 'space-y-4')
+    // 그래디언트 텍스트 확인
+    const title = screen.getByText('리딩 타운')
+    expect(title).toHaveClass('text-3xl', 'font-bold', 'text-center')
   })
 })

@@ -1,8 +1,13 @@
 'use client'
 
+import { useAuth } from '@/hooks/useAuth'
 import { GoogleLoginButton, KakaoLoginButton } from '@/components/auth/SocialLoginButtons'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function LoginPage() {
+  const { isAuthenticated, isLoading } = useAuth()
+  const router = useRouter()
 
   const handleGoogleLogin = () => {
     window.location.assign('/oauth2/authorization/google')
@@ -12,6 +17,38 @@ export default function LoginPage() {
     window.location.assign('/oauth2/authorization/kakao')
   }
 
+  // 인증된 사용자는 대시보드로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      router.push('/')
+    }
+  }, [isAuthenticated, isLoading, router])
+
+  // 로딩 중일 때
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mx-auto mb-4"></div>
+          <p className="text-gray-500">로딩 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 인증된 사용자는 리다이렉트 중이므로 로딩 화면 표시
+  if (isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mx-auto mb-4"></div>
+          <p className="text-gray-500">대시보드로 이동 중...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 미인증 사용자 - 로그인 화면
   return (
     <div className="min-h-screen flex flex-col items-center justify-center space-y-8">
       <div className="text-center space-y-4">

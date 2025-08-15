@@ -39,11 +39,16 @@ export function useAuth() {
     },
     staleTime: 1000 * 60 * 5,
     retry: (failureCount, error: unknown) => {
-      if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
-        return false
+      // 401 (Unauthorized) 또는 404 (Not Found) 시 재시도 안함
+      if (error && typeof error === 'object' && 'status' in error) {
+        const status = error.status as number
+        if (status === 401 || status === 404) {
+          return false
+        }
       }
-      return failureCount < 2
+      return failureCount < 1 // 재시도 횟수를 1번으로 줄임
     },
+    retryDelay: 500, // 재시도 간격을 500ms로 단축
   })
 
   const logoutMutation = useMutation({
