@@ -21,7 +21,9 @@ npm run start    # Start the production server
 
 ### Code Quality
 ```bash
-npm run lint     # Run ESLint
+npm run lint           # Run ESLint
+npm run quality:check  # Run lint + build + test (full quality check)
+npm run quality:fix    # Run ESLint with auto-fix
 ```
 
 ### Testing
@@ -388,3 +390,46 @@ src/mocks/server.ts     # Mock 서버 설정
 - 시스템 설정에 따라 자동 전환
 - Primary/Secondary 색상은 밝기 자동 조정
 - 배경과 텍스트는 반전 처리
+
+## 코드 품질 관리
+
+### 자동화된 코드 품질 검사
+프로젝트에는 Husky와 lint-staged를 사용한 자동화된 코드 품질 검사 시스템이 구축되어 있습니다.
+
+#### Git Hooks
+- **pre-commit**: 커밋 전 lint, build, lint-staged 실행
+- **pre-push**: 푸시 전 전체 테스트 실행
+
+#### 코드 품질 스크립트
+```bash
+npm run quality:check  # 전체 품질 검사 (lint + build + test)
+npm run quality:fix    # ESLint 자동 수정
+```
+
+#### Lint-staged 설정
+커밋 시 staging된 파일에 대해 자동으로:
+- TypeScript/JavaScript 파일: ESLint 자동 수정
+- TypeScript 파일: 빌드 검증
+
+### 코딩 표준
+- **TypeScript 엄격 모드** 사용
+- **ESLint 규칙** 준수 (Next.js + TypeScript)
+- **any 타입 사용 금지** - unknown 타입 사용 권장
+- **컴포넌트 displayName** 필수 (테스트 환경)
+- **require() 대신 import() 사용** (ES6 모듈)
+
+### 빌드 실패 감지
+Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
+1. ESLint 에러 발생 시
+2. TypeScript 컴파일 에러 발생 시  
+3. 테스트 실패 시
+4. 빌드 과정 실패 시
+
+### 개발 워크플로우
+1. 코드 작성
+2. `npm run quality:check`로 로컬 검증
+3. `git add .` (staging)
+4. `git commit` (pre-commit hook 자동 실행)
+5. `git push` (pre-push hook으로 테스트 실행)
+
+이 시스템을 통해 빌드 실패나 코드 품질 문제를 사전에 방지할 수 있습니다.

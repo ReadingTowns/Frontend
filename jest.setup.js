@@ -1,17 +1,5 @@
 import '@testing-library/jest-dom'
 
-// 환경변수 설정
-process.env.NODE_ENV = 'test'
-
-// whatwg-fetch polyfill for fetch API
-import 'whatwg-fetch'
-
-// TextEncoder/TextDecoder polyfill for MSW
-import { TextEncoder, TextDecoder } from 'util'
-
-global.TextEncoder = TextEncoder
-global.TextDecoder = TextDecoder
-
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {
@@ -29,16 +17,35 @@ jest.mock('next/navigation', () => ({
   },
 }))
 
-// Mock window.location globally (Jest 공식 문서 방식)
-delete global.window.location
-global.window.location = {
-  assign: jest.fn(),
-  href: 'http://localhost:3000',
-  origin: 'http://localhost:3000',
-  protocol: 'http:',
-  hostname: 'localhost',
-  port: '3000',
-  pathname: '/',
-  search: '',
-  hash: '',
-}
+// Note: window.location mocking handled per test as needed
+
+// MSW 서버 설정
+import { server } from './src/mocks/server'
+
+// 테스트 실행 전에 MSW 서버 시작
+beforeAll(() => {
+  server.listen({
+    onUnhandledRequest: 'warn'
+  })
+})
+
+// 각 테스트 후에 핸들러 리셋 및 상태 정리
+afterEach(() => {
+  server.resetHandlers()
+  
+  // 쿠키 초기화 (JSDOM 환경에서)
+  if (typeof document !== 'undefined') {
+    document.cookie.split(";").forEach((c) => {
+      const eqPos = c.indexOf("=")
+      const name = eqPos > -1 ? c.substr(0, eqPos) : c
+      document.cookie = name.trim() + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
+    })
+  }
+  
+  // Additional cleanup if needed
+})
+
+// 모든 테스트 완료 후 서버 종료
+afterAll(() => {
+  server.close()
+})

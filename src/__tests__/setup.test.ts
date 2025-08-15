@@ -17,8 +17,8 @@ describe('Jest Setup', () => {
     expect(element).toHaveTextContent('Hello World')
   })
 
-  it('should mock Next.js navigation', () => {
-    const { useRouter } = require('next/navigation')
+  it('should mock Next.js navigation', async () => {
+    const { useRouter } = await import('next/navigation')
     const router = useRouter()
     
     expect(router.push).toBeDefined()

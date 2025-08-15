@@ -13,9 +13,11 @@ export function createQueryClient() {
         // 네트워크가 다시 연결될 때만 리페치
         refetchOnReconnect: true,
         // 재시도 횟수 설정
-        retry: (failureCount, error: any) => {
+        retry: (failureCount, error: unknown) => {
           // 4xx 에러는 재시도하지 않음
-          if (error?.status >= 400 && error?.status < 500) {
+          if (error && typeof error === 'object' && 'status' in error && 
+              typeof error.status === 'number' && 
+              error.status >= 400 && error.status < 500) {
             return false
           }
           // 최대 3번까지 재시도
