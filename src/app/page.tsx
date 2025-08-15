@@ -1,103 +1,120 @@
-import Image from "next/image";
-
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen py-8">
+      {/* Header */}
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold text-center bg-gradient-to-r from-primary-200 to-secondary-800 bg-clip-text text-transparent">
+          리딩 타운
+        </h1>
+        <p className="text-center text-gray-500 mt-2">
+          책으로 연결되는 우리 동네
+        </p>
+      </header>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      {/* Main Content */}
+      <div className="space-y-8">
+        {/* Current Exchange */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4">현재 교환</h2>
+          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-24 bg-gradient-to-br from-primary-200 to-secondary-200 rounded"></div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">혼자 있는 시간의 힘</h3>
+                <p className="text-sm text-gray-600">정희선</p>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="inline-block px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded">
+                    D-15
+                  </span>
+                  <span className="text-sm text-gray-500">반납까지</span>
+                </div>
+              </div>
+              <button className="px-4 py-2 bg-primary-400 text-white rounded-lg text-sm font-medium">
+                채팅
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Recommended Users */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4">추천 이웃</h2>
+          <div className="space-y-3">
+            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-300 to-secondary-300 rounded-full"></div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">김리딩</h4>
+                  <p className="text-sm text-gray-500">취향 유사도 85% · 우리동네</p>
+                </div>
+                <button className="text-primary-600 text-sm font-medium">
+                  팔로우
+                </button>
+              </div>
+            </div>
+            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-secondary-300 to-primary-300 rounded-full"></div>
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-900">박북스</h4>
+                  <p className="text-sm text-gray-500">취향 유사도 78% · 우리동네</p>
+                </div>
+                <button className="text-primary-600 text-sm font-medium">
+                  팔로우
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* AI Recommendations */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4">오늘의 추천 도서</h2>
+          <div className="space-y-3">
+            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <div className="flex gap-4">
+                <div className="w-16 h-24 bg-gradient-to-br from-primary-300 to-secondary-300 rounded"></div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-gray-900">사피엔스</h3>
+                  <p className="text-sm text-gray-600">유발 하라리</p>
+                  <p className="text-xs text-gray-500 mt-1">AI 추천 이유: 최근 읽은 책과 유사한 주제</p>
+                  <div className="flex gap-2 mt-2">
+                    <span className="inline-block px-2 py-1 bg-secondary-100 text-secondary-700 text-xs rounded">
+                      역사
+                    </span>
+                    <span className="inline-block px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded">
+                      인문
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section>
+          <h2 className="text-xl font-semibold mb-4">빠른 실행</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <button className="p-4 bg-primary-400 text-white rounded-lg text-center hover:bg-primary-500 transition-colors">
+              <div className="text-2xl mb-1">📚</div>
+              <div className="text-sm font-medium">내 서재</div>
+            </button>
+            <button className="p-4 bg-secondary-200 text-gray-800 rounded-lg text-center hover:bg-secondary-300 transition-colors">
+              <div className="text-2xl mb-1">🔍</div>
+              <div className="text-sm font-medium">책 검색</div>
+            </button>
+            <button className="p-4 bg-gray-100 text-gray-800 rounded-lg text-center hover:bg-gray-200 transition-colors">
+              <div className="text-2xl mb-1">💬</div>
+              <div className="text-sm font-medium">채팅</div>
+            </button>
+            <button className="p-4 bg-gray-100 text-gray-800 rounded-lg text-center hover:bg-gray-200 transition-colors">
+              <div className="text-2xl mb-1">👥</div>
+              <div className="text-sm font-medium">이웃 찾기</div>
+            </button>
+          </div>
+        </section>
+      </div>
     </div>
   );
 }
