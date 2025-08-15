@@ -1,5 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-import { GoogleLoginButton, KakaoLoginButton } from '@/components/auth/SocialLoginButtons'
+import {
+  GoogleLoginButton,
+  KakaoLoginButton,
+} from '@/components/auth/SocialLoginButtons'
 
 describe('SocialLoginButtons', () => {
   describe('GoogleLoginButton', () => {

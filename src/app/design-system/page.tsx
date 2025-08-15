@@ -145,5 +145,5 @@ export default function DesignSystem() {
         </section>
       </div>
     </div>
-  );
+  )
 }

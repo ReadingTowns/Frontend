@@ -8,7 +8,9 @@ export default function KakaoCallbackPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const queryClient = useQueryClient()
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
+    'loading'
+  )
   const [errorMessage, setErrorMessage] = useState<string>('')
 
   useEffect(() => {
@@ -31,26 +33,29 @@ export default function KakaoCallbackPage() {
         }
 
         // OAuth 콜백 처리
-        const response = await fetch(`/auth/callback/kakao?code=${code}&state=${state}`, {
-          method: 'GET',
-          credentials: 'include',
-        })
+        const response = await fetch(
+          `/auth/callback/kakao?code=${code}&state=${state}`,
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        )
 
         if (response.ok) {
           const data = await response.json()
           if (data.success) {
             setStatus('success')
-            
+
             // MSW에서 Set-Cookie 헤더로 쿠키가 자동 설정됨
             // 제공자 정보 저장 (MSW에서 사용)
             localStorage.setItem('lastProvider', 'kakao')
-            
+
             // 인증 상태 업데이트
             queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
-            
-            // 홈으로 리다이렉트
+
+            // 리다이렉트 페이지로 이동
             setTimeout(() => {
-              router.push('/home')
+              router.push('/auth/redirect')
             }, 1000)
           } else {
             setErrorMessage(data.message || '카카오 로그인에 실패했습니다.')
@@ -86,8 +91,18 @@ export default function KakaoCallbackPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-5 h-5 text-green-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
           </div>
           <p className="text-green-600 font-medium">카카오 로그인 성공!</p>
@@ -101,11 +116,23 @@ export default function KakaoCallbackPage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center max-w-md mx-auto px-4">
         <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-5 h-5 text-red-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </div>
-        <h2 className="text-lg font-semibold text-gray-900 mb-2">로그인 실패</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-2">
+          로그인 실패
+        </h2>
         <p className="text-red-600 text-sm mb-4">{errorMessage}</p>
         <button
           onClick={() => router.push('/login')}

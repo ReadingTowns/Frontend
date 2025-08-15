@@ -1,0 +1,6 @@
+export { default as StartStep } from './StartStep'
+export { default as PhoneStep } from './PhoneStep'
+export { default as ProfileStep } from './ProfileStep'
+export { default as LocationStep } from './LocationStep'
+export { default as PreferencesStep } from './PreferencesStep'
+export { default as CompleteStep } from './CompleteStep'

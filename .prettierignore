@@ -1,0 +1,8 @@
+node_modules
+.next
+dist
+build
+coverage
+*.md
+.git
+public/mockServiceWorker.js

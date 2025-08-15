@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -14,8 +16,8 @@
     "test:ui": "playwright test --ui",
     "test:mcp": "claude mcp add playwright -- npx -y @playwright/mcp@latest",
     "test:browser": "echo 'MCP Playwright를 사용하려면 Claude Code에서 다음 명령어를 실행하세요:' && echo 'claude mcp add playwright -- npx -y @playwright/mcp@latest'",
-    "quality:check": "npm run lint && npm run build && npm test",
-    "quality:fix": "npm run lint --fix",
+    "quality:check": "npm run lint && npm run format:check && npm run build && npm test",
+    "quality:fix": "npm run format && npm run lint --fix",
     "prepare": "husky"
   },
   "dependencies": {
@@ -42,6 +44,7 @@
     "jest-fixed-jsdom": "^0.0.9",
     "lint-staged": "^16.1.5",
     "msw": "^2.10.5",
+    "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5",
     "undici": "^7.13.0",
@@ -49,6 +52,7 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [
+      "prettier --write",
       "eslint --fix"
     ]
   },

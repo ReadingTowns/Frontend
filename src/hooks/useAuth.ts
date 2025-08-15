@@ -10,6 +10,7 @@ interface User {
   profileImage?: string
   provider: 'google' | 'kakao'
   isAuthenticated: boolean
+  onboardingCompleted?: boolean
 }
 
 interface AuthResponse {
@@ -66,13 +67,13 @@ export function useAuth() {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('lastProvider')
       }
-      
+
       queryClient.setQueryData(authKeys.me(), {
         success: false,
         user: undefined,
       })
       queryClient.invalidateQueries({ queryKey: authKeys.all })
-      
+
       // 루트로 리다이렉트 (미들웨어에서 /login으로 리다이렉트됨)
       router.push('/')
     },
@@ -94,6 +95,7 @@ export function useAuth() {
   return {
     user: authData?.user,
     isAuthenticated: authData?.success || false,
+    isNewUser: authData?.success && !authData?.user?.onboardingCompleted,
     isLoading,
     error,
     logout: logoutMutation.mutate,
