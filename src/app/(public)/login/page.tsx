@@ -10,17 +10,27 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleGoogleLogin = () => {
-    window.location.assign('/oauth2/authorization/google')
+    // 개발 환경에서는 직접 콜백 페이지로 이동 (MSW 제약사항 때문)
+    if (process.env.NODE_ENV === 'development') {
+      router.push('/auth/callback/google?code=mock_google_code&state=mock_state')
+    } else {
+      window.location.assign('/oauth2/authorization/google')
+    }
   }
 
   const handleKakaoLogin = () => {
-    window.location.assign('/oauth2/authorization/kakao')
+    // 개발 환경에서는 직접 콜백 페이지로 이동 (MSW 제약사항 때문)
+    if (process.env.NODE_ENV === 'development') {
+      router.push('/auth/callback/kakao?code=mock_kakao_code&state=mock_state')
+    } else {
+      window.location.assign('/oauth2/authorization/kakao')
+    }
   }
 
-  // 인증된 사용자는 대시보드로 리다이렉트
+  // 인증된 사용자는 홈으로 리다이렉트
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      router.push('/')
+      router.push('/home')
     }
   }, [isAuthenticated, isLoading, router])
 
@@ -42,7 +52,7 @@ export default function LoginPage() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400 mx-auto mb-4"></div>
-          <p className="text-gray-500">대시보드로 이동 중...</p>
+          <p className="text-gray-500">홈으로 이동 중...</p>
         </div>
       </div>
     )
