@@ -26,6 +26,7 @@ export interface ProfileStepProps {
   profileImage: string
   onNicknameChange: (nickname: string) => void
   onProfileImageChange: (profileImage: string) => void
+  onNicknameValidationChange: (isValid: boolean) => void
   onBack: () => void
 }
 

@@ -1,6 +1,4 @@
-import { StartStepProps } from '@/types/onboarding'
-
-export default function StartStep({}: StartStepProps) {
+export default function StartStep() {
   return (
     <div className="px-4 py-8">
       <div className="text-center mb-8">
