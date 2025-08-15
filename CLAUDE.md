@@ -433,3 +433,185 @@ Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
 5. `git push` (pre-push hook으로 테스트 실행)
 
 이 시스템을 통해 빌드 실패나 코드 품질 문제를 사전에 방지할 수 있습니다.
+
+## 개발 및 테스트 프로세스
+
+### 1. 개발 환경 구성
+```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 시작
+npm run dev  # http://localhost:3000
+
+# MCP 서버 설정 (선택사항)
+claude mcp add playwright -- npx -y @playwright/mcp@latest
+claude mcp add --transport http context7 https://mcp.context7.com
+```
+
+### 2. 개발 단계별 테스트 가이드
+
+#### 2.1 기능 개발 중
+```bash
+# Watch 모드로 Unit 테스트 실행
+npm run test:watch
+
+# 특정 파일 테스트
+npm test -- src/__tests__/components/auth/SocialLoginButtons.test.tsx
+
+# 커버리지 확인
+npm run test:coverage
+```
+
+#### 2.2 기능 개발 완료 후
+```bash
+# 전체 품질 검사 (필수)
+npm run quality:check
+
+# 개별 검사 단계
+npm run lint           # ESLint 검사
+npm run build          # 빌드 검증
+npm test               # 전체 단위 테스트
+```
+
+#### 2.3 UI/UX 검증
+```bash
+# E2E 테스트 (권장: Chrome만 빠른 테스트)
+npx playwright test --project=chromium --reporter=list
+
+# 전체 브라우저 E2E 테스트
+npm run test:e2e
+
+# UI 모드로 시각적 테스트
+npm run test:ui
+```
+
+### 3. Git 워크플로우
+
+#### 3.1 커밋 전 체크리스트
+- [ ] `npm run quality:check` 통과
+- [ ] 새로운 기능에 대한 테스트 작성 완료
+- [ ] ESLint 에러 해결
+- [ ] TypeScript 컴파일 에러 해결
+
+#### 3.2 자동화된 Git Hooks
+```bash
+# pre-commit: 자동 실행됨
+npm run lint           # ESLint 검사
+npx lint-staged        # Staged 파일 자동 수정
+
+# pre-push: 자동 실행됨
+npm test               # 전체 테스트 실행
+```
+
+### 4. 테스트 유형별 가이드
+
+#### 4.1 Unit Testing (Jest + React Testing Library)
+**대상**: 컴포넌트, 훅, 유틸리티 함수
+```bash
+# 모든 단위 테스트
+npm test
+
+# 특정 테스트 패턴
+npm test -- --testNamePattern="should render"
+
+# Watch 모드
+npm run test:watch
+```
+
+**테스트 파일 위치**:
+- 컴포넌트: `src/__tests__/components/`
+- 페이지: `src/__tests__/app/`
+- 훅: `src/__tests__/hooks/`
+
+#### 4.2 API Mocking (MSW)
+**MSW 핸들러 확인**:
+```bash
+# MSW 모킹 테스트
+npm test -- src/__tests__/mocks.test.ts
+```
+
+**Mock API 엔드포인트**:
+- `/oauth2/authorization/google` - Google OAuth
+- `/oauth2/authorization/kakao` - Kakao OAuth  
+- `/api/auth/me` - 인증 상태 확인
+- `/api/auth/logout` - 로그아웃
+
+#### 4.3 E2E Testing (Playwright)
+**대상**: 사용자 플로우, 페이지 간 이동, 브라우저 호환성
+```bash
+# 빠른 E2E 테스트 (Chrome만)
+npx playwright test --project=chromium --reporter=list
+
+# 전체 브라우저 테스트
+npm run test:e2e
+
+# 디버그 모드
+npm run test:ui
+
+# 특정 테스트 파일
+npx playwright test __tests__/e2e/auth.spec.ts
+```
+
+**테스트 브라우저**:
+- Desktop: Chrome, Firefox, Safari, Edge
+- Mobile: Chrome (Pixel 5), Safari (iPhone 12)
+
+### 5. 프로덕션 배포 전 체크리스트
+
+#### 5.1 필수 검증 항목
+- [ ] `npm run quality:check` 100% 통과
+- [ ] 모든 E2E 테스트 통과
+- [ ] 프로덕션 빌드 성공: `npm run build`
+- [ ] 다양한 브라우저에서 기능 검증
+- [ ] 모바일 반응형 동작 확인
+
+#### 5.2 성능 검증
+```bash
+# 프로덕션 빌드 크기 확인
+npm run build
+
+# 로컬 프로덕션 서버 테스트
+npm run start
+```
+
+### 6. 트러블슈팅 가이드
+
+#### 6.1 테스트 실패 시
+1. **Unit 테스트 실패**:
+   - MSW 핸들러 설정 확인
+   - 비동기 처리 (`waitFor`) 확인
+   - Mock 함수 초기화 확인
+
+2. **E2E 테스트 실패**:
+   - 개발 서버 실행 상태 확인
+   - 브라우저별 차이점 확인
+   - 타이밍 이슈 (`page.waitFor`) 확인
+
+3. **빌드 실패**:
+   - TypeScript 에러 해결
+   - ESLint 규칙 준수
+   - Import 경로 확인
+
+#### 6.2 Hook 실패 시
+```bash
+# Hook 비활성화 (긴급시에만)
+git commit --no-verify
+
+# Hook 재설정
+npx husky install
+```
+
+### 7. 새로운 기능 개발 시 권장 프로세스
+
+1. **기능 설계**: 요구사항 명확화
+2. **테스트 우선 작성**: TDD 방식 권장
+3. **컴포넌트 구현**: 기본 UI 구현
+4. **인증/상태 연동**: useAuth, TanStack Query 활용
+5. **Unit 테스트 보완**: 엣지 케이스 추가
+6. **E2E 테스트 추가**: 사용자 시나리오 기반
+7. **코드 리뷰**: `npm run quality:check` 통과 확인
+8. **최종 검증**: 다양한 환경에서 테스트
+
+이 프로세스를 따라 안정적이고 품질 높은 코드를 개발할 수 있습니다.
+- dev서버는 3000포트에서 열려있으면 그거 사용하고 없을때만 키기
