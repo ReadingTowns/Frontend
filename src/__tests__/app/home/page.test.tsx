@@ -53,8 +53,8 @@ describe('Home Page (Dashboard)', () => {
             email: 'test@example.com',
             name: 'Test User',
             provider: 'google',
-            isAuthenticated: true
-          }
+            isAuthenticated: true,
+          },
         })
       })
     )
@@ -85,8 +85,8 @@ describe('Home Page (Dashboard)', () => {
             email: 'test@example.com',
             name: 'Test User',
             provider: 'google',
-            isAuthenticated: true
-          }
+            isAuthenticated: true,
+          },
         })
       }),
       http.post('/api/auth/logout', () => {
@@ -112,8 +112,8 @@ describe('Home Page (Dashboard)', () => {
             email: 'test@example.com',
             name: 'Test User',
             provider: 'google',
-            isAuthenticated: true
-          }
+            isAuthenticated: true,
+          },
         })
       })
     )

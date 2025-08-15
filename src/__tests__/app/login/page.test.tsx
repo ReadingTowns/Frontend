@@ -74,8 +74,12 @@ describe('Login Page', () => {
 
     await waitFor(() => {
       expect(screen.getByText('리딩타운')).toBeInTheDocument()
-      expect(screen.getByText('책으로 이웃과 연결되는 공간')).toBeInTheDocument()
-      expect(screen.getByText('로그인하여 리딩타운의 모든 서비스를 이용하세요')).toBeInTheDocument()
+      expect(
+        screen.getByText('책으로 이웃과 연결되는 공간')
+      ).toBeInTheDocument()
+      expect(
+        screen.getByText('로그인하여 리딩타운의 모든 서비스를 이용하세요')
+      ).toBeInTheDocument()
     })
 
     expect(screen.getByText('Google로 로그인')).toBeInTheDocument()
@@ -93,8 +97,8 @@ describe('Login Page', () => {
             email: 'test@example.com',
             name: 'Test User',
             provider: 'google',
-            isAuthenticated: true
-          }
+            isAuthenticated: true,
+          },
         })
       })
     )
@@ -117,8 +121,8 @@ describe('Login Page', () => {
             email: 'test@example.com',
             name: 'Test User',
             provider: 'google',
-            isAuthenticated: true
-          }
+            isAuthenticated: true,
+          },
         })
       })
     )
@@ -152,8 +156,7 @@ describe('Login Page', () => {
 
     const buttonContainer = screen
       .getByText('Google로 로그인')
-      .closest('button')
-      ?.parentElement
+      .closest('button')?.parentElement
     expect(buttonContainer).toHaveClass('w-full', 'max-w-sm', 'space-y-4')
   })
 })

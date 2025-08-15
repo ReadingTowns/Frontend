@@ -6,17 +6,22 @@ export function MSWProvider({ children }: { children: React.ReactNode }) {
   const [mswReady, setMswReady] = useState(false)
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+    if (
+      typeof window !== 'undefined' &&
+      process.env.NODE_ENV === 'development'
+    ) {
       import('@/mocks/browser').then(({ worker }) => {
-        worker.start({
-          onUnhandledRequest: 'warn',
-          serviceWorker: {
-            url: '/mockServiceWorker.js'
-          }
-        }).then(() => {
-          console.log('MSW started successfully!')
-          setMswReady(true)
-        })
+        worker
+          .start({
+            onUnhandledRequest: 'warn',
+            serviceWorker: {
+              url: '/mockServiceWorker.js',
+            },
+          })
+          .then(() => {
+            console.log('MSW started successfully!')
+            setMswReady(true)
+          })
       })
     } else {
       setMswReady(true)

@@ -7,8 +7,10 @@ describe('MSW API Mocking', () => {
   beforeEach(() => {
     // 매 테스트마다 쿠키 상태 초기화
     if (typeof document !== 'undefined') {
-      document.cookie = "access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
-      document.cookie = "refresh_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/"
+      document.cookie =
+        'access_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/'
+      document.cookie =
+        'refresh_token=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/'
     }
   })
 
@@ -25,16 +27,20 @@ describe('MSW API Mocking', () => {
   })
 
   it('should mock Google OAuth redirect', async () => {
-    const response = await fetch('/oauth2/authorization/google', { redirect: 'manual' })
-    
+    const response = await fetch('/oauth2/authorization/google', {
+      redirect: 'manual',
+    })
+
     expect(response.status).toBe(302)
     expect(response.headers.get('location')).toContain('/auth/callback/google')
     expect(response.headers.get('location')).toContain('code=mock_google_code')
   })
 
   it('should mock Kakao OAuth redirect', async () => {
-    const response = await fetch('/oauth2/authorization/kakao', { redirect: 'manual' })
-    
+    const response = await fetch('/oauth2/authorization/kakao', {
+      redirect: 'manual',
+    })
+
     expect(response.status).toBe(302)
     expect(response.headers.get('location')).toContain('/auth/callback/kakao')
     expect(response.headers.get('location')).toContain('code=mock_kakao_code')
@@ -63,8 +69,8 @@ describe('MSW API Mocking', () => {
   it('should handle authorized auth check with cookie', async () => {
     const response = await fetch('/api/auth/me', {
       headers: {
-        'cookie': 'access_token=mock_access_token'
-      }
+        cookie: 'access_token=mock_access_token',
+      },
     })
     const data = await response.json()
 

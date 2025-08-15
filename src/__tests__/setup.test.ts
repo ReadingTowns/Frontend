@@ -20,7 +20,7 @@ describe('Jest Setup', () => {
   it('should mock Next.js navigation', async () => {
     const { useRouter } = await import('next/navigation')
     const router = useRouter()
-    
+
     expect(router.push).toBeDefined()
     expect(typeof router.push).toBe('function')
   })

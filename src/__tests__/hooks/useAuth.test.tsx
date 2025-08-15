@@ -102,9 +102,12 @@ describe('useAuth', () => {
       wrapper: createWrapper(),
     })
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    }, { timeout: 3000 })
+    await waitFor(
+      () => {
+        expect(result.current.isLoading).toBe(false)
+      },
+      { timeout: 3000 }
+    )
 
     // 에러가 발생하면 isAuthenticated는 false여야 함
     expect(result.current.isAuthenticated).toBe(false)

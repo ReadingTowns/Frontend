@@ -10,7 +10,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen py-8">
+    <div className="min-h-screen py-8 px-4">
       {/* Header */}
       <header className="mb-8">
         <div className="flex justify-between items-center mb-4">
@@ -44,7 +44,9 @@ export default function HomePage() {
             <div className="flex items-center gap-4">
               <div className="w-16 h-24 bg-gradient-to-br from-primary-200 to-secondary-200 rounded"></div>
               <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">혼자 있는 시간의 힘</h3>
+                <h3 className="font-semibold text-gray-900">
+                  혼자 있는 시간의 힘
+                </h3>
                 <p className="text-sm text-gray-600">정희선</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="inline-block px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded">
@@ -69,7 +71,9 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-gradient-to-br from-primary-300 to-secondary-300 rounded-full"></div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">김리딩</h4>
-                  <p className="text-sm text-gray-500">취향 유사도 85% · 우리동네</p>
+                  <p className="text-sm text-gray-500">
+                    취향 유사도 85% · 우리동네
+                  </p>
                 </div>
                 <button className="text-primary-600 text-sm font-medium">
                   팔로우
@@ -81,7 +85,9 @@ export default function HomePage() {
                 <div className="w-12 h-12 bg-gradient-to-br from-secondary-300 to-primary-300 rounded-full"></div>
                 <div className="flex-1">
                   <h4 className="font-medium text-gray-900">박북스</h4>
-                  <p className="text-sm text-gray-500">취향 유사도 78% · 우리동네</p>
+                  <p className="text-sm text-gray-500">
+                    취향 유사도 78% · 우리동네
+                  </p>
                 </div>
                 <button className="text-primary-600 text-sm font-medium">
                   팔로우
@@ -101,7 +107,9 @@ export default function HomePage() {
                 <div className="flex-1">
                   <h3 className="font-semibold text-gray-900">사피엔스</h3>
                   <p className="text-sm text-gray-600">유발 하라리</p>
-                  <p className="text-xs text-gray-500 mt-1">AI 추천 이유: 최근 읽은 책과 유사한 주제</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    AI 추천 이유: 최근 읽은 책과 유사한 주제
+                  </p>
                   <div className="flex gap-2 mt-2">
                     <span className="inline-block px-2 py-1 bg-secondary-100 text-secondary-700 text-xs rounded">
                       역사
@@ -140,5 +148,5 @@ export default function HomePage() {
         </section>
       </div>
     </div>
-  );
+  )
 }
