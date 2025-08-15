@@ -1,6 +1,7 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useRouter } from 'next/navigation'
 
 interface User {
   id: string
@@ -24,6 +25,7 @@ const authKeys = {
 
 export function useAuth() {
   const queryClient = useQueryClient()
+  const router = useRouter()
 
   const {
     data: authData,
@@ -60,11 +62,19 @@ export function useAuth() {
       return response.json()
     },
     onSuccess: () => {
+      // localStorage 정리 (개발 환경에서 MSW가 사용하는 정보)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('lastProvider')
+      }
+      
       queryClient.setQueryData(authKeys.me(), {
         success: false,
         user: undefined,
       })
       queryClient.invalidateQueries({ queryKey: authKeys.all })
+      
+      // 루트로 리다이렉트 (미들웨어에서 /login으로 리다이렉트됨)
+      router.push('/')
     },
   })
 

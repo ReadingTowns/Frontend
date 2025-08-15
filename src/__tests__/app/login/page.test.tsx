@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactNode } from 'react'
-import LoginPage from '@/app/login/page'
+import LoginPage from '@/app/(public)/login/page'
 import { server } from '@/mocks/server'
 import { http, HttpResponse } from 'msw'
 
@@ -102,7 +102,7 @@ describe('Login Page', () => {
     render(<LoginPage />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/')
+      expect(mockPush).toHaveBeenCalledWith('/home')
     })
   })
 
@@ -126,7 +126,7 @@ describe('Login Page', () => {
     render(<LoginPage />, { wrapper: createWrapper() })
 
     await waitFor(() => {
-      expect(screen.getByText('대시보드로 이동 중...')).toBeInTheDocument()
+      expect(screen.getByText('홈으로 이동 중...')).toBeInTheDocument()
     })
   })
 

@@ -25,21 +25,19 @@ describe('MSW API Mocking', () => {
   })
 
   it('should mock Google OAuth redirect', async () => {
-    const response = await fetch('/oauth2/authorization/google')
-    const data = await response.json()
-
-    expect(response.status).toBe(200)
-    expect(data.message).toBe('Redirecting to Google OAuth')
-    expect(data.redirectUrl).toContain('/auth/callback/google')
+    const response = await fetch('/oauth2/authorization/google', { redirect: 'manual' })
+    
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toContain('/auth/callback/google')
+    expect(response.headers.get('location')).toContain('code=mock_google_code')
   })
 
   it('should mock Kakao OAuth redirect', async () => {
-    const response = await fetch('/oauth2/authorization/kakao')
-    const data = await response.json()
-
-    expect(response.status).toBe(200)
-    expect(data.message).toBe('Redirecting to Kakao OAuth')
-    expect(data.redirectUrl).toContain('/auth/callback/kakao')
+    const response = await fetch('/oauth2/authorization/kakao', { redirect: 'manual' })
+    
+    expect(response.status).toBe(302)
+    expect(response.headers.get('location')).toContain('/auth/callback/kakao')
+    expect(response.headers.get('location')).toContain('code=mock_kakao_code')
   })
 
   it('should mock Google OAuth callback', async () => {
