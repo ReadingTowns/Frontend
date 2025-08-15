@@ -1,10 +1,8 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
 import { GoogleLoginButton, KakaoLoginButton } from '@/components/auth/SocialLoginButtons'
 
 export default function LoginPage() {
-  const router = useRouter()
 
   const handleGoogleLogin = () => {
     window.location.assign('/oauth2/authorization/google')

@@ -38,8 +38,8 @@ export function useAuth() {
       return response.json()
     },
     staleTime: 1000 * 60 * 5,
-    retry: (failureCount, error: any) => {
-      if (error?.status === 401) {
+    retry: (failureCount, error: unknown) => {
+      if (error && typeof error === 'object' && 'status' in error && error.status === 401) {
         return false
       }
       return failureCount < 2

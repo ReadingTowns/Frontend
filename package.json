@@ -13,7 +13,10 @@
     "test:e2e": "playwright test",
     "test:ui": "playwright test --ui",
     "test:mcp": "claude mcp add playwright -- npx -y @playwright/mcp@latest",
-    "test:browser": "echo 'MCP Playwright를 사용하려면 Claude Code에서 다음 명령어를 실행하세요:' && echo 'claude mcp add playwright -- npx -y @playwright/mcp@latest'"
+    "test:browser": "echo 'MCP Playwright를 사용하려면 Claude Code에서 다음 명령어를 실행하세요:' && echo 'claude mcp add playwright -- npx -y @playwright/mcp@latest'",
+    "quality:check": "npm run lint && npm run build && npm test",
+    "quality:fix": "npm run lint --fix",
+    "prepare": "husky"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.85.3",
@@ -33,12 +36,20 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
+    "husky": "^9.1.7",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
+    "jest-fixed-jsdom": "^0.0.9",
+    "lint-staged": "^16.1.5",
     "msw": "^2.10.5",
     "tailwindcss": "^4",
     "typescript": "^5",
     "undici": "^7.13.0",
     "whatwg-fetch": "^3.6.20"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "eslint --fix"
+    ]
   }
 }

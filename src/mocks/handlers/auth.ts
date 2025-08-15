@@ -2,43 +2,27 @@ import { http, HttpResponse } from 'msw'
 
 export const authHandlers = [
   // 구글 로그인 - 리다이렉션 시뮬레이션
-  http.get('/oauth2/authorization/google', ({ request }) => {
-    // 실제로는 구글 OAuth 페이지로 리다이렉션
-    // 테스트에서는 성공적인 리다이렉션을 시뮬레이션
-    const redirectUrl = new URL(request.url)
-    const mockCallbackUrl = `${redirectUrl.origin}/auth/callback/google?code=mock_google_code&state=mock_state`
-    
+  http.get('/oauth2/authorization/google', () => {
     return HttpResponse.json(
       { 
         message: 'Redirecting to Google OAuth',
-        redirectUrl: mockCallbackUrl 
+        redirectUrl: 'http://localhost:3000/auth/callback/google?code=mock_google_code&state=mock_state'
       },
       { 
-        status: 302,
-        headers: {
-          'Location': 'https://accounts.google.com/oauth/authorize?client_id=mock&redirect_uri=callback'
-        }
+        status: 302
       }
     )
   }),
 
   // 카카오 로그인 - 리다이렉션 시뮬레이션
-  http.get('/oauth2/authorization/kakao', ({ request }) => {
-    // 실제로는 카카오 OAuth 페이지로 리다이렉션
-    // 테스트에서는 성공적인 리다이렉션을 시뮬레이션
-    const redirectUrl = new URL(request.url)
-    const mockCallbackUrl = `${redirectUrl.origin}/auth/callback/kakao?code=mock_kakao_code&state=mock_state`
-    
+  http.get('/oauth2/authorization/kakao', () => {
     return HttpResponse.json(
       { 
         message: 'Redirecting to Kakao OAuth',
-        redirectUrl: mockCallbackUrl 
+        redirectUrl: 'http://localhost:3000/auth/callback/kakao?code=mock_kakao_code&state=mock_state'
       },
       { 
-        status: 302,
-        headers: {
-          'Location': 'https://kauth.kakao.com/oauth/authorize?client_id=mock&redirect_uri=callback'
-        }
+        status: 302
       }
     )
   }),

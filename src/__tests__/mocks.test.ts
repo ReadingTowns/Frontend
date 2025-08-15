@@ -1,11 +1,9 @@
 /**
  * MSW 모킹 테스트
  * API 핸들러가 올바르게 동작하는지 확인
- * 
- * 현재 MSW 설정 이슈로 임시 비활성화
  */
 
-describe.skip('MSW API Mocking', () => {
+describe('MSW API Mocking', () => {
   it('should mock Google OAuth redirect', async () => {
     const response = await fetch('/oauth2/authorization/google')
     const data = await response.json()
