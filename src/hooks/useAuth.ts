@@ -11,6 +11,7 @@ interface User {
   provider: 'google' | 'kakao'
   isAuthenticated: boolean
   onboardingCompleted?: boolean
+  memberId?: number
 }
 
 interface AuthResponse {
