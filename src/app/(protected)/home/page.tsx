@@ -1,16 +1,23 @@
 'use client'
 
 import { useAuth } from '@/hooks/useAuth'
+import { useDashboard } from '@/hooks/useDashboard'
+import {
+  CurrentExchange,
+  UserRecommendations,
+  BookRecommendations,
+} from '@/components/dashboard'
 
 export default function HomePage() {
   const { user, logout, isLoggingOut } = useAuth()
+  const dashboard = useDashboard()
 
   const handleLogout = () => {
     logout()
   }
 
   return (
-    <div className="min-h-screen py-8 px-4">
+    <div className="max-w-[430px] mx-auto bg-white min-h-screen py-8 px-4">
       {/* Header */}
       <header className="mb-8">
         <div className="flex justify-between items-center mb-4">
@@ -37,92 +44,20 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="space-y-8">
-        {/* Current Exchange */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4">현재 교환</h2>
-          <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-24 bg-gradient-to-br from-primary-200 to-secondary-200 rounded"></div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-gray-900">
-                  혼자 있는 시간의 힘
-                </h3>
-                <p className="text-sm text-gray-600">정희선</p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="inline-block px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded">
-                    D-15
-                  </span>
-                  <span className="text-sm text-gray-500">반납까지</span>
-                </div>
-              </div>
-              <button className="px-4 py-2 bg-primary-400 text-white rounded-lg text-sm font-medium">
-                채팅
-              </button>
-            </div>
-          </div>
-        </section>
+        <CurrentExchange
+          exchange={dashboard.currentExchange.data}
+          isLoading={dashboard.currentExchange.isLoading}
+        />
 
-        {/* Recommended Users */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4">추천 이웃</h2>
-          <div className="space-y-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-300 to-secondary-300 rounded-full"></div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">김리딩</h4>
-                  <p className="text-sm text-gray-500">
-                    취향 유사도 85% · 우리동네
-                  </p>
-                </div>
-                <button className="text-primary-600 text-sm font-medium">
-                  팔로우
-                </button>
-              </div>
-            </div>
-            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-secondary-300 to-primary-300 rounded-full"></div>
-                <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">박북스</h4>
-                  <p className="text-sm text-gray-500">
-                    취향 유사도 78% · 우리동네
-                  </p>
-                </div>
-                <button className="text-primary-600 text-sm font-medium">
-                  팔로우
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <UserRecommendations
+          users={dashboard.recommendedUsers.data}
+          isLoading={dashboard.recommendedUsers.isLoading}
+        />
 
-        {/* AI Recommendations */}
-        <section>
-          <h2 className="text-xl font-semibold mb-4">오늘의 추천 도서</h2>
-          <div className="space-y-3">
-            <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-              <div className="flex gap-4">
-                <div className="w-16 h-24 bg-gradient-to-br from-primary-300 to-secondary-300 rounded"></div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">사피엔스</h3>
-                  <p className="text-sm text-gray-600">유발 하라리</p>
-                  <p className="text-xs text-gray-500 mt-1">
-                    AI 추천 이유: 최근 읽은 책과 유사한 주제
-                  </p>
-                  <div className="flex gap-2 mt-2">
-                    <span className="inline-block px-2 py-1 bg-secondary-100 text-secondary-700 text-xs rounded">
-                      역사
-                    </span>
-                    <span className="inline-block px-2 py-1 bg-primary-100 text-primary-700 text-xs rounded">
-                      인문
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <BookRecommendations
+          books={dashboard.recommendedBooks.data}
+          isLoading={dashboard.recommendedBooks.isLoading}
+        />
 
         {/* Quick Actions */}
         <section>
