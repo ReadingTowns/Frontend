@@ -43,7 +43,6 @@
     "jest-environment-jsdom": "^30.0.5",
     "jest-fixed-jsdom": "^0.0.9",
     "lint-staged": "^16.1.5",
-    "msw": "^2.10.5",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
     "typescript": "^5",
@@ -54,11 +53,6 @@
     "*.{ts,tsx,js,jsx}": [
       "prettier --write",
       "eslint --fix"
-    ]
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
     ]
   }
 }

@@ -17,24 +17,82 @@ jest.mock('next/navigation', () => ({
   },
 }))
 
-// Global fetch mock - MSW가 fetch를 처리하므로 제거
+// Global fetch mock for API Routes testing
+global.fetch = jest.fn()
 
-// window.location mock - 각 테스트에서 개별적으로 설정
+// Reset fetch mock before each test
+beforeEach(() => {
+  fetch.mockClear()
+})
 
-// MSW 서버 설정
-import { server } from './src/mocks/server'
-
-// 테스트 실행 전에 MSW 서버 시작
+// Mock default successful API responses
 beforeAll(() => {
-  server.listen({
-    onUnhandledRequest: 'warn',
+  // Mock successful auth check
+  fetch.mockImplementation(url => {
+    if (url.includes('/api/auth/me')) {
+      return Promise.resolve({
+        ok: true,
+        json: () =>
+          Promise.resolve({
+            success: true,
+            user: {
+              id: 'test_user',
+              email: 'test@example.com',
+              name: 'Test User',
+            },
+          }),
+      })
+    }
+
+    // Mock OAuth redirects
+    if (url.includes('/oauth2/authorization/')) {
+      return Promise.resolve({
+        ok: true,
+        status: 302,
+        headers: { get: () => 'http://localhost:3000/auth/callback' },
+      })
+    }
+
+    // Mock dashboard data
+    if (url.includes('/api/v1/members/me/exchanges')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ result: null }),
+      })
+    }
+
+    if (url.includes('/api/v1/users/recommendations')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ result: [] }),
+      })
+    }
+
+    if (url.includes('/api/v1/books/recommendations')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ result: [] }),
+      })
+    }
+
+    // Mock library data
+    if (url.includes('/api/v1/bookhouse/members/me')) {
+      return Promise.resolve({
+        ok: true,
+        json: () => Promise.resolve({ result: { content: [] } }),
+      })
+    }
+
+    // Default successful response
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({ success: true }),
+    })
   })
 })
 
-// 각 테스트 후에 핸들러 리셋 및 상태 정리
+// Cookie cleanup after each test
 afterEach(() => {
-  server.resetHandlers()
-
   // 쿠키 초기화 (JSDOM 환경에서)
   if (typeof document !== 'undefined') {
     // 모든 쿠키 삭제
@@ -56,9 +114,4 @@ afterEach(() => {
 
   // Reset mocks
   jest.clearAllMocks()
-})
-
-// 모든 테스트 완료 후 서버 종료
-afterAll(() => {
-  server.close()
 })

@@ -1,6 +1,6 @@
 // Library/서재 관련 타입 정의 (노션 API 명세 기반)
 
-import { ApiResponse } from './common'
+import { ApiResponse, PaginationInfo } from './common'
 
 // 기본 서재 책 정보 (리스트 조회시)
 export interface LibraryBook {
@@ -8,15 +8,6 @@ export interface LibraryBook {
   image: string // 이미지 조회 URI
   title: string // 책 제목
   authorName: string // 작가 이름
-}
-
-// 페이지네이션 응답 정보
-export interface PaginationInfo {
-  curPage: number // 현재 페이지 번호
-  curElements: number // 현재 페이지의 데이터 개수
-  totalPages: number // 전체 페이지 개수
-  totalElements: number // 전체 데이터 개수
-  last: boolean // 마지막 페이지 여부
 }
 
 // 서재 책 리스트 응답

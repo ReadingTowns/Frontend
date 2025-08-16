@@ -24,23 +24,24 @@ const createWrapper = () => {
   return TestWrapper
 }
 
-// MSW를 사용한 테스트 (fetch mock 대신)
-import { server } from '@/mocks/server'
-import { http, HttpResponse } from 'msw'
-
 describe('useAuth', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
   it('should return default state when not authenticated', async () => {
-    // MSW 핸들러 추가 - 인증되지 않은 상태
-    server.use(
-      http.get('/api/auth/me', () => {
-        return HttpResponse.json(
-          { success: false, message: 'Unauthorized' },
-          { status: 401 }
-        )
+    // Mock unauthenticated response
+    fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 401,
+        json: () =>
+          Promise.resolve({
+            timestamp: '2025-08-16 08:29:38',
+            code: '4001',
+            message: 'Unauthorized',
+            result: null,
+          }),
       })
     )
 
@@ -53,7 +54,7 @@ describe('useAuth', () => {
     })
 
     expect(result.current.isAuthenticated).toBe(false)
-    expect(result.current.user).toBeUndefined()
+    expect(result.current.user).toBeNull()
   })
 
   it('should return user data when authenticated', async () => {
@@ -65,13 +66,18 @@ describe('useAuth', () => {
       isAuthenticated: true,
     }
 
-    // MSW 핸들러 추가 - 인증된 상태
-    server.use(
-      http.get('/api/auth/me', () => {
-        return HttpResponse.json({
-          success: true,
-          user: mockUser,
-        })
+    // Mock authenticated response
+    fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            timestamp: '2025-08-16 08:29:38',
+            code: '1000',
+            message: '인증 성공',
+            result: mockUser,
+          }),
       })
     )
 
@@ -88,13 +94,18 @@ describe('useAuth', () => {
   })
 
   it('should handle fetch errors gracefully', async () => {
-    // MSW 핸들러 추가 - 서버 에러 (500)
-    server.use(
-      http.get('/api/auth/me', () => {
-        return HttpResponse.json(
-          { error: 'Internal Server Error' },
-          { status: 500 }
-        )
+    // Mock server error response
+    fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        json: () =>
+          Promise.resolve({
+            timestamp: '2025-08-16 08:29:38',
+            code: '5000',
+            message: 'Internal Server Error',
+            result: null,
+          }),
       })
     )
 
@@ -114,13 +125,16 @@ describe('useAuth', () => {
   })
 
   it('should handle 401 unauthorized correctly', async () => {
-    // MSW 핸들러 추가 - 401 응답
-    server.use(
-      http.get('/api/auth/me', () => {
-        return HttpResponse.json(
-          { success: false, message: 'Unauthorized' },
-          { status: 401 }
-        )
+    // Mock 401 response
+    fetch.mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 401,
+        json: () =>
+          Promise.resolve({
+            success: false,
+            message: 'Unauthorized',
+          }),
       })
     )
 

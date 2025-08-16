@@ -22,16 +22,7 @@ export function useCurrentExchange() {
       }
 
       const data: ExchangeApiResponse = await response.json()
-
-      // D-day 계산 추가 (임시로 15일로 설정)
-      if (data.result) {
-        return {
-          ...data.result,
-          daysLeft: 15,
-        }
-      }
-
-      return null
+      return data.result
     },
     staleTime: 1000 * 60 * 5, // 5분
   })

@@ -106,6 +106,19 @@
   .border-info {
     border-color: var(--info);
   }
+
+  /* Safe viewport height utilities for modern browsers */
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: env(keyboard, 100vh);
+  }
+
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+    height: env(keyboard, 100vh);
+  }
 }
 
 /* Button Components */
@@ -145,7 +158,6 @@
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    min-height: 100vh;
   }
 
   /* Focus styles */

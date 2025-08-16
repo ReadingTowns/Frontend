@@ -2,23 +2,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-
-interface User {
-  id: string
-  email: string
-  name: string
-  profileImage?: string
-  provider: 'google' | 'kakao'
-  isAuthenticated: boolean
-  onboardingCompleted?: boolean
-  memberId?: number
-}
-
-interface AuthResponse {
-  success: boolean
-  user?: User
-  message?: string
-}
+import { AuthMeApiResponse } from '@/types/auth'
+import { API_CODES } from '@/constants/apiCodes'
 
 const authKeys = {
   all: ['auth'] as const,
@@ -35,7 +20,7 @@ export function useAuth() {
     error,
   } = useQuery({
     queryKey: authKeys.me(),
-    queryFn: async (): Promise<AuthResponse> => {
+    queryFn: async (): Promise<AuthMeApiResponse> => {
       const response = await fetch('/api/auth/me', {
         credentials: 'include',
       })
@@ -64,14 +49,15 @@ export function useAuth() {
       return response.json()
     },
     onSuccess: () => {
-      // localStorage 정리 (개발 환경에서 MSW가 사용하는 정보)
+      // localStorage 정리
       if (typeof window !== 'undefined') {
         localStorage.removeItem('lastProvider')
       }
 
       queryClient.setQueryData(authKeys.me(), {
-        success: false,
-        user: undefined,
+        code: API_CODES.UNAUTHORIZED,
+        message: '로그아웃되었습니다',
+        result: null,
       })
       queryClient.invalidateQueries({ queryKey: authKeys.all })
 
@@ -94,9 +80,12 @@ export function useAuth() {
   })
 
   return {
-    user: authData?.user,
-    isAuthenticated: authData?.success || false,
-    isNewUser: authData?.success && !authData?.user?.onboardingCompleted,
+    user: authData?.result,
+    isAuthenticated: authData?.code === API_CODES.SUCCESS && !!authData?.result,
+    isNewUser:
+      authData?.code === API_CODES.SUCCESS &&
+      !!authData?.result &&
+      !authData?.result?.onboardingCompleted,
     isLoading,
     error,
     logout: logoutMutation.mutate,

@@ -41,7 +41,7 @@ export default function CurrentExchange({
     )
   }
 
-  if (!exchange || !exchange.myBook.bookName) {
+  if (!exchange || !exchange.myBook || !exchange.myBook.bookName) {
     return (
       <section>
         <h2 className="text-xl font-semibold mb-4">현재 교환</h2>

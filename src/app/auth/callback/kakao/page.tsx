@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 
-export default function KakaoCallbackPage() {
+function KakaoCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const queryClient = useQueryClient()
@@ -34,7 +34,7 @@ export default function KakaoCallbackPage() {
 
         // OAuth 콜백 처리
         const response = await fetch(
-          `/auth/callback/kakao?code=${code}&state=${state}`,
+          `/api/auth/callback/kakao?code=${code}&state=${state}`,
           {
             method: 'GET',
             credentials: 'include',
@@ -46,8 +46,8 @@ export default function KakaoCallbackPage() {
           if (data.success) {
             setStatus('success')
 
-            // MSW에서 Set-Cookie 헤더로 쿠키가 자동 설정됨
-            // 제공자 정보 저장 (MSW에서 사용)
+            // API Route에서 Set-Cookie 헤더로 쿠키가 자동 설정됨
+            // 제공자 정보 저장
             localStorage.setItem('lastProvider', 'kakao')
 
             // 인증 상태 업데이트
@@ -142,5 +142,22 @@ export default function KakaoCallbackPage() {
         </button>
       </div>
     </div>
+  )
+}
+
+export default function KakaoCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+            <p className="text-gray-500">로딩 중...</p>
+          </div>
+        </div>
+      }
+    >
+      <KakaoCallbackContent />
+    </Suspense>
   )
 }

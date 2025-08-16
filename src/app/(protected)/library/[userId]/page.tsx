@@ -2,13 +2,15 @@
 
 import { useParams } from 'next/navigation'
 import { useUserLibraryBooks, useUserProfile } from '@/hooks/useLibrary'
-import { LibraryBookCard, LibraryStats } from '@/components/library'
+import { LibraryBookCard } from '@/components/library/LibraryBookCard'
+import { LibraryStats } from '@/components/library/LibraryStats'
 import { useAuth } from '@/hooks/useAuth'
 import {
   BookCardSkeleton,
   ProfileSkeleton,
   HeaderSkeleton,
 } from '@/components/ui/Skeleton'
+import { LibraryBook } from '@/types/library'
 
 export default function UserLibraryPage() {
   const params = useParams()
@@ -24,7 +26,7 @@ export default function UserLibraryPage() {
 
   if (profileLoading || booksLoading) {
     return (
-      <div className="max-w-[430px] mx-auto bg-gray-50 min-h-screen py-4 px-4">
+      <>
         <HeaderSkeleton />
         <ProfileSkeleton />
         <div className="grid grid-cols-2 gap-4">
@@ -32,28 +34,26 @@ export default function UserLibraryPage() {
             <BookCardSkeleton key={i} />
           ))}
         </div>
-      </div>
+      </>
     )
   }
 
   if (!profile) {
     return (
-      <div className="max-w-[430px] mx-auto bg-white min-h-screen py-4 px-4">
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">😕</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            사용자를 찾을 수 없습니다
-          </h3>
-          <p className="text-gray-600">
-            존재하지 않거나 접근할 수 없는 사용자입니다.
-          </p>
-        </div>
+      <div className="bg-white text-center py-12">
+        <div className="text-6xl mb-4">😕</div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          사용자를 찾을 수 없습니다
+        </h3>
+        <p className="text-gray-600">
+          존재하지 않거나 접근할 수 없는 사용자입니다.
+        </p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-[430px] mx-auto bg-gray-50 min-h-screen py-4 px-4">
+    <>
       {/* Header */}
       <header className="mb-6">
         <button
@@ -151,7 +151,7 @@ export default function UserLibraryPage() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              {books.map(book => (
+              {books.map((book: LibraryBook) => (
                 <LibraryBookCard
                   key={book.id}
                   book={book}
@@ -172,6 +172,6 @@ export default function UserLibraryPage() {
           </>
         )}
       </section>
-    </div>
+    </>
   )
 }
