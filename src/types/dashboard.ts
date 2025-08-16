@@ -1,3 +1,5 @@
+import { ApiResponse } from './common'
+
 // 교환 중인 책 정보 타입 (노션 API 명세 기반)
 export interface ExchangeData {
   chatRoomId: number
@@ -43,20 +45,6 @@ export interface DashboardData {
 }
 
 // API 응답 타입들
-export interface ExchangeApiResponse {
-  code: string
-  message: string
-  result: ExchangeData | null
-}
-
-export interface UserRecommendationApiResponse {
-  code: string
-  message: string
-  result: RecommendedUser[]
-}
-
-export interface BookRecommendationApiResponse {
-  code: string
-  message: string
-  result: RecommendedBook[]
-}
+export type ExchangeApiResponse = ApiResponse<ExchangeData | null>
+export type UserRecommendationApiResponse = ApiResponse<RecommendedUser[]>
+export type BookRecommendationApiResponse = ApiResponse<RecommendedBook[]>

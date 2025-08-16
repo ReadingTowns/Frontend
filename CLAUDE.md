@@ -56,7 +56,7 @@ npx playwright test --project=chromium --reporter=list  # Quick test (Chrome onl
 - **Linting**: ESLint 9 with Next.js configuration
 - **State Management**: TanStack Query v5 for server state
 - **Authentication**: OAuth2 (Google, Kakao) with cookie-based token management
-- **Testing**: Jest + React Testing Library + Playwright + MSW
+- **Testing**: Jest + React Testing Library + Playwright + API Routes
 
 ### Project Structure
 
@@ -71,9 +71,9 @@ npx playwright test --project=chromium --reporter=list  # Quick test (Chrome onl
   - `useAuth.ts` - Authentication state management
 - `/src/lib/` - Utility functions and configurations
   - `queryClient.ts` - TanStack Query client setup
-- `/src/mocks/` - MSW API mocking
-  - `handlers.ts` - Mock API handlers
-  - `server.ts` - Mock server setup
+- `/src/app/api/` - Next.js API Routes
+  - `auth/` - Authentication endpoints
+  - `v1/` - Application API endpoints
 - `/src/__tests__/` - Test files
   - `app/` - Unit tests for pages
   - `components/` - Component tests
@@ -90,7 +90,7 @@ npx playwright test --project=chromium --reporter=list  # Quick test (Chrome onl
 - **Tailwind CSS**: Version 4 with PostCSS plugin architecture
 - **Jest**: Configured with next/jest for Next.js integration
 - **Playwright**: Multi-browser testing with MCP integration support
-- **MSW**: API mocking for development and testing
+- **API Routes**: Next.js API endpoints for SSR compatibility
 
 ## Layout Design
 
@@ -186,7 +186,7 @@ window.location.assign('/oauth2/authorization/kakao');
 - ✅ TanStack Query 설정 및 인증 훅
 - ✅ Unit 테스트 (Jest + React Testing Library)
 - ✅ E2E 테스트 (Playwright + MCP 통합)
-- 🔄 MSW API 모킹 설정 (진행 중)
+- ✅ API Routes 기반 서버사이드 API 구현
 
 ## 테스트 환경 설정
 
@@ -251,22 +251,28 @@ mcp__playwright__browser_click        # 요소 클릭
 mcp__playwright__browser_evaluate     # JavaScript 실행
 ```
 
-### API Mocking (MSW)
+### API Routes
 
-Mock Service Worker를 사용한 API 모킹 설정:
+Next.js API Routes를 사용한 서버사이드 API 엔드포인트:
 
 ```bash
-# MSW 설정 파일
-src/mocks/handlers.ts   # API 핸들러 정의
-src/mocks/server.ts     # Mock 서버 설정
+# API Routes 구조
+src/app/api/             # API Routes 루트
+├── auth/               # 인증 관련 API
+├── oauth2/             # OAuth 인증
+└── v1/                 # 애플리케이션 API
 ```
 
-**주요 모킹 엔드포인트:**
+**주요 API 엔드포인트:**
 
-- `/oauth2/authorization/google` - Google OAuth 시뮬레이션
-- `/oauth2/authorization/kakao` - Kakao OAuth 시뮬레이션
+- `/api/oauth2/authorization/google` - Google OAuth 리다이렉트
+- `/api/oauth2/authorization/kakao` - Kakao OAuth 리다이렉트
 - `/api/auth/me` - 사용자 정보 조회
 - `/api/auth/logout` - 로그아웃
+- `/api/v1/members/me/exchanges` - 사용자 교환 정보
+- `/api/v1/users/recommendations` - 사용자 추천
+- `/api/v1/books/recommendations` - 책 추천
+- `/api/v1/bookhouse/members/me` - 서재 정보
 
 ## 프로젝트 기능 명세서
 
@@ -601,21 +607,23 @@ npm run test:watch
 - 페이지: `src/__tests__/app/`
 - 훅: `src/__tests__/hooks/`
 
-#### 4.2 API Mocking (MSW)
+#### 4.2 API Routes 테스트
 
-**MSW 핸들러 확인**:
+**API Routes 테스트 확인**:
 
 ```bash
-# MSW 모킹 테스트
+# API Routes 모킹 테스트
 npm test -- src/__tests__/mocks.test.ts
 ```
 
-**Mock API 엔드포인트**:
+**주요 API 엔드포인트**:
 
-- `/oauth2/authorization/google` - Google OAuth
-- `/oauth2/authorization/kakao` - Kakao OAuth
+- `/api/oauth2/authorization/google` - Google OAuth
+- `/api/oauth2/authorization/kakao` - Kakao OAuth
 - `/api/auth/me` - 인증 상태 확인
 - `/api/auth/logout` - 로그아웃
+- `/api/v1/members/me/exchanges` - 사용자 교환 정보
+- `/api/v1/bookhouse/members/me` - 서재 정보
 
 #### 4.3 E2E Testing (Playwright)
 
@@ -666,7 +674,7 @@ npm run start
 
 1. **Unit 테스트 실패**:
 
-   - MSW 핸들러 설정 확인
+   - fetch mock 핸들러 설정 확인
    - 비동기 처리 (`waitFor`) 확인
    - Mock 함수 초기화 확인
 
@@ -705,3 +713,5 @@ npx husky install
 이 프로세스를 따라 안정적이고 품질 높은 코드를 개발할 수 있습니다.
 
 - dev서버는 3000포트에서 열려있으면 그거 사용하고 없을때만 키기
+
+- !!!!do NOT use any!!!!!

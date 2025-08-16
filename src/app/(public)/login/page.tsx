@@ -13,7 +13,7 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleGoogleLogin = () => {
-    // 개발 환경에서는 직접 콜백 페이지로 이동 (MSW 제약사항 때문)
+    // 개발 환경에서는 직접 콜백 페이지로 이동
     if (process.env.NODE_ENV === 'development') {
       router.push(
         '/auth/callback/google?code=mock_google_code&state=mock_state'
@@ -24,7 +24,7 @@ export default function LoginPage() {
   }
 
   const handleKakaoLogin = () => {
-    // 개발 환경에서는 직접 콜백 페이지로 이동 (MSW 제약사항 때문)
+    // 개발 환경에서는 직접 콜백 페이지로 이동
     if (process.env.NODE_ENV === 'development') {
       router.push('/auth/callback/kakao?code=mock_kakao_code&state=mock_state')
     } else {

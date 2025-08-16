@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import QueryProvider from './providers/QueryProvider'
-import { MSWProvider } from './providers/MSWProvider'
+import Providers from './providers'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -25,17 +24,15 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="min-h-screen-safe">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex justify-center `}
       >
-        <MSWProvider>
-          <QueryProvider>
-            <div className="min-h-screen w-full max-w-[430px] bg-white shadow-lg">
-              {children}
-            </div>
-          </QueryProvider>
-        </MSWProvider>
+        <Providers>
+          <div className="w-full max-w-[430px] bg-white shadow-lg min-h-screen-safe">
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   )

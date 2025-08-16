@@ -59,7 +59,7 @@ export default function AddLibraryBookPage() {
   }
 
   return (
-    <div className="max-w-[430px] mx-auto bg-white min-h-screen py-4 px-4">
+    <div className="bg-white">
       {/* Header */}
       <header className="mb-6">
         <button
@@ -68,8 +68,8 @@ export default function AddLibraryBookPage() {
         >
           ← 뒤로
         </button>
-        <h1 className="text-2xl font-bold text-gray-900">책 등록</h1>
-        <p className="text-sm text-gray-600 mt-2">
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">책 등록</h1>
+        <p className="text-sm text-gray-600">
           서재에 추가할 책 정보를 입력해주세요
         </p>
       </header>

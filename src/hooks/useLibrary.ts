@@ -3,7 +3,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   LibraryBooksResponse,
-  PaginationInfo,
   AddLibraryBookRequest,
   UserProfile,
   BookReview,
@@ -17,6 +16,7 @@ import {
   AddReviewApiResponse,
   UpdateReviewApiResponse,
 } from '@/types/library'
+import { PaginationInfo } from '@/types/common'
 
 // 내 서재 책 리스트 조회
 export function useMyLibraryBooks(params?: { page?: number; size?: number }) {

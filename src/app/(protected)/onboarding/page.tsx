@@ -1,15 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import {
-  StartStep,
-  PhoneStep,
-  ProfileStep,
-  LocationStep,
-  PreferencesStep,
-  CompleteStep,
-} from '@/components/onboarding'
+import { useHeader } from '@/contexts/HeaderContext'
+import ProgressHeader from '@/components/layout/ProgressHeader'
+import StartStep from '@/components/onboarding/StartStep'
+import PhoneStep from '@/components/onboarding/PhoneStep'
+import ProfileStep from '@/components/onboarding/ProfileStep'
+import LocationStep from '@/components/onboarding/LocationStep'
+import PreferencesStep from '@/components/onboarding/PreferencesStep'
+import CompleteStep from '@/components/onboarding/CompleteStep'
 import { OnboardingStep, OnboardingData } from '@/types/onboarding'
 
 // 온보딩 단계 정의
@@ -24,10 +24,26 @@ const steps: OnboardingStep[] = [
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const { setHeaderContent } = useHeader()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('start')
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isNicknameValid, setIsNicknameValid] = useState(false)
+
+  // Update header when step changes
+  useEffect(() => {
+    const currentStepIndex = steps.indexOf(currentStep) + 1
+    setHeaderContent(
+      <ProgressHeader
+        currentStep={currentStepIndex}
+        totalSteps={steps.length}
+      />
+    )
+
+    return () => {
+      setHeaderContent(null)
+    }
+  }, [currentStep, setHeaderContent])
 
   const handleBackButton = () => {
     switch (currentStep) {
@@ -204,27 +220,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
-      {/* 진행률 표시 - 상단 고정 */}
-      <div className="bg-white border-b border-gray-200 flex-shrink-0">
-        <div className="max-w-[430px] mx-auto px-4 py-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-600">온보딩</span>
-            <span className="text-sm text-gray-600">
-              {steps.indexOf(currentStep) + 1} / {steps.length}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div
-              className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-              style={{
-                width: `${((steps.indexOf(currentStep) + 1) / steps.length) * 100}%`,
-              }}
-            />
-          </div>
-        </div>
-      </div>
-
+    <div className="min-h-screen-safe bg-gray-50 flex flex-col">
       {/* 컨텐츠 영역 - 스크롤 가능 */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-[430px] mx-auto">{renderStep()}</div>
