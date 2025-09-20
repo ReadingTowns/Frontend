@@ -7,7 +7,7 @@ export default function ProtectedLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen-safe bg-gray-50">
+    <div className="bg-gray-50">
       <HeaderProvider>
         <ProtectedLayoutClient>{children}</ProtectedLayoutClient>
       </HeaderProvider>
