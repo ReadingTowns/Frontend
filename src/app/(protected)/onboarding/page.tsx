@@ -220,15 +220,13 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen-safe bg-gray-50 flex flex-col">
+    <>
       {/* 컨텐츠 영역 - 스크롤 가능 */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-[430px] mx-auto">{renderStep()}</div>
-      </div>
+      <div className="flex-1 overflow-y-auto">{renderStep()}</div>
 
       {/* 버튼 영역 - 하단 고정 */}
-      <div className="bg-white border-t border-gray-200 flex-shrink-0 shadow-lg">
-        <div className="max-w-[430px] mx-auto p-4">
+      <div className="bg-white border-t border-gray-200 shadow-lg flex-shrink-0">
+        <div className="p-4">
           <button
             onClick={() => handleNextButton()}
             disabled={!canProceed() || isSubmitting}
@@ -238,6 +236,6 @@ export default function OnboardingPage() {
           </button>
         </div>
       </div>
-    </div>
+    </>
   )
 }

@@ -111,13 +111,15 @@
   .min-h-screen-safe {
     min-height: 100vh;
     min-height: 100dvh;
-    min-height: env(keyboard, 100vh);
+    min-height: env(keyboard, 100dvh);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   .h-screen-safe {
     height: 100vh;
     height: 100dvh;
-    height: env(keyboard, 100vh);
+    height: env(keyboard, 100dvh);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
