@@ -13,23 +13,13 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleGoogleLogin = () => {
-    // 개발 환경에서는 직접 콜백 페이지로 이동
-    if (process.env.NODE_ENV === 'development') {
-      router.push(
-        '/auth/callback/google?code=mock_google_code&state=mock_state'
-      )
-    } else {
-      window.location.assign('/oauth2/authorization/google')
-    }
+    // API Routes를 통해 백엔드 OAuth2 엔드포인트로 리다이렉트
+    window.location.assign('/api/oauth2/authorization/google')
   }
 
   const handleKakaoLogin = () => {
-    // 개발 환경에서는 직접 콜백 페이지로 이동
-    if (process.env.NODE_ENV === 'development') {
-      router.push('/auth/callback/kakao?code=mock_kakao_code&state=mock_state')
-    } else {
-      window.location.assign('/oauth2/authorization/kakao')
-    }
+    // API Routes를 통해 백엔드 OAuth2 엔드포인트로 리다이렉트
+    window.location.assign('/api/oauth2/authorization/kakao')
   }
 
   // 인증된 사용자는 홈으로 리다이렉트

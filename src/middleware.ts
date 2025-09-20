@@ -8,9 +8,13 @@ export function middleware(request: NextRequest) {
   const accessToken = request.cookies.get('access_token')?.value
   const refreshToken = request.cookies.get('refresh_token')?.value
 
-  // 인증 상태 확인 (mock token 체크)
-  const isAuthenticated =
-    accessToken === 'mock_access_token' || refreshToken === 'mock_refresh_token'
+  // Mock 모드 확인
+  const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
+
+  // 인증 상태 확인
+  const isAuthenticated = isMockMode
+    ? accessToken?.startsWith('mock_') || refreshToken?.startsWith('mock_')
+    : !!(accessToken || refreshToken)
 
   // Public routes (인증 없이 접근 가능)
   const publicRoutes = ['/login', '/auth']
