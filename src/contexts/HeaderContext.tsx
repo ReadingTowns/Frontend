@@ -2,18 +2,31 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react'
 
+interface HeaderConfig {
+  type?: 'main' | 'search'
+  title?: string
+  showBack?: boolean
+  showSearch?: boolean
+  onSearch?: (query: string) => void
+}
+
 interface HeaderContextType {
   headerContent: ReactNode | null
   setHeaderContent: (content: ReactNode | null) => void
+  headerConfig: HeaderConfig | null
+  setHeaderConfig: (config: HeaderConfig | null) => void
 }
 
 const HeaderContext = createContext<HeaderContextType | undefined>(undefined)
 
 export function HeaderProvider({ children }: { children: ReactNode }) {
   const [headerContent, setHeaderContent] = useState<ReactNode | null>(null)
+  const [headerConfig, setHeaderConfig] = useState<HeaderConfig | null>(null)
 
   return (
-    <HeaderContext.Provider value={{ headerContent, setHeaderContent }}>
+    <HeaderContext.Provider
+      value={{ headerContent, setHeaderContent, headerConfig, setHeaderConfig }}
+    >
       {children}
     </HeaderContext.Provider>
   )
