@@ -24,7 +24,7 @@ const navigationItems: NavigationItem[] = [
     activeIcon: '📖',
   },
   {
-    href: '/users',
+    href: '/neighbors',
     label: '이웃',
     icon: '👥',
     activeIcon: '👥',
@@ -45,7 +45,8 @@ export default function BottomNavigation() {
       <div className="max-w-[430px] mx-auto px-4 py-2">
         <div className="flex justify-around">
           {navigationItems.map(item => {
-            const isActive = pathname === item.href
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + '/')
             return (
               <Link
                 key={item.href}
