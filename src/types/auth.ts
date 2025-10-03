@@ -7,7 +7,7 @@ export interface User {
   email: string
   name: string
   profileImage?: string
-  provider: 'google' | 'kakao'
+  provider: 'google' | 'kakao' | 'dev'
   isAuthenticated: boolean
   onboardingCompleted?: boolean
   memberId?: number
