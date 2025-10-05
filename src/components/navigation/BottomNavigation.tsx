@@ -24,16 +24,16 @@ const navigationItems: NavigationItem[] = [
     activeIcon: '📖',
   },
   {
-    href: '/neighbors',
-    label: '이웃',
-    icon: '👥',
-    activeIcon: '👥',
-  },
-  {
     href: '/chat',
     label: '채팅',
     icon: '💬',
     activeIcon: '💬',
+  },
+  {
+    href: '/mypage',
+    label: '마이페이지',
+    icon: '👤',
+    activeIcon: '👤',
   },
 ]
 
