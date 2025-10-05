@@ -62,7 +62,7 @@ export async function POST(
   // 실제 백엔드 호출
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/members/${memberId}/follow`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'}/api/v1/members/${memberId}/follow`,
       {
         method: 'POST',
         headers: {
@@ -138,7 +138,7 @@ export async function DELETE(
   // 실제 백엔드 호출
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/members/${memberId}/follow`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'}/api/v1/members/${memberId}/follow`,
       {
         method: 'DELETE',
         headers: {

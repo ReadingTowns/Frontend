@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
   // 실제 백엔드 호출
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/members/search?nickname=${nickname || ''}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'}/api/v1/members/search?nickname=${nickname || ''}`,
       {
         headers: {
           Cookie: request.headers.get('cookie') || '',

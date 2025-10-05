@@ -11,7 +11,7 @@ export async function GET() {
 
   // 실제 백엔드 OAuth2 엔드포인트로 리다이렉트
   const backendUrl =
-    process.env.NEXT_PUBLIC_API_URL || 'https://readingtown.site'
+    process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
   const kakaoOAuthUrl = `${backendUrl}/oauth2/authorization/kakao`
 
   return NextResponse.redirect(kakaoOAuthUrl)

@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
 
     // 실제 백엔드 서버와 통신하여 토큰 교환
     const backendUrl =
-      process.env.NEXT_PUBLIC_API_URL || 'https://readingtown.site'
+      process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
     const tokenResponse = await fetch(
       `${backendUrl}/login/oauth2/code/google?code=${code}&state=${state}`,
       {

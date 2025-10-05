@@ -51,7 +51,9 @@ export async function POST(request: NextRequest) {
     } else {
       // 실제 백엔드 API 호출
       const backendUrl =
-        process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'
+        process.env.NEXT_PUBLIC_BACKEND_URL ||
+        'https://api.readingtown.site' ||
+        'http://localhost:8080'
       const response = await fetch(`${backendUrl}/api/v1/bookhouse/books`, {
         method: 'POST',
         headers: {
