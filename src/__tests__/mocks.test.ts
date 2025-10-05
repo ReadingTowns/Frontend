@@ -41,7 +41,7 @@ describe('API Routes Mocking', () => {
         headers: {
           get: (name: string) => {
             if (name === 'location') {
-              return 'http://localhost:3000/auth/callback/google?code=mock_google_code&state=mock_state'
+              return 'http://localhost:3000/login/oauth2/code/google?code=mock_google_code&state=mock_state'
             }
             return null
           },
@@ -52,7 +52,9 @@ describe('API Routes Mocking', () => {
     const response = await fetch('/oauth2/authorization/google')
 
     expect(response.status).toBe(302)
-    expect(response.headers.get('location')).toContain('/auth/callback/google')
+    expect(response.headers.get('location')).toContain(
+      '/login/oauth2/code/google'
+    )
     expect(response.headers.get('location')).toContain('code=mock_google_code')
   })
 
@@ -65,7 +67,7 @@ describe('API Routes Mocking', () => {
         headers: {
           get: (name: string) => {
             if (name === 'location') {
-              return 'http://localhost:3000/auth/callback/kakao?code=mock_kakao_code&state=mock_state'
+              return 'http://localhost:3000/login/oauth2/code/kakao?code=mock_kakao_code&state=mock_state'
             }
             return null
           },
@@ -76,7 +78,9 @@ describe('API Routes Mocking', () => {
     const response = await fetch('/oauth2/authorization/kakao')
 
     expect(response.status).toBe(302)
-    expect(response.headers.get('location')).toContain('/auth/callback/kakao')
+    expect(response.headers.get('location')).toContain(
+      '/login/oauth2/code/kakao'
+    )
     expect(response.headers.get('location')).toContain('code=mock_kakao_code')
   })
 
@@ -100,7 +104,7 @@ describe('API Routes Mocking', () => {
     )
 
     const response = await fetch(
-      '/api/auth/callback/google?code=mock_code&state=mock_state'
+      '/login/oauth2/code/google?code=mock_code&state=mock_state'
     )
     const data = await response.json()
 
@@ -130,7 +134,7 @@ describe('API Routes Mocking', () => {
     )
 
     const response = await fetch(
-      '/api/auth/callback/kakao?code=mock_code&state=mock_state'
+      '/login/oauth2/code/kakao?code=mock_code&state=mock_state'
     )
     const data = await response.json()
 

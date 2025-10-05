@@ -4,8 +4,8 @@ export async function GET() {
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
 
   if (isMockMode) {
-    // Mock 모드: 직접 콜백으로 리다이렉트
-    const mockCallbackUrl = `http://localhost:3000/api/auth/callback/kakao?code=mock_kakao_code&state=mock_state`
+    // Mock 모드: 직접 콜백 페이지로 리다이렉트
+    const mockCallbackUrl = `http://localhost:3000/login/oauth2/code/kakao?code=mock_kakao_code&state=mock_state`
     return NextResponse.redirect(mockCallbackUrl)
   }
 
