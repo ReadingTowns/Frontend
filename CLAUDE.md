@@ -163,6 +163,13 @@ After MCP setup, the following browser automation tools are available:
   Google/Kakao 버튼 컴포넌트
 - **인증 훅** (`/src/hooks/useAuth.ts`): TanStack Query 기반 인증 상태 관리
 
+#### OAuth2 콜백 페이지 (백엔드 리다이렉트 URI와 일치)
+
+- **Google 콜백** (`/src/app/login/oauth2/code/google/page.tsx`): Google OAuth 콜백 처리
+- **Kakao 콜백** (`/src/app/login/oauth2/code/kakao/page.tsx`): Kakao OAuth 콜백 처리
+- **기존 콜백** (`/src/app/auth/callback/[provider]/page.tsx`): 레거시 호환용
+- **인증 리다이렉트** (`/src/app/auth/redirect/page.tsx`): 인증 후 라우팅 처리
+
 #### OAuth2 엔드포인트
 
 ```typescript
@@ -172,6 +179,13 @@ window.location.assign('/oauth2/authorization/google');
 // Kakao 로그인
 window.location.assign('/oauth2/authorization/kakao');
 ```
+
+#### 백엔드 OAuth2 설정
+
+- **백엔드 URL**: `https://readingtown.site`
+- **Google Redirect URI**: `https://readingtown.site/login/oauth2/code/google`
+- **Kakao Redirect URI**: `https://readingtown.site/login/oauth2/code/kakao`
+- **로컬 개발**: `http://localhost:3000/login/oauth2/code/{provider}`
 
 #### 토큰 관리
 

@@ -34,7 +34,7 @@ function GoogleOAuthCallbackContent() {
 
         // OAuth 콜백을 백엔드로 전달
         const response = await fetch(
-          `https://readingtown.site/login/oauth2/code/google?code=${code}&state=${state}`,
+          `https://api.readingtown.site/login/oauth2/code/google?code=${code}&state=${state}`,
           {
             method: 'GET',
             credentials: 'include',
@@ -78,7 +78,7 @@ function GoogleOAuthCallbackContent() {
           const code = searchParams.get('code')
           const state = searchParams.get('state')
           if (code) {
-            window.location.href = `https://readingtown.site/login/oauth2/code/google?code=${code}&state=${state}`
+            window.location.href = `https://api.readingtown.site/login/oauth2/code/google?code=${code}&state=${state}`
             return
           }
         }
