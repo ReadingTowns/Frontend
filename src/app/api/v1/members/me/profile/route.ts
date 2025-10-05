@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
   const accessToken = cookieStore.get('access_token')
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
 
-  // 인증 체크
+  // 인증 체크 - Mock 모드에서는 토큰이 있기만 하면 OK
   const isAuthenticated = isMockMode
-    ? accessToken?.value?.startsWith('mock_')
+    ? !!accessToken?.value
     : !!accessToken?.value
 
   if (!isAuthenticated) {
