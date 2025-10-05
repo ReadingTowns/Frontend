@@ -57,26 +57,61 @@ export async function GET(request: NextRequest) {
   const page = parseInt(url.searchParams.get('page') || '0')
   const size = parseInt(url.searchParams.get('size') || '10')
 
-  // 페이지네이션 시뮬레이션
-  const startIndex = page * size
-  const endIndex = startIndex + size
-  const paginatedBooks = mockLibraryBooks.slice(startIndex, endIndex)
+  const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
 
-  const totalElements = mockLibraryBooks.length
-  const totalPages = Math.ceil(totalElements / size)
-  const isLast = page >= totalPages - 1
+  if (isMockMode) {
+    // Mock 모드일 때 페이지네이션 시뮬레이션
+    const startIndex = page * size
+    const endIndex = startIndex + size
+    const paginatedBooks = mockLibraryBooks.slice(startIndex, endIndex)
 
-  return NextResponse.json({
-    timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-    code: '1000',
-    message: '서재 책 목록 조회 성공',
-    result: {
-      content: paginatedBooks,
-      curPage: page,
-      curElements: paginatedBooks.length,
-      totalPages,
-      totalElements,
-      last: isLast,
-    },
-  })
+    const totalElements = mockLibraryBooks.length
+    const totalPages = Math.ceil(totalElements / size)
+    const isLast = page >= totalPages - 1
+
+    return NextResponse.json({
+      timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
+      code: '1000',
+      message: '서재 책 목록 조회 성공 (Mock)',
+      result: {
+        content: paginatedBooks,
+        curPage: page,
+        curElements: paginatedBooks.length,
+        totalPages,
+        totalElements,
+        last: isLast,
+      },
+    })
+  }
+
+  // 실제 백엔드 API 호출
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/bookhouse/members/me?page=${page}&size=${size}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error fetching bookhouse:', error)
+    return NextResponse.json(
+      {
+        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        code: '5000',
+        message: 'Internal Server Error',
+        result: null,
+      },
+      { status: 500 }
+    )
+  }
 }
