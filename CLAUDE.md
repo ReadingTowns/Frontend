@@ -182,7 +182,7 @@ window.location.assign('/oauth2/authorization/kakao');
 
 #### 백엔드 OAuth2 설정
 
-- **백엔드 URL**: `https://readingtown.site`
+- **백엔드 URL**: `https://api.readingtown.site`
 - **Google Redirect URI**: `https://readingtown.site/login/oauth2/code/google`
 - **Kakao Redirect URI**: `https://readingtown.site/login/oauth2/code/kakao`
 - **로컬 개발**: `http://localhost:3000/login/oauth2/code/{provider}`
@@ -521,6 +521,21 @@ Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
 5. `git push` (pre-push hook으로 테스트 실행)
 
 이 시스템을 통해 빌드 실패나 코드 품질 문제를 사전에 방지할 수 있습니다.
+
+## 백엔드 API 설정
+
+### 환경변수
+- **NEXT_PUBLIC_BACKEND_URL**: 백엔드 API 서버 URL
+- **기본값**: `https://api.readingtown.site`
+
+### API 엔드포인트
+- **백엔드 서버**: `https://api.readingtown.site`
+- **유저 검색**: `/api/v1/members/search?nickname={query}`
+- **채팅방 생성**: `/api/v1/chatrooms`
+
+### 인증
+- **쿠키 기반**: `access_token`, `refresh_token`
+- **Credentials**: `include` 설정 필요
 
 ## 개발 및 테스트 프로세스
 

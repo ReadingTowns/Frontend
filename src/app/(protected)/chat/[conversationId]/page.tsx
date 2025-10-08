@@ -7,11 +7,12 @@ export const metadata: Metadata = {
 }
 
 interface ChatRoomPageProps {
-  params: {
+  params: Promise<{
     conversationId: string
-  }
+  }>
 }
 
-export default function ChatRoomPage({ params }: ChatRoomPageProps) {
-  return <ChatRoomClient conversationId={params.conversationId} />
+export default async function ChatRoomPage({ params }: ChatRoomPageProps) {
+  const { conversationId } = await params
+  return <ChatRoomClient conversationId={conversationId} />
 }

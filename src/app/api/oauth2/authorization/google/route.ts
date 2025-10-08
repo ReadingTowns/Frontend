@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
 
   if (isMockMode) {
@@ -12,7 +13,9 @@ export async function GET() {
   // 실제 백엔드 OAuth2 엔드포인트로 리다이렉트
   const backendUrl =
     process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-  const googleOAuthUrl = `${backendUrl}/oauth2/authorization/google`
+  const origin = request.nextUrl.origin
+  const redirectUri = `${origin}/auth/callback`
+  const googleOAuthUrl = `${backendUrl}/oauth2/authorization/google?redirect_uri=${encodeURIComponent(redirectUri)}`
 
   return NextResponse.redirect(googleOAuthUrl)
 }
