@@ -749,7 +749,11 @@ export default function ApiTestPage() {
 
                 <select
                   value={filter}
-                  onChange={e => setFilter(e.target.value)}
+                  onChange={e =>
+                    setFilter(
+                      e.target.value as 'all' | 'success' | 'error' | 'pending'
+                    )
+                  }
                   className="px-4 py-2 border border-gray-300 rounded-lg"
                 >
                   <option value="all">모든 상태</option>

@@ -15,7 +15,13 @@ import { NotificationListResponse } from '@/types/notification'
 
 // 알림 목록 조회 훅
 export function useNotifications(params: FetchNotificationsParams = {}) {
-  return useInfiniteQuery({
+  return useInfiniteQuery<
+    NotificationListResponse,
+    Error,
+    InfiniteData<NotificationListResponse>,
+    [string, string],
+    string | null
+  >({
     queryKey: ['notifications', params.filter || 'all'],
     queryFn: ({ pageParam = null }) =>
       fetchNotifications({ ...params, cursor: pageParam }),

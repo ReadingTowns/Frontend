@@ -3,7 +3,7 @@ import {
   useNotifications,
   useNotificationMutations,
 } from '@/hooks/useNotifications'
-import { NotificationFilter } from '@/types/notification'
+import { NotificationFilter, Notification } from '@/types/notification'
 import NotificationList from './NotificationList'
 import NotificationFilters from './NotificationFilters'
 import EmptyNotifications from './EmptyNotifications'
@@ -20,13 +20,17 @@ export default function NotificationTab() {
     error,
   } = useNotifications({ filter })
 
+  // 타입 가드: data가 정의되어 있는지 확인
+  const pages = data?.pages ?? []
+
   const { deleteAllNotifications } = useNotificationMutations()
 
   // 모든 페이지의 알림 합치기
-  const allNotifications =
-    data?.pages?.flatMap(page => page.result.notifications) || []
-  const totalCount = data?.pages?.[0]?.result?.totalCount || 0
-  const unreadCount = data?.pages?.[0]?.result?.unreadCount || 0
+  const allNotifications: Notification[] = pages.flatMap(
+    page => page.result.notifications
+  )
+  const totalCount = pages[0]?.result?.totalCount || 0
+  const unreadCount = pages[0]?.result?.unreadCount || 0
 
   const handleFilterChange = (newFilter: NotificationFilter) => {
     setFilter(newFilter)

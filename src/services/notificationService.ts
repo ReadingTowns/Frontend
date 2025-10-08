@@ -7,7 +7,7 @@ import {
 export interface FetchNotificationsParams {
   filter?: 'all' | 'unread'
   limit?: number
-  cursor?: string
+  cursor?: string | null
 }
 
 // Mock 데이터 생성 함수
