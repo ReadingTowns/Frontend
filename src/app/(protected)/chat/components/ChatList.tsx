@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
+import UserSearchModal from './UserSearchModal'
 import type { Conversation } from '../ChatClient'
 
 interface ChatListProps {
@@ -16,6 +17,7 @@ export default function ChatList({
 }: ChatListProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
+  const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false)
 
   // Mock data for development
   const mockConversations: Conversation[] = [
@@ -191,9 +193,18 @@ export default function ChatList({
       </div>
 
       {/* New Chat Button */}
-      <button className="m-4 py-3 bg-primary-400 text-white rounded-lg hover:bg-primary-500 transition-colors font-medium">
+      <button
+        onClick={() => setIsUserSearchModalOpen(true)}
+        className="m-4 py-3 bg-primary-400 text-white rounded-lg hover:bg-primary-500 transition-colors font-medium"
+      >
         새 대화 시작하기
       </button>
+
+      {/* User Search Modal */}
+      <UserSearchModal
+        isOpen={isUserSearchModalOpen}
+        onClose={() => setIsUserSearchModalOpen(false)}
+      />
     </div>
   )
 }

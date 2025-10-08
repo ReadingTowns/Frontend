@@ -4,8 +4,11 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
+import { useUnreadNotificationCount } from '@/hooks/useNotifications'
 import ProfileSection from './components/ProfileSection'
-import MenuList from './components/MenuList'
+import TabNavigation from './components/TabNavigation'
+import SettingsTab from './components/SettingsTab'
+import NotificationTab from './components/NotificationTab'
 import LogoutModal from './components/LogoutModal'
 
 interface UserProfile {
@@ -19,10 +22,16 @@ interface UserProfile {
   userRatingCount: number
 }
 
+type TabType = 'settings' | 'notifications'
+
 export default function MypageClient() {
   const router = useRouter()
   const { setHeaderContent } = useHeader()
+  const [activeTab, setActiveTab] = useState<TabType>('settings')
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+
+  // 읽지 않은 알림 수 조회
+  const unreadCount = useUnreadNotificationCount()
 
   useEffect(() => {
     setHeaderContent(
@@ -107,40 +116,6 @@ export default function MypageClient() {
     setShowLogoutModal(false)
   }
 
-  const menuItems = [
-    {
-      id: 'profile',
-      title: '프로필 수정',
-      icon: '👤',
-      onClick: () => router.push('/mypage/profile'),
-    },
-    {
-      id: 'reading-habit',
-      title: '독서 습관 설정',
-      icon: '📚',
-      onClick: () => router.push('/mypage/reading-habit'),
-    },
-    {
-      id: 'notifications',
-      title: '알림 설정',
-      icon: '🔔',
-      onClick: () => router.push('/mypage/notifications'),
-    },
-    {
-      id: 'about',
-      title: '앱 정보',
-      icon: 'ℹ️',
-      onClick: () => router.push('/mypage/about'),
-    },
-    {
-      id: 'logout',
-      title: '로그아웃',
-      icon: '🚪',
-      onClick: () => setShowLogoutModal(true),
-      isDanger: true,
-    },
-  ]
-
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -175,7 +150,20 @@ export default function MypageClient() {
         {profile && (
           <>
             <ProfileSection profile={profile} />
-            <MenuList items={menuItems} />
+
+            <div className="bg-white">
+              <TabNavigation
+                activeTab={activeTab}
+                onTabChange={setActiveTab}
+                unreadCount={unreadCount}
+              />
+
+              {activeTab === 'settings' ? (
+                <SettingsTab onShowLogout={() => setShowLogoutModal(true)} />
+              ) : (
+                <NotificationTab />
+              )}
+            </div>
           </>
         )}
       </div>

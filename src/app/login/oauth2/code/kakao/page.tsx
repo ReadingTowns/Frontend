@@ -21,7 +21,9 @@ function KakaoOAuthCallbackContent() {
 
     if (code) {
       // 백엔드로 직접 리다이렉트 (백엔드가 쿠키 설정 후 /auth/callback으로 리다이렉트)
-      window.location.href = `https://api.readingtown.site/login/oauth2/code/kakao?code=${code}&state=${state}`
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      window.location.href = `${backendUrl}/login/oauth2/code/kakao?code=${code}&state=${state}`
     } else {
       // 인증 코드가 없으면 로그인 페이지로
       window.location.href = '/login?error=no_code'
