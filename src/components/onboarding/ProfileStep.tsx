@@ -30,8 +30,13 @@ export default function ProfileStep({
     setNicknameError('')
 
     try {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
       const response = await fetch(
-        `/api/v1/members/nickname/validate?nickname=${encodeURIComponent(nick)}`
+        `${backendUrl}/api/v1/members/nickname/validate?nickname=${encodeURIComponent(nick)}`,
+        {
+          credentials: 'include',
+        }
       )
       const data = await response.json()
 
@@ -68,8 +73,13 @@ export default function ProfileStep({
       if (nickname || profileImage) return
 
       try {
+        const backendUrl =
+          process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
         const response = await fetch(
-          '/api/v1/members/onboarding/default-profile'
+          `${backendUrl}/api/v1/members/onboarding/default-profile`,
+          {
+            credentials: 'include',
+          }
         )
         const data = await response.json()
 

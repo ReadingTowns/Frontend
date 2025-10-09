@@ -17,13 +17,25 @@ export default function LoginPage() {
   const [isDevLoading, setIsDevLoading] = useState(false)
 
   const handleGoogleLogin = () => {
-    // API Routes를 통해 백엔드 OAuth2 엔드포인트로 리다이렉트
-    window.location.assign('/api/oauth2/authorization/google')
+    // 백엔드 OAuth2 엔드포인트로 직접 리다이렉트
+    const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+    const origin = window.location.origin
+    const redirectUri = `${origin}/auth/callback`
+    window.location.assign(
+      `${backendUrl}/oauth2/authorization/google?redirect_uri=${encodeURIComponent(redirectUri)}`
+    )
   }
 
   const handleKakaoLogin = () => {
-    // API Routes를 통해 백엔드 OAuth2 엔드포인트로 리다이렉트
-    window.location.assign('/api/oauth2/authorization/kakao')
+    // 백엔드 OAuth2 엔드포인트로 직접 리다이렉트
+    const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+    const origin = window.location.origin
+    const redirectUri = `${origin}/auth/callback`
+    window.location.assign(
+      `${backendUrl}/oauth2/authorization/kakao?redirect_uri=${encodeURIComponent(redirectUri)}`
+    )
   }
 
   const handleDevLogin = async () => {

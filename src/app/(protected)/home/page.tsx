@@ -6,28 +6,20 @@ import type {
 } from '@/types/dashboard'
 
 async function fetchDashboardData() {
-  const baseUrl =
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3000'
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  const backendUrl =
+    process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
 
   try {
     const [currentExchangeRes, recommendedUsersRes, recommendedBooksRes] =
       await Promise.all([
-        fetch(`${baseUrl}/api/v1/members/me/exchanges`, {
-          headers: {
-            Cookie: 'access_token=mock_access_token', // SSR에서 쿠키 기반 인증
-          },
+        fetch(`${backendUrl}/api/v1/members/me/exchanges`, {
+          credentials: 'include',
         }),
-        fetch(`${baseUrl}/api/v1/users/recommendations`, {
-          headers: {
-            Cookie: 'access_token=mock_access_token',
-          },
+        fetch(`${backendUrl}/api/v1/users/recommendations`, {
+          credentials: 'include',
         }),
-        fetch(`${baseUrl}/api/v1/books/recommendations`, {
-          headers: {
-            Cookie: 'access_token=mock_access_token',
-          },
+        fetch(`${backendUrl}/api/v1/books/recommendations`, {
+          credentials: 'include',
         }),
       ])
 
