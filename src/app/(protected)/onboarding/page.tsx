@@ -91,24 +91,29 @@ export default function OnboardingPage() {
     setIsSubmitting(true)
 
     try {
-      const response = await fetch('/api/v1/members/onboarding/complete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          phoneNumber: onboardingData.phoneNumber,
-          latitude: onboardingData.latitude,
-          longitude: onboardingData.longitude,
-          nickname: onboardingData.nickname,
-          profileImage: onboardingData.profileImage,
-          availableTime:
-            onboardingData.availableTime === '나중에 설정하기'
-              ? null
-              : onboardingData.availableTime,
-        }),
-      })
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(
+        `${backendUrl}/api/v1/members/onboarding/complete`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            phoneNumber: onboardingData.phoneNumber,
+            latitude: onboardingData.latitude,
+            longitude: onboardingData.longitude,
+            nickname: onboardingData.nickname,
+            profileImage: onboardingData.profileImage,
+            availableTime:
+              onboardingData.availableTime === '나중에 설정하기'
+                ? null
+                : onboardingData.availableTime,
+          }),
+        }
+      )
 
       if (response.ok) {
         router.push('/home')

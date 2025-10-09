@@ -21,7 +21,9 @@ export function useAuth() {
   } = useQuery({
     queryKey: authKeys.me(),
     queryFn: async (): Promise<AuthMeApiResponse> => {
-      const response = await fetch('/api/auth/me', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/auth/me`, {
         credentials: 'include',
       })
       return response.json()
@@ -42,7 +44,9 @@ export function useAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/auth/logout', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       })
@@ -68,7 +72,9 @@ export function useAuth() {
 
   const refreshTokenMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/auth/refresh', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
       })

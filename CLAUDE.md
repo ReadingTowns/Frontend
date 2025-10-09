@@ -12,9 +12,25 @@ CSS v4. The project uses the Next.js App Router architecture.
 
 ### Development
 
+**중요: 쿠키 인증을 위해 프록시 환경에서 개발해야 합니다.**
+
 ```bash
 npm run dev      # Start development server with Turbopack
 ```
+
+개발 서버가 시작되면 다음 URL로 접속하세요:
+- **개발 환경**: https://dev.readingtown.site (권장)
+- ~~localhost:3000~~ (쿠키 인증 불가 - 사용 금지)
+
+**쿠키 인증 문제**:
+- 백엔드: `api.readingtown.site` (프로덕션 도메인)
+- localhost: `localhost:3000` (다른 도메인)
+- 크로스 도메인 쿠키 차단으로 인증 실패
+
+**해결 방법**:
+- 프록시 환경 (`dev.readingtown.site`)에서 개발
+- 프록시가 `localhost:3000`으로 요청 전달
+- 쿠키가 `.readingtown.site` 도메인에 설정되어 정상 작동
 
 ### Build & Production
 

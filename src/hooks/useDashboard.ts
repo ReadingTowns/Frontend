@@ -8,12 +8,15 @@ import type {
   BookRecommendationApiResponse,
 } from '@/types/dashboard'
 
+const BASE_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+
 // 교환 중인 책 조회
 export function useCurrentExchange() {
   return useQuery<ExchangeData | null>({
     queryKey: ['dashboard', 'current-exchange'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/members/me/exchanges', {
+      const response = await fetch(`${BASE_URL}/api/v1/members/me/exchanges`, {
         credentials: 'include',
       })
 
@@ -33,7 +36,7 @@ export function useRecommendedUsers() {
   return useQuery<RecommendedUser[]>({
     queryKey: ['dashboard', 'recommended-users'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/users/recommendations', {
+      const response = await fetch(`${BASE_URL}/api/v1/users/recommendations`, {
         credentials: 'include',
       })
 
@@ -53,7 +56,7 @@ export function useRecommendedBooks() {
   return useQuery<RecommendedBook[]>({
     queryKey: ['dashboard', 'recommended-books'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/books/recommendations', {
+      const response = await fetch(`${BASE_URL}/api/v1/books/recommendations`, {
         credentials: 'include',
       })
 
@@ -80,10 +83,13 @@ export function useFollowUser() {
       userId: number
       isFollowing: boolean
     }) => {
-      const response = await fetch(`/api/v1/users/${userId}/follow`, {
-        method: isFollowing ? 'DELETE' : 'POST',
-        credentials: 'include',
-      })
+      const response = await fetch(
+        `${BASE_URL}/api/v1/users/${userId}/follow`,
+        {
+          method: isFollowing ? 'DELETE' : 'POST',
+          credentials: 'include',
+        }
+      )
 
       if (!response.ok) {
         throw new Error('Failed to toggle follow')
