@@ -94,7 +94,7 @@ describe('Login Page', () => {
         status: 200,
         json: () =>
           Promise.resolve({
-            code: '1000',
+            code: 1000, // 숫자로 변경
             message: '인증 성공',
             result: {
               id: '1',
@@ -122,7 +122,7 @@ describe('Login Page', () => {
         status: 200,
         json: () =>
           Promise.resolve({
-            code: '1000',
+            code: 1000, // 숫자로 변경
             message: '인증 성공',
             result: {
               id: '1',
@@ -151,7 +151,7 @@ describe('Login Page', () => {
         status: 401,
         json: () =>
           Promise.resolve({
-            code: '4001',
+            code: 4001, // 숫자로 변경
             message: 'Unauthorized',
             result: null,
           }),

@@ -38,7 +38,7 @@ describe('useAuth', () => {
         json: () =>
           Promise.resolve({
             timestamp: '2025-08-16 08:29:38',
-            code: '4001',
+            code: 4001, // 숫자로 변경
             message: 'Unauthorized',
             result: null,
           }),
@@ -74,7 +74,7 @@ describe('useAuth', () => {
         json: () =>
           Promise.resolve({
             timestamp: '2025-08-16 08:29:38',
-            code: '1000',
+            code: 1000, // 숫자로 변경
             message: '인증 성공',
             result: mockUser,
           }),
@@ -102,7 +102,7 @@ describe('useAuth', () => {
         json: () =>
           Promise.resolve({
             timestamp: '2025-08-16 08:29:38',
-            code: '5000',
+            code: 5000, // 숫자로 변경
             message: 'Internal Server Error',
             result: null,
           }),

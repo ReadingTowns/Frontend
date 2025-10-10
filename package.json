@@ -12,10 +12,6 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "test:e2e": "playwright test",
-    "test:ui": "playwright test --ui",
-    "test:mcp": "claude mcp add playwright -- npx -y @playwright/mcp@latest",
-    "test:browser": "echo 'MCP Playwright를 사용하려면 Claude Code에서 다음 명령어를 실행하세요:' && echo 'claude mcp add playwright -- npx -y @playwright/mcp@latest'",
     "quality:check": "npm run lint && npm run format:check && npm run build && npm test",
     "quality:fix": "npm run format && npm run lint --fix",
     "prepare": "husky"
@@ -33,7 +29,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@playwright/test": "^1.54.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.7.0",
     "@testing-library/react": "^16.3.0",
