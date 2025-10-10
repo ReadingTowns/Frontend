@@ -1,15 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
-import { useUnreadNotificationCount } from '@/hooks/useNotifications'
 import ProfileSection from './components/ProfileSection'
-import TabNavigation from './components/TabNavigation'
 import SettingsTab from './components/SettingsTab'
-import NotificationTab from './components/NotificationTab'
 import LogoutModal from './components/LogoutModal'
+import { useState } from 'react'
 
 interface UserProfile {
   memberId: number
@@ -22,16 +20,10 @@ interface UserProfile {
   userRatingCount: number
 }
 
-type TabType = 'settings' | 'notifications'
-
 export default function MypageClient() {
   const router = useRouter()
   const { setHeaderContent } = useHeader()
-  const [activeTab, setActiveTab] = useState<TabType>('settings')
   const [showLogoutModal, setShowLogoutModal] = useState(false)
-
-  // 읽지 않은 알림 수 조회
-  const unreadCount = useUnreadNotificationCount()
 
   useEffect(() => {
     setHeaderContent(
@@ -154,19 +146,8 @@ export default function MypageClient() {
         {profile && (
           <>
             <ProfileSection profile={profile} />
-
             <div className="bg-white">
-              <TabNavigation
-                activeTab={activeTab}
-                onTabChange={setActiveTab}
-                unreadCount={unreadCount}
-              />
-
-              {activeTab === 'settings' ? (
-                <SettingsTab onShowLogout={() => setShowLogoutModal(true)} />
-              ) : (
-                <NotificationTab />
-              )}
+              <SettingsTab onShowLogout={() => setShowLogoutModal(true)} />
             </div>
           </>
         )}
