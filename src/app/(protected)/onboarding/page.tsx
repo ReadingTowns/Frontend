@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
+import { useAuth } from '@/hooks/useAuth'
 import ProgressHeader from '@/components/layout/ProgressHeader'
 import StartStep from '@/components/onboarding/StartStep'
 import PhoneStep from '@/components/onboarding/PhoneStep'
@@ -25,10 +26,28 @@ const steps: OnboardingStep[] = [
 export default function OnboardingPage() {
   const router = useRouter()
   const { setHeaderContent } = useHeader()
+  const { isAuthenticated, isNewUser, isLoading } = useAuth()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('start')
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isNicknameValid, setIsNicknameValid] = useState(false)
+
+  // 온보딩 완료 여부 확인 및 리다이렉트
+  useEffect(() => {
+    if (isLoading) return
+
+    // 인증되지 않은 경우 로그인 페이지로
+    if (!isAuthenticated) {
+      router.push('/login')
+      return
+    }
+
+    // 이미 온보딩 완료한 경우 홈으로
+    if (isAuthenticated && !isNewUser) {
+      router.push('/home')
+      return
+    }
+  }, [isAuthenticated, isNewUser, isLoading, router])
 
   // Update header when step changes
   useEffect(() => {
@@ -220,6 +239,21 @@ export default function OnboardingPage() {
       default:
         return <StartStep />
     }
+  }
+
+  // 로딩 중이거나 리다이렉트 중일 때
+  if (isLoading || !isAuthenticated || !isNewUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-primary-100 rounded-full mx-auto flex items-center justify-center mb-4">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400"></div>
+          </div>
+          <h2 className="text-lg font-medium text-gray-900 mb-2">로딩 중...</h2>
+          <p className="text-gray-600">잠시만 기다려주세요</p>
+        </div>
+      </div>
+    )
   }
 
   return (

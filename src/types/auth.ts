@@ -3,14 +3,18 @@
 import { ApiResponse } from './common'
 
 export interface User {
-  id: string
-  email: string
-  name: string
+  memberId: number
   profileImage?: string
-  provider: 'google' | 'kakao' | 'dev'
-  isAuthenticated: boolean
-  onboardingCompleted?: boolean
-  memberId?: number
+  nickname?: string
+  currentTown?: string
+  userRating?: number | null
+  userRatingCount?: number
+  availableTime?: string | null
+}
+
+// 온보딩 완료 여부 확인 API 응답
+export interface OnboardingCheckResponse {
+  onboardingCompleted: boolean
 }
 
 // 인증 상태 확인 API 응답
