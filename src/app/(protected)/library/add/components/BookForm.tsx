@@ -74,11 +74,14 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
   // 책 등록 API
   const registerBookMutation = useMutation({
     mutationFn: async (data: BookData) => {
-      const response = await fetch('/api/v1/bookhouse/books', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/v1/bookhouse/books`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(data),
       })
 

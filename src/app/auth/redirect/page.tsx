@@ -2,30 +2,49 @@
 
 import { useAuth } from '@/hooks/useAuth'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function AuthRedirectPage() {
   const { isAuthenticated, isNewUser, isLoading } = useAuth()
   const router = useRouter()
+  const [retryCount, setRetryCount] = useState(0)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        // 인증되지 않은 경우 로그인 페이지로
-        router.push('/login')
-        return
-      }
+    // 이미 처리 중이면 중복 실행 방지
+    if (isProcessing) return
 
+    // 로딩 중이면 대기
+    if (isLoading) return
+
+    // 인증된 경우 라우팅 처리
+    if (isAuthenticated) {
+      setIsProcessing(true)
       if (isNewUser) {
-        // 신규 사용자는 온보딩으로
         router.push('/onboarding')
-        return
+      } else {
+        router.push('/home')
       }
-
-      // 기존 사용자는 홈으로
-      router.push('/home')
+      return
     }
-  }, [isAuthenticated, isNewUser, isLoading, router])
+
+    // 인증되지 않았지만 재시도 가능한 경우
+    if (!isAuthenticated && retryCount < 3) {
+      // OAuth 콜백 직후에는 쿠키가 설정되었지만
+      // TanStack Query 캐시가 업데이트되지 않았을 수 있음
+      // 짧은 딜레이 후 재시도
+      const timer = setTimeout(() => {
+        setRetryCount(prev => prev + 1)
+      }, 300)
+      return () => clearTimeout(timer)
+    }
+
+    // 3번 재시도 후에도 인증되지 않으면 로그인으로
+    if (!isAuthenticated && retryCount >= 3) {
+      setIsProcessing(true)
+      router.push('/login')
+    }
+  }, [isAuthenticated, isNewUser, isLoading, router, retryCount, isProcessing])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

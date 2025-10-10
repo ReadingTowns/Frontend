@@ -64,7 +64,9 @@ export default function MypageClient() {
   } = useQuery<UserProfile>({
     queryKey: ['members', 'me', 'profile'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/members/me/profile', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/v1/members/me/profile`, {
         credentials: 'include',
       })
       const data = await response.json()
@@ -93,7 +95,9 @@ export default function MypageClient() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/auth/logout', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/v1/auth/logout`, {
         method: 'POST',
         credentials: 'include',
       })

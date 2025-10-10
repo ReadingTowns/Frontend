@@ -40,8 +40,10 @@ export default function UserCard({
   // 팔로우/언팔로우 Mutation
   const followMutation = useMutation({
     mutationFn: async (follow: boolean) => {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
       const method = follow ? 'POST' : 'DELETE'
-      const res = await fetch(`/api/v1/members/${userId}/follow`, {
+      const res = await fetch(`${backendUrl}/api/v1/members/${userId}/follow`, {
         method,
       })
       if (!res.ok) throw new Error('Failed to update follow status')

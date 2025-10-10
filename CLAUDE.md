@@ -199,9 +199,6 @@ window.location.assign('/oauth2/authorization/kakao');
 #### 백엔드 OAuth2 설정
 
 - **백엔드 URL**: `https://api.readingtown.site`
-- **Google Redirect URI**: `https://readingtown.site/login/oauth2/code/google`
-- **Kakao Redirect URI**: `https://readingtown.site/login/oauth2/code/kakao`
-- **로컬 개발**: `http://localhost:3000/login/oauth2/code/{provider}`
 
 #### 토큰 관리
 
@@ -560,9 +557,6 @@ Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
 ```bash
 # 의존성 설치
 npm install
-
-# 개발 서버 시작
-npm run dev  # http://localhost:3000
 
 # MCP 서버 설정 (선택사항)
 claude mcp add playwright -- npx -y @playwright/mcp@latest

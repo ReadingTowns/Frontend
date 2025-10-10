@@ -41,7 +41,9 @@ export default function NeighborsPageClient() {
   const { data: recommendations, isLoading: recommendLoading } = useQuery({
     queryKey: ['users', 'recommendations'],
     queryFn: async () => {
-      const res = await fetch('/api/v1/users/recommendations')
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const res = await fetch(`${backendUrl}/api/v1/users/recommendations`)
       if (!res.ok) throw new Error('Failed to fetch recommendations')
       const data = await res.json()
       return data.result as User[]
@@ -53,7 +55,9 @@ export default function NeighborsPageClient() {
   const { data: following, isLoading: followingLoading } = useQuery({
     queryKey: ['users', 'following'],
     queryFn: async () => {
-      const res = await fetch('/api/v1/members/me/following')
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const res = await fetch(`${backendUrl}/api/v1/members/me/following`)
       if (!res.ok) throw new Error('Failed to fetch following')
       const data = await res.json()
       return data.result as User[]
@@ -65,7 +69,9 @@ export default function NeighborsPageClient() {
   const { data: followers, isLoading: followersLoading } = useQuery({
     queryKey: ['users', 'followers'],
     queryFn: async () => {
-      const res = await fetch('/api/v1/members/me/followers')
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const res = await fetch(`${backendUrl}/api/v1/members/me/followers`)
       if (!res.ok) throw new Error('Failed to fetch followers')
       const data = await res.json()
       return data.result as User[]
@@ -77,7 +83,11 @@ export default function NeighborsPageClient() {
   const { data: searchResults, isLoading: searchLoading } = useQuery({
     queryKey: ['users', 'search', searchQuery],
     queryFn: async () => {
-      const res = await fetch(`/api/v1/members/search?nickname=${searchQuery}`)
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const res = await fetch(
+        `${backendUrl}/api/v1/members/search?nickname=${searchQuery}`
+      )
       if (!res.ok) throw new Error('Failed to search users')
       const data = await res.json()
       return data.result as User[]

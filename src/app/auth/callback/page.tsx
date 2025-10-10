@@ -12,11 +12,16 @@ export default function AuthCallbackPage() {
     // 백엔드에서 OAuth 인증 성공 후 이 페이지로 리다이렉트됨
     // 이 시점에 이미 백엔드가 쿠키를 설정했어야 함
 
-    // 인증 상태 새로고침
-    queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
+    // 쿠키가 브라우저에 완전히 설정될 때까지 짧은 딜레이
+    const timer = setTimeout(() => {
+      // 인증 상태 새로고침
+      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
 
-    // 인증 확인 페이지로 이동
-    router.push('/auth/redirect')
+      // 인증 확인 페이지로 이동
+      router.push('/auth/redirect')
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [router, queryClient])
 
   return (

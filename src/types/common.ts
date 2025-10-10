@@ -1,7 +1,7 @@
 // 공통 API 응답 타입 정의
 
 export interface ApiResponse<T> {
-  code: string
+  code: number // 백엔드가 숫자로 반환
   message: string
   result: T
 }
