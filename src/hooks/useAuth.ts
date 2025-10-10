@@ -2,12 +2,14 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
-import { AuthMeApiResponse } from '@/types/auth'
+import { AuthMeApiResponse, OnboardingCheckResponse } from '@/types/auth'
 import { API_CODES } from '@/constants/apiCodes'
+import { ApiResponse } from '@/types/common'
 
 const authKeys = {
   all: ['auth'] as const,
   me: () => [...authKeys.all, 'me'] as const,
+  onboarding: () => [...authKeys.all, 'onboarding'] as const,
 }
 
 export function useAuth() {
@@ -40,6 +42,24 @@ export function useAuth() {
       return failureCount < 1 // 재시도 횟수를 1번으로 줄임
     },
     retryDelay: 500, // 재시도 간격을 500ms로 단축
+  })
+
+  // 온보딩 완료 여부 확인
+  const { data: onboardingData } = useQuery({
+    queryKey: authKeys.onboarding(),
+    queryFn: async (): Promise<ApiResponse<OnboardingCheckResponse>> => {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(
+        `${backendUrl}/api/v1/members/onboarding/check`,
+        {
+          credentials: 'include',
+        }
+      )
+      return response.json()
+    },
+    enabled: authData?.code === API_CODES.SUCCESS && !!authData?.result, // 인증된 경우에만 실행
+    staleTime: 1000 * 60 * 5,
   })
 
   const logoutMutation = useMutation({
@@ -119,7 +139,8 @@ export function useAuth() {
     isNewUser:
       authData?.code === API_CODES.SUCCESS &&
       !!authData?.result &&
-      !authData?.result?.onboardingCompleted,
+      onboardingData?.code === API_CODES.SUCCESS &&
+      !onboardingData?.result?.onboardingCompleted,
     isLoading,
     error,
     logout: logoutMutation.mutate,
