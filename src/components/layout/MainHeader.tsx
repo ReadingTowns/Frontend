@@ -36,7 +36,7 @@ export default function MainHeader({
       {subtitle && <p className="text-center text-gray-500 mt-2">{subtitle}</p>}
       {showUserGreeting && user && (
         <p className="text-center text-sm text-gray-400 mt-1">
-          안녕하세요, {user.name}님!
+          안녕하세요, {user.nickname}님!
         </p>
       )}
     </header>

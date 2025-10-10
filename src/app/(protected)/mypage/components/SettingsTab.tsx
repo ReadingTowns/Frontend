@@ -22,12 +22,6 @@ export default function SettingsTab({ onShowLogout }: SettingsTabProps) {
       onClick: () => router.push('/mypage/reading-habit'),
     },
     {
-      id: 'notifications',
-      title: '알림 설정',
-      icon: '🔔',
-      onClick: () => router.push('/mypage/notifications'),
-    },
-    {
       id: 'about',
       title: '앱 정보',
       icon: 'ℹ️',
