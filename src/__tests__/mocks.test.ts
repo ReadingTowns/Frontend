@@ -15,7 +15,7 @@ describe('API Routes Mocking', () => {
         status: 401,
         json: () =>
           Promise.resolve({
-            code: '4001',
+            code: 4001, // 숫자로 변경
             message: '인증되지 않은 사용자입니다',
           }),
       })
@@ -28,7 +28,7 @@ describe('API Routes Mocking', () => {
     console.log('Response data:', data)
 
     expect(response.status).toBe(401)
-    expect(data.code).toBe('4001')
+    expect(data.code).toBe(4001) // 숫자로 변경
     expect(data.message).toBe('인증되지 않은 사용자입니다')
   })
 
@@ -152,7 +152,7 @@ describe('API Routes Mocking', () => {
         status: 200,
         json: () =>
           Promise.resolve({
-            code: '1000',
+            code: 1000, // 숫자로 변경
             result: {
               isAuthenticated: true,
               user: {
@@ -171,7 +171,7 @@ describe('API Routes Mocking', () => {
     const data = await response.json()
 
     expect(response.status).toBe(200)
-    expect(data.code).toBe('1000')
+    expect(data.code).toBe(1000) // 숫자로 변경
     expect(data.result.isAuthenticated).toBe(true)
   })
 })

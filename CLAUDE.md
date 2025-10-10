@@ -54,11 +54,6 @@ npm run quality:fix    # Run ESLint with auto-fix
 npm run test            # Run Jest unit tests
 npm run test:watch      # Run Jest in watch mode
 npm run test:coverage   # Run Jest with coverage report
-
-# E2E Testing
-npm run test:e2e        # Run Playwright E2E tests (all browsers)
-npm run test:ui         # Run Playwright with UI mode
-npx playwright test --project=chromium --reporter=list  # Quick test (Chrome only, CLI output)
 ```
 
 ## Architecture
@@ -72,7 +67,7 @@ npx playwright test --project=chromium --reporter=list  # Quick test (Chrome onl
 - **Linting**: ESLint 9 with Next.js configuration
 - **State Management**: TanStack Query v5 for server state
 - **Authentication**: OAuth2 (Google, Kakao) with cookie-based token management
-- **Testing**: Jest + React Testing Library + Playwright + API Routes
+- **Testing**: Jest + React Testing Library + API Routes
 
 ### Project Structure
 
@@ -93,8 +88,6 @@ npx playwright test --project=chromium --reporter=list  # Quick test (Chrome onl
 - `/src/__tests__/` - Test files
   - `app/` - Unit tests for pages
   - `components/` - Component tests
-- `/__tests__/e2e/` - Playwright E2E tests
-  - `auth.spec.ts` - Authentication flow tests
 - `/public/` - Static assets (SVG icons)
 - TypeScript configuration uses strict mode with path alias `@/*` mapping to
   `./src/*`
@@ -105,7 +98,6 @@ npx playwright test --project=chromium --reporter=list  # Quick test (Chrome onl
 - **ESLint**: Configured with Next.js core-web-vitals and TypeScript rules
 - **Tailwind CSS**: Version 4 with PostCSS plugin architecture
 - **Jest**: Configured with next/jest for Next.js integration
-- **Playwright**: Multi-browser testing with MCP integration support
 - **API Routes**: Next.js API endpoints for SSR compatibility
 
 ## Layout Design
@@ -117,20 +109,6 @@ npx playwright test --project=chromium --reporter=list  # Quick test (Chrome onl
 - **Dark mode support**: Automatic color scheme switching
 
 ## MCP Server Setup
-
-### Playwright MCP
-
-```bash
-# Install Playwright MCP server
-claude mcp add playwright -- npx -y @playwright/mcp@latest
-
-# Verify installation
-claude mcp list
-
-# Restart Claude Code to activate MCP tools
-exit
-claude
-```
 
 ### Context7 MCP
 
@@ -145,26 +123,6 @@ claude mcp list
 exit
 claude
 ```
-
-### Available Playwright Tools
-
-After MCP setup, the following browser automation tools are available:
-
-- `mcp__playwright__browser_navigate` - Navigate to URLs
-- `mcp__playwright__browser_resize` - Set viewport size
-- `mcp__playwright__browser_take_screenshot` - Capture screenshots
-- `mcp__playwright__browser_snapshot` - Get accessibility tree
-- `mcp__playwright__browser_click` - Click elements
-- `mcp__playwright__browser_type` - Type text
-
-### Testing Workflow
-
-1. Start development server: `npm run dev`
-2. Use Playwright MCP tools to:
-   - Navigate to `http://localhost:3000`
-   - Test different viewport sizes (375x812, 768x1024, 1920x1080)
-   - Capture screenshots for visual verification
-   - Verify 430px max-width constraint on all devices
 
 ## 인증 시스템 구현 현황
 
@@ -212,7 +170,6 @@ window.location.assign('/oauth2/authorization/kakao');
 - ✅ Google/Kakao 소셜 로그인 버튼
 - ✅ TanStack Query 설정 및 인증 훅
 - ✅ Unit 테스트 (Jest + React Testing Library)
-- ✅ E2E 테스트 (Playwright + MCP 통합)
 - ✅ API Routes 기반 서버사이드 API 구현
 
 ## 테스트 환경 설정
@@ -237,46 +194,6 @@ npm run test:coverage   # 커버리지 리포트
 - `src/__tests__/app/login/page.test.tsx` - 로그인 페이지 컴포넌트 테스트
 - `src/__tests__/components/auth/SocialLoginButtons.test.tsx` - 소셜 로그인 버튼
   테스트
-
-### E2E Testing (Playwright)
-
-```bash
-# 설정 파일
-playwright.config.ts    # Playwright 설정
-
-# 테스트 실행
-npm run test:e2e        # 모든 브라우저에서 E2E 테스트
-npx playwright test --project=chromium --reporter=list  # Chrome만, CLI 결과
-npm run test:ui         # UI 모드로 테스트
-```
-
-**테스트 브라우저:**
-
-- Desktop: Chrome, Firefox, Safari, Edge
-- Mobile: Chrome (Pixel 5), Safari (iPhone 12)
-
-**주요 테스트 시나리오** (`__tests__/e2e/auth.spec.ts`):
-
-1. 로그인 페이지 기본 요소 표시 확인
-2. 반응형 레이아웃 테스트 (모바일, 태블릿, 데스크톱)
-3. 소셜 로그인 버튼 스타일 검증
-4. OAuth 리다이렉트 기능 테스트
-
-### MCP Playwright 통합
-
-MCP를 통해 브라우저 자동화가 가능합니다:
-
-```bash
-# MCP 설치 및 설정
-claude mcp add playwright -- npx -y @playwright/mcp@latest
-
-# 사용 가능한 MCP 도구
-mcp__playwright__browser_navigate     # URL 이동
-mcp__playwright__browser_resize       # 뷰포트 크기 변경
-mcp__playwright__browser_take_screenshot  # 스크린샷 촬영
-mcp__playwright__browser_click        # 요소 클릭
-mcp__playwright__browser_evaluate     # JavaScript 실행
-```
 
 ### API Routes
 
@@ -559,7 +476,6 @@ Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
 npm install
 
 # MCP 서버 설정 (선택사항)
-claude mcp add playwright -- npx -y @playwright/mcp@latest
 claude mcp add --transport http context7 https://mcp.context7.com
 ```
 
@@ -588,19 +504,6 @@ npm run quality:check
 npm run lint           # ESLint 검사
 npm run build          # 빌드 검증
 npm test               # 전체 단위 테스트
-```
-
-#### 2.3 UI/UX 검증
-
-```bash
-# E2E 테스트 (권장: Chrome만 빠른 테스트)
-npx playwright test --project=chromium --reporter=list
-
-# 전체 브라우저 E2E 테스트
-npm run test:e2e
-
-# UI 모드로 시각적 테스트
-npm run test:ui
 ```
 
 ### 3. Git 워크플로우
@@ -664,35 +567,11 @@ npm test -- src/__tests__/mocks.test.ts
 - `/api/v1/members/me/exchanges` - 사용자 교환 정보
 - `/api/v1/bookhouse/members/me` - 서재 정보
 
-#### 4.3 E2E Testing (Playwright)
-
-**대상**: 사용자 플로우, 페이지 간 이동, 브라우저 호환성
-
-```bash
-# 빠른 E2E 테스트 (Chrome만)
-npx playwright test --project=chromium --reporter=list
-
-# 전체 브라우저 테스트
-npm run test:e2e
-
-# 디버그 모드
-npm run test:ui
-
-# 특정 테스트 파일
-npx playwright test __tests__/e2e/auth.spec.ts
-```
-
-**테스트 브라우저**:
-
-- Desktop: Chrome, Firefox, Safari, Edge
-- Mobile: Chrome (Pixel 5), Safari (iPhone 12)
-
 ### 5. 프로덕션 배포 전 체크리스트
 
 #### 5.1 필수 검증 항목
 
 - [ ] `npm run quality:check` 100% 통과
-- [ ] 모든 E2E 테스트 통과
 - [ ] 프로덕션 빌드 성공: `npm run build`
 - [ ] 다양한 브라우저에서 기능 검증
 - [ ] 모바일 반응형 동작 확인
@@ -717,13 +596,7 @@ npm run start
    - 비동기 처리 (`waitFor`) 확인
    - Mock 함수 초기화 확인
 
-2. **E2E 테스트 실패**:
-
-   - 개발 서버 실행 상태 확인
-   - 브라우저별 차이점 확인
-   - 타이밍 이슈 (`page.waitFor`) 확인
-
-3. **빌드 실패**:
+2. **빌드 실패**:
    - TypeScript 에러 해결
    - ESLint 규칙 준수
    - Import 경로 확인
@@ -745,9 +618,8 @@ npx husky install
 3. **컴포넌트 구현**: 기본 UI 구현
 4. **인증/상태 연동**: useAuth, TanStack Query 활용
 5. **Unit 테스트 보완**: 엣지 케이스 추가
-6. **E2E 테스트 추가**: 사용자 시나리오 기반
-7. **코드 리뷰**: `npm run quality:check` 통과 확인
-8. **최종 검증**: 다양한 환경에서 테스트
+6. **코드 리뷰**: `npm run quality:check` 통과 확인
+7. **최종 검증**: 다양한 환경에서 테스트
 
 이 프로세스를 따라 안정적이고 품질 높은 코드를 개발할 수 있습니다.
 
