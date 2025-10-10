@@ -52,7 +52,9 @@ export default function ProfileEditClient() {
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ['members', 'me', 'profile'],
     queryFn: async () => {
-      const response = await fetch('/api/v1/members/me/profile', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/v1/members/me/profile`, {
         credentials: 'include',
       })
       if (!response.ok) {
@@ -90,8 +92,10 @@ export default function ProfileEditClient() {
     setNicknameError('')
 
     try {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
       const response = await fetch(
-        `/api/v1/members/nickname/validate?nickname=${encodeURIComponent(nicknameToCheck)}`
+        `${backendUrl}/api/v1/members/nickname/validate?nickname=${encodeURIComponent(nicknameToCheck)}`
       )
       const data = await response.json()
 
@@ -128,7 +132,9 @@ export default function ProfileEditClient() {
       availableTime: string
       profileImage: string
     }) => {
-      const response = await fetch('/api/v1/members/profile', {
+      const backendUrl =
+        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/v1/members/profile`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

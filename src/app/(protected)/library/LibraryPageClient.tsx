@@ -46,10 +46,15 @@ export default function LibraryPageClient({
   const handleDeleteBook = async (bookId: string) => {
     if (confirm('정말로 이 책을 서재에서 삭제하시겠습니까?')) {
       try {
-        const response = await fetch(`/api/v1/bookhouse/books/${bookId}`, {
-          method: 'DELETE',
-          credentials: 'include',
-        })
+        const backendUrl =
+          process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+        const response = await fetch(
+          `${backendUrl}/api/v1/bookhouse/books/${bookId}`,
+          {
+            method: 'DELETE',
+            credentials: 'include',
+          }
+        )
 
         if (response.ok) {
           setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId))

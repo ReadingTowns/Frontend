@@ -139,10 +139,8 @@ export default function OnboardingPage() {
       case 'location':
         return !!(onboardingData.latitude && onboardingData.longitude)
       case 'preferences':
-        return !!(
-          onboardingData.availableTime &&
-          onboardingData.availableTime.trim().length >= 2
-        )
+        // 선택적 입력: 항상 다음 단계로 진행 가능
+        return true
       case 'complete':
         return true
       default:
