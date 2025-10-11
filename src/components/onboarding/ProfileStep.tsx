@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ProfileStepProps } from '@/types/onboarding'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
+import NicknameInput from '@/components/common/NicknameInput'
 
 export default function ProfileStep({
   nickname,
@@ -11,55 +13,6 @@ export default function ProfileStep({
 }: ProfileStepProps) {
   const [localNickname, setLocalNickname] = useState(nickname)
   const [localProfileImage, setLocalProfileImage] = useState(profileImage)
-  const [nicknameError, setNicknameError] = useState('')
-  const [isCheckingNickname, setIsCheckingNickname] = useState(false)
-  const [nicknameStatus, setNicknameStatus] = useState<
-    'unchecked' | 'available' | 'unavailable'
-  >('unchecked')
-
-  const checkNicknameAvailability = async () => {
-    const nick = localNickname.trim()
-
-    if (nick.length < 2 || nick.length > 20) {
-      setNicknameError('닉네임은 2자 이상 20자 이하로 입력해주세요')
-      setNicknameStatus('unchecked')
-      return
-    }
-
-    setIsCheckingNickname(true)
-    setNicknameError('')
-
-    try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(
-        `${backendUrl}/api/v1/members/nickname/validate?nickname=${encodeURIComponent(nick)}`,
-        {
-          credentials: 'include',
-        }
-      )
-      const data = await response.json()
-
-      if (data.result.isAvailable) {
-        setNicknameStatus('available')
-        setNicknameError('')
-        onNicknameChange(nick)
-        onNicknameValidationChange(true)
-      } else {
-        setNicknameStatus('unavailable')
-        setNicknameError('이미 사용 중인 닉네임입니다')
-        onNicknameChange('')
-        onNicknameValidationChange(false)
-      }
-    } catch {
-      setNicknameError('닉네임 확인 중 오류가 발생했습니다')
-      setNicknameStatus('unchecked')
-      onNicknameChange('')
-      onNicknameValidationChange(false)
-    } finally {
-      setIsCheckingNickname(false)
-    }
-  }
 
   useEffect(() => {
     setLocalNickname(nickname)
@@ -101,17 +54,22 @@ export default function ProfileStep({
 
   const handleNicknameChange = (newNickname: string) => {
     setLocalNickname(newNickname)
-    setNicknameStatus('unchecked')
-    setNicknameError('')
-    onNicknameChange('')
-    onNicknameValidationChange(false)
+    onNicknameChange(newNickname)
+  }
+
+  const handleNicknameValidation = (isValid: boolean) => {
+    onNicknameValidationChange(isValid)
   }
 
   return (
     <div className="px-4 py-8">
       {/* 이전 버튼 */}
-      <button onClick={onBack} className="btn-ghost text-left mb-4">
-        ← 이전
+      <button
+        onClick={onBack}
+        className="btn-ghost text-left mb-4 flex items-center gap-1"
+      >
+        <ArrowLeftIcon className="w-5 h-5" />
+        이전
       </button>
 
       <h2 className="text-xl font-bold text-gray-900 mb-2">
@@ -136,62 +94,11 @@ export default function ProfileStep({
 
       {/* 닉네임 입력 */}
       <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          닉네임
-        </label>
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={localNickname}
-            onChange={e => handleNicknameChange(e.target.value)}
-            placeholder="닉네임을 입력해주세요"
-            className={`flex-1 px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent ${
-              nicknameError
-                ? 'border-red-500'
-                : nicknameStatus === 'available'
-                  ? 'border-green-500'
-                  : 'border-gray-300'
-            }`}
-            maxLength={20}
-            disabled={isCheckingNickname}
-          />
-          <button
-            type="button"
-            onClick={checkNicknameAvailability}
-            disabled={
-              isCheckingNickname ||
-              localNickname.trim().length < 2 ||
-              localNickname.trim().length > 20
-            }
-            className="px-4 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed whitespace-nowrap"
-          >
-            {isCheckingNickname ? '확인중...' : '중복확인'}
-          </button>
-        </div>
-
-        {/* 상태 메시지 */}
-        {nicknameError && (
-          <p className="mt-2 text-sm text-red-600 flex items-center gap-1">
-            <span>❌</span>
-            {nicknameError}
-          </p>
-        )}
-        {nicknameStatus === 'available' && !nicknameError && (
-          <p className="mt-2 text-sm text-green-600 flex items-center gap-1">
-            <span>✅</span>
-            사용 가능한 닉네임입니다
-          </p>
-        )}
-        {isCheckingNickname && (
-          <p className="mt-2 text-sm text-blue-600 flex items-center gap-1">
-            <span>🔄</span>
-            닉네임 중복 확인 중...
-          </p>
-        )}
-
-        <p className="mt-1 text-sm text-gray-500">
-          2자 이상 20자 이하로 입력해주세요
-        </p>
+        <NicknameInput
+          value={localNickname}
+          onChange={handleNicknameChange}
+          onValidationChange={handleNicknameValidation}
+        />
       </div>
     </div>
   )

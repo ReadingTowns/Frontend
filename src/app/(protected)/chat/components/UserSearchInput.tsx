@@ -1,6 +1,11 @@
 'use client'
 
 import React from 'react'
+import {
+  MagnifyingGlassIcon,
+  ClockIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 
 interface UserSearchInputProps {
   value: string
@@ -26,9 +31,9 @@ export default function UserSearchInput({
     <div className="relative">
       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
         {isLoading ? (
-          <span className="inline-block animate-spin">⏳</span>
+          <ClockIcon className="w-5 h-5 animate-spin" />
         ) : (
-          <span>🔍</span>
+          <MagnifyingGlassIcon className="w-5 h-5" />
         )}
       </div>
 
@@ -46,7 +51,7 @@ export default function UserSearchInput({
           onClick={handleClear}
           className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
         >
-          <span className="text-gray-500 text-lg">✕</span>
+          <XMarkIcon className="w-5 h-5 text-gray-500" />
         </button>
       )}
     </div>

@@ -1,9 +1,11 @@
 'use client'
 
+import { ChevronRightIcon } from '@heroicons/react/24/outline'
+
 interface MenuItem {
   id: string
   title: string
-  icon: string
+  icon: React.ReactNode
   onClick: () => void
   isDanger?: boolean
 }
@@ -31,7 +33,10 @@ export default function MenuList({ items }: MenuListProps) {
             `}
           >
             <div className="flex items-center gap-3">
-              <span className="text-2xl" role="img" aria-label={item.title}>
+              <span
+                className={item.isDanger ? 'text-red-600' : 'text-gray-600'}
+                aria-label={item.title}
+              >
                 {item.icon}
               </span>
               <span
@@ -43,19 +48,9 @@ export default function MenuList({ items }: MenuListProps) {
                 {item.title}
               </span>
             </div>
-            <svg
+            <ChevronRightIcon
               className={`w-5 h-5 ${item.isDanger ? 'text-red-400' : 'text-gray-400'}`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            />
           </button>
         ))}
       </div>

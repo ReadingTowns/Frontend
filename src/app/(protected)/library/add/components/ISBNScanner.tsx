@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { CameraIcon, PhotoIcon } from '@heroicons/react/24/outline'
 
 interface ISBNScannerProps {
   onISBNScanned: (isbn: string) => void
@@ -92,7 +93,7 @@ export default function ISBNScanner({
               ) : (
                 <div className="text-center">
                   <div className="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <span className="text-3xl">📷</span>
+                    <CameraIcon className="w-10 h-10 text-gray-500" />
                   </div>
                   <p className="text-gray-600 mb-4">
                     책 뒷면의 바코드를 스캔하세요
@@ -128,9 +129,10 @@ export default function ISBNScanner({
               />
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
               >
-                📸 갤러리에서 선택
+                <PhotoIcon className="w-5 h-5" />
+                갤러리에서 선택
               </button>
             </div>
           </div>

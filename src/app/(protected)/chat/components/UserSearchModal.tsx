@@ -3,6 +3,13 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  XMarkIcon,
+  MagnifyingGlassIcon,
+  ClockIcon,
+  XCircleIcon,
+  UserGroupIcon,
+} from '@heroicons/react/24/outline'
 import UserSearchInput from './UserSearchInput'
 import UserResultCard from './UserResultCard'
 import { searchUsers, createChatRoom } from '@/services/userSearchService'
@@ -102,7 +109,7 @@ export default function UserSearchModal({
             onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
-            <span className="text-gray-500 text-xl">✕</span>
+            <XMarkIcon className="w-6 h-6 text-gray-500" />
           </button>
         </div>
 
@@ -126,7 +133,7 @@ export default function UserSearchModal({
         <div className="flex-1 overflow-y-auto">
           {debouncedQuery.length < 2 ? (
             <div className="flex flex-col items-center justify-center py-12 px-4">
-              <div className="text-6xl mb-4">🔍</div>
+              <MagnifyingGlassIcon className="w-16 h-16 text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 사용자 검색
               </h3>
@@ -136,12 +143,12 @@ export default function UserSearchModal({
             </div>
           ) : isSearching ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="animate-spin text-4xl mb-4">⏳</div>
+              <ClockIcon className="w-12 h-12 text-gray-400 animate-spin mb-4" />
               <p className="text-gray-600">검색 중...</p>
             </div>
           ) : searchError ? (
             <div className="flex flex-col items-center justify-center py-12 px-4">
-              <div className="text-4xl mb-4">❌</div>
+              <XCircleIcon className="w-12 h-12 text-red-500 mb-4" />
               <p className="text-red-600 text-center">
                 검색 중 오류가 발생했습니다
               </p>
@@ -158,7 +165,7 @@ export default function UserSearchModal({
             </div>
           ) : searchResults.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 px-4">
-              <div className="text-4xl mb-4">👥</div>
+              <UserGroupIcon className="w-12 h-12 text-gray-300 mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 검색 결과 없음
               </h3>

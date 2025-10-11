@@ -3,6 +3,12 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
+import {
+  BookOpenIcon,
+  MagnifyingGlassIcon,
+  ChatBubbleLeftIcon,
+  UserGroupIcon,
+} from '@heroicons/react/24/outline'
 import MainHeader from '@/components/layout/MainHeader'
 import CurrentExchange from '@/components/dashboard/CurrentExchange'
 import UserRecommendations from '@/components/dashboard/UserRecommendations'
@@ -62,20 +68,20 @@ export default function HomePageClient({ initialData }: HomePageClientProps) {
         <section>
           <h2 className="text-xl font-semibold mb-4">빠른 실행</h2>
           <div className="grid grid-cols-2 gap-3">
-            <button className="p-4 bg-primary-400 text-white rounded-lg text-center hover:bg-primary-500 transition-colors">
-              <div className="text-2xl mb-1">📚</div>
+            <button className="p-4 bg-primary-400 text-white rounded-lg text-center hover:bg-primary-500 transition-colors flex flex-col items-center">
+              <BookOpenIcon className="w-8 h-8 mb-1" />
               <div className="text-sm font-medium">내 서재</div>
             </button>
-            <button className="p-4 bg-secondary-200 text-gray-800 rounded-lg text-center hover:bg-secondary-300 transition-colors">
-              <div className="text-2xl mb-1">🔍</div>
+            <button className="p-4 bg-secondary-200 text-gray-800 rounded-lg text-center hover:bg-secondary-300 transition-colors flex flex-col items-center">
+              <MagnifyingGlassIcon className="w-8 h-8 mb-1" />
               <div className="text-sm font-medium">책 검색</div>
             </button>
-            <button className="p-4 bg-gray-100 text-gray-800 rounded-lg text-center hover:bg-gray-200 transition-colors">
-              <div className="text-2xl mb-1">💬</div>
+            <button className="p-4 bg-gray-100 text-gray-800 rounded-lg text-center hover:bg-gray-200 transition-colors flex flex-col items-center">
+              <ChatBubbleLeftIcon className="w-8 h-8 mb-1" />
               <div className="text-sm font-medium">채팅</div>
             </button>
-            <button className="p-4 bg-gray-100 text-gray-800 rounded-lg text-center hover:bg-gray-200 transition-colors">
-              <div className="text-2xl mb-1">👥</div>
+            <button className="p-4 bg-gray-100 text-gray-800 rounded-lg text-center hover:bg-gray-200 transition-colors flex flex-col items-center">
+              <UserGroupIcon className="w-8 h-8 mb-1" />
               <div className="text-sm font-medium">이웃 찾기</div>
             </button>
           </div>

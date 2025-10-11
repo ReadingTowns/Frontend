@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { LocationStepProps } from '@/types/onboarding'
+import { MapPinIcon, MapIcon } from '@heroicons/react/24/solid'
 
 export default function LocationStep({
   latitude,
@@ -87,12 +88,12 @@ export default function LocationStep({
         <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center mb-4">
           {location ? (
             <div className="text-center">
-              <div className="text-2xl mb-2">📍</div>
+              <MapPinIcon className="w-12 h-12 text-primary-600 mx-auto mb-2" />
               <p className="text-sm text-gray-600">{address}</p>
             </div>
           ) : (
             <div className="text-center text-gray-500">
-              <div className="text-2xl mb-2">🗺️</div>
+              <MapIcon className="w-12 h-12 mx-auto mb-2" />
               <p className="text-sm">위치를 설정해주세요</p>
             </div>
           )}

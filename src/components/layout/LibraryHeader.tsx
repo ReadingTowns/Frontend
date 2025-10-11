@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { PlusIcon } from '@heroicons/react/24/outline'
 
 interface LibraryHeaderProps {
   title?: string
@@ -19,7 +20,7 @@ export default function LibraryHeader({
         <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
         <Link href={addButtonHref}>
           <button className="p-2 text-gray-600 hover:text-gray-800">
-            <span className="text-xl">➕</span>
+            <PlusIcon className="w-6 h-6" />
           </button>
         </Link>
       </div>

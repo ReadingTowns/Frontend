@@ -1,6 +1,15 @@
 'use client'
 
 import { useState, useRef, KeyboardEvent } from 'react'
+import {
+  ChatBubbleLeftIcon,
+  CameraIcon,
+  MapPinIcon,
+  PaperAirplaneIcon,
+  ClockIcon,
+  CalendarIcon,
+  BookOpenIcon,
+} from '@heroicons/react/24/outline'
 
 interface MessageInputProps {
   onSendMessage: (content: string) => void
@@ -73,19 +82,19 @@ export default function MessageInput({
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="빠른 답장"
             >
-              <span className="text-xl">💬</span>
+              <ChatBubbleLeftIcon className="w-5 h-5 text-gray-600" />
             </button>
             <button
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="사진 전송"
             >
-              <span className="text-xl">📷</span>
+              <CameraIcon className="w-5 h-5 text-gray-600" />
             </button>
             <button
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               title="위치 공유"
             >
-              <span className="text-xl">📍</span>
+              <MapPinIcon className="w-5 h-5 text-gray-600" />
             </button>
           </div>
 
@@ -117,20 +126,21 @@ export default function MessageInput({
             }`}
           >
             {isLoading ? (
-              <span className="inline-block animate-spin">⏳</span>
+              <ClockIcon className="w-5 h-5 animate-spin" />
             ) : (
-              <span className="text-xl">↗️</span>
+              <PaperAirplaneIcon className="w-5 h-5" />
             )}
           </button>
         </div>
 
         {/* Book Exchange Action Bar */}
         <div className="mt-3 flex gap-2">
-          <button className="flex-1 py-2 px-3 bg-secondary-100 hover:bg-secondary-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-            📅 교환 일정 제안
+          <button className="flex-1 py-2 px-3 bg-secondary-100 hover:bg-secondary-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            <CalendarIcon className="w-4 h-4" />
+            교환 일정 제안
           </button>
-          <button className="flex-1 py-2 px-3 bg-secondary-100 hover:bg-secondary-200 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-            📚 책 정보 공유
+          <button className="flex-1 py-2 px-3 bg-secondary-100 hover:bg-secondary-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+            <BookOpenIcon className="w-4 h-4" />책 정보 공유
           </button>
         </div>
       </div>

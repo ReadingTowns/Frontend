@@ -2,38 +2,50 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import {
+  HomeIcon,
+  BookOpenIcon,
+  ChatBubbleLeftIcon,
+  UserIcon,
+} from '@heroicons/react/24/outline'
+import {
+  HomeIcon as HomeIconSolid,
+  BookOpenIcon as BookOpenIconSolid,
+  ChatBubbleLeftIcon as ChatBubbleLeftIconSolid,
+  UserIcon as UserIconSolid,
+} from '@heroicons/react/24/solid'
 
 interface NavigationItem {
   href: string
   label: string
-  icon: string
-  activeIcon: string
+  Icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
+  ActiveIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>
 }
 
 const navigationItems: NavigationItem[] = [
   {
     href: '/home',
     label: '홈',
-    icon: '🏠',
-    activeIcon: '🏠',
+    Icon: HomeIcon,
+    ActiveIcon: HomeIconSolid,
   },
   {
     href: '/library',
     label: '서재',
-    icon: '📖',
-    activeIcon: '📖',
+    Icon: BookOpenIcon,
+    ActiveIcon: BookOpenIconSolid,
   },
   {
     href: '/chat',
     label: '채팅',
-    icon: '💬',
-    activeIcon: '💬',
+    Icon: ChatBubbleLeftIcon,
+    ActiveIcon: ChatBubbleLeftIconSolid,
   },
   {
     href: '/mypage',
     label: '마이페이지',
-    icon: '👤',
-    activeIcon: '👤',
+    Icon: UserIcon,
+    ActiveIcon: UserIconSolid,
   },
 ]
 
@@ -57,9 +69,11 @@ export default function BottomNavigation() {
                     : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <span className="text-lg mb-1">
-                  {isActive ? item.activeIcon : item.icon}
-                </span>
+                {isActive ? (
+                  <item.ActiveIcon className="w-6 h-6 mb-1" />
+                ) : (
+                  <item.Icon className="w-6 h-6 mb-1" />
+                )}
                 <span className="text-xs font-medium">{item.label}</span>
               </Link>
             )

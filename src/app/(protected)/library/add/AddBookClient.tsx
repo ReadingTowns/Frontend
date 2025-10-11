@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
+import {
+  CameraIcon,
+  PencilSquareIcon,
+  ChevronRightIcon,
+} from '@heroicons/react/24/outline'
 import ISBNScanner from './components/ISBNScanner'
 import BookForm from './components/BookForm'
 
@@ -59,7 +64,7 @@ export default function AddBookClient() {
           >
             <div className="flex items-center">
               <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                <span className="text-2xl">📷</span>
+                <CameraIcon className="w-6 h-6 text-primary-600" />
               </div>
               <div className="ml-4 flex-1 text-left">
                 <h3 className="text-lg font-medium text-gray-900">
@@ -69,19 +74,7 @@ export default function AddBookClient() {
                   책 뒷면의 바코드를 카메라로 스캔하세요
                 </p>
               </div>
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRightIcon className="w-5 h-5 text-gray-400" />
             </div>
           </button>
 
@@ -92,7 +85,7 @@ export default function AddBookClient() {
           >
             <div className="flex items-center">
               <div className="flex-shrink-0 w-12 h-12 bg-secondary-200 rounded-full flex items-center justify-center">
-                <span className="text-2xl">📝</span>
+                <PencilSquareIcon className="w-6 h-6 text-secondary-700" />
               </div>
               <div className="ml-4 flex-1 text-left">
                 <h3 className="text-lg font-medium text-gray-900">직접 입력</h3>
@@ -100,19 +93,7 @@ export default function AddBookClient() {
                   책 정보를 직접 입력하세요
                 </p>
               </div>
-              <svg
-                className="w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              <ChevronRightIcon className="w-5 h-5 text-gray-400" />
             </div>
           </button>
 

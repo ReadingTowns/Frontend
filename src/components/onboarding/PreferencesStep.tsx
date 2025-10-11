@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { PreferencesStepProps } from '@/types/onboarding'
+import { LightBulbIcon } from '@heroicons/react/24/solid'
 
 export default function PreferencesStep({
   value,
@@ -49,10 +50,11 @@ export default function PreferencesStep({
           선택 사항이에요. 나중에 마이페이지에서 설정할 수 있어요 (최대 200자)
         </p>
 
-        <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+        <div className="mt-4 p-3 bg-blue-50 rounded-lg flex items-start gap-2">
+          <LightBulbIcon className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-blue-700">
-            <strong>💡 예시:</strong> &ldquo;평일 저녁 7시 이후, 주말 오후
-            시간대 가능합니다&rdquo;
+            <strong>예시:</strong> &ldquo;평일 저녁 7시 이후, 주말 오후 시간대
+            가능합니다&rdquo;
           </p>
         </div>
       </div>

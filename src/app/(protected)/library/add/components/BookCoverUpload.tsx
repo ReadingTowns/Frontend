@@ -2,6 +2,13 @@
 
 import { useRef, useState } from 'react'
 import Image from 'next/image'
+import {
+  BookOpenIcon,
+  CameraIcon,
+  FolderIcon,
+  LinkIcon,
+  PhotoIcon,
+} from '@heroicons/react/24/outline'
 
 interface BookCoverUploadProps {
   imageUrl?: string
@@ -91,7 +98,7 @@ export default function BookCoverUpload({
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-gray-400">
-                  <span className="text-4xl">📚</span>
+                  <BookOpenIcon className="w-12 h-12" />
                 </div>
               )}
               {/* 삭제 버튼 */}
@@ -105,7 +112,7 @@ export default function BookCoverUpload({
             </>
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center text-gray-400">
-              <span className="text-4xl mb-2">📷</span>
+              <CameraIcon className="w-10 h-10 mb-2" />
               <span className="text-xs text-center px-2">표지 추가</span>
             </div>
           )}
@@ -125,32 +132,37 @@ export default function BookCoverUpload({
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {isUploading ? (
-              <div className="flex items-center justify-center">
-                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin mr-2" />
+              <>
+                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                 업로드 중...
-              </div>
+              </>
             ) : (
-              '📁 파일 선택'
+              <>
+                <FolderIcon className="w-5 h-5" />
+                파일 선택
+              </>
             )}
           </button>
 
           <button
             type="button"
             onClick={handleUrlInput}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center justify-center gap-2"
           >
-            🔗 URL 입력
+            <LinkIcon className="w-5 h-5" />
+            URL 입력
           </button>
 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center justify-center gap-2"
           >
-            📸 사진 촬영
+            <PhotoIcon className="w-5 h-5" />
+            사진 촬영
           </button>
 
           <p className="text-xs text-gray-500 mt-2">
