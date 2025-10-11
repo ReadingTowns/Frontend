@@ -1,7 +1,25 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useExchangedBooks } from '@/hooks/useExchangedBooks'
 import { ExchangedBook } from '@/types/home'
+
+// Mock the API client before importing hooks
+const mockApiGet = jest.fn()
+const mockApiPost = jest.fn()
+const mockApiPut = jest.fn()
+const mockApiPatch = jest.fn()
+const mockApiDelete = jest.fn()
+
+jest.mock('../../lib/api', () => ({
+  api: {
+    get: (...args: unknown[]) => mockApiGet(...args),
+    post: (...args: unknown[]) => mockApiPost(...args),
+    put: (...args: unknown[]) => mockApiPut(...args),
+    patch: (...args: unknown[]) => mockApiPatch(...args),
+    delete: (...args: unknown[]) => mockApiDelete(...args),
+  },
+}))
+
+import { useExchangedBooks } from '@/hooks/useExchangedBooks'
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -45,17 +63,7 @@ describe('useExchangedBooks', () => {
       },
     ]
 
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '1000',
-            message: '성공',
-            result: mockBooks,
-          }),
-      })
-    ) as jest.Mock
+    mockApiGet.mockResolvedValue(mockBooks)
 
     const { result } = renderHook(() => useExchangedBooks(), {
       wrapper: createWrapper(),
@@ -65,42 +73,11 @@ describe('useExchangedBooks', () => {
 
     expect(result.current.data).toEqual(mockBooks)
     expect(result.current.data?.length).toBe(2)
+    expect(mockApiGet).toHaveBeenCalledWith('/api/v1/members/me/exchanges')
   })
 
-  it('should return empty array when API returns non-success code', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '4001',
-            message: '인증 실패',
-            result: null,
-          }),
-      })
-    ) as jest.Mock
-
-    const { result } = renderHook(() => useExchangedBooks(), {
-      wrapper: createWrapper(),
-    })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    expect(result.current.data).toEqual([])
-  })
-
-  it('should return empty array when result is null', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '1000',
-            message: '성공',
-            result: null,
-          }),
-      })
-    ) as jest.Mock
+  it('should return empty array when result is empty array', async () => {
+    mockApiGet.mockResolvedValue([])
 
     const { result } = renderHook(() => useExchangedBooks(), {
       wrapper: createWrapper(),

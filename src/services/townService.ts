@@ -34,6 +34,42 @@ export async function getTownInfo(): Promise<TownInfo> {
 }
 
 /**
+ * Get town name by coordinates (latitude, longitude)
+ */
+export async function getTownByCoordinates(
+  longitude: number,
+  latitude: number
+): Promise<{ currentTown: string }> {
+  try {
+    const response = await fetch(
+      `${BASE_URL}/api/v1/members/town/coordinates?longitude=${longitude}&latitude=${latitude}`,
+      {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to get town by coordinates: ${response.status}`)
+    }
+
+    const data = await response.json()
+
+    if (data.code !== 1000) {
+      throw new Error(data.message || 'Failed to get town by coordinates')
+    }
+
+    return data.result
+  } catch (error) {
+    console.error('Get town by coordinates error:', error)
+    throw error
+  }
+}
+
+/**
  * Update town information
  */
 export async function updateTown(

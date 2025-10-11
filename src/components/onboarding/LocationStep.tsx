@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { LocationStepProps } from '@/types/onboarding'
 import { MapPinIcon, MapIcon } from '@heroicons/react/24/solid'
+import { getTownByCoordinates } from '@/services/townService'
 
 export default function LocationStep({
   latitude,
@@ -24,10 +25,19 @@ export default function LocationStep({
     }
 
     navigator.geolocation.getCurrentPosition(
-      position => {
+      async position => {
         const { latitude, longitude } = position.coords
         handleLocationSet(latitude, longitude)
-        setAddress('현재 위치')
+
+        // 위경도로 동네 이름 조회
+        try {
+          const townData = await getTownByCoordinates(longitude, latitude)
+          setAddress(townData.currentTown)
+        } catch (error) {
+          console.error('동네 정보를 가져올 수 없습니다:', error)
+          setAddress('현재 위치')
+        }
+
         setIsLoading(false)
       },
       error => {

@@ -469,7 +469,63 @@ Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
 
 ### 인증
 - **쿠키 기반**: `access_token`, `refresh_token`
-- **Credentials**: `include` 설정 필요
+- **API 클라이언트**: 중앙화된 `api` 함수 사용 (`src/lib/api.ts`)
+
+### API 클라이언트 사용법
+
+프로젝트에는 중앙화된 API 클라이언트가 구현되어 있습니다.
+
+**파일 위치**: `src/lib/api.ts`
+
+**주요 기능**:
+- ✅ 자동 `credentials: 'include'` (쿠키 자동 포함)
+- ✅ 자동 JSON 파싱
+- ✅ 통일된 에러 처리
+- ✅ TypeScript 타입 안전성
+- ✅ Query parameter 지원
+
+**사용 예시**:
+
+```typescript
+import { api } from '@/lib/api'
+
+// GET 요청
+const users = await api.get('/api/v1/members/search', { nickname: 'john' })
+
+// POST 요청
+await api.post('/api/v1/members/11/follow')
+
+// POST with body
+await api.post('/api/v1/bookhouse/books', {
+  isbn: '1234567890',
+  title: '책 제목'
+})
+
+// PUT 요청
+await api.put('/api/v1/members/profile', { nickname: 'newname' })
+
+// DELETE 요청
+await api.delete('/api/v1/members/11/follow')
+```
+
+**TanStack Query와 함께 사용**:
+
+```typescript
+import { api } from '@/lib/api'
+import { useMutation } from '@tanstack/react-query'
+
+const followMutation = useMutation({
+  mutationFn: async (follow: boolean) => {
+    if (follow) {
+      return await api.post(`/api/v1/members/${userId}/follow`)
+    } else {
+      return await api.delete(`/api/v1/members/${userId}/follow`)
+    }
+  }
+})
+```
+
+**⚠️ 중요**: 모든 새로운 API 호출은 `api` 클라이언트를 사용해야 합니다. 직접 `fetch`를 사용하지 마세요.
 
 ## 개발 및 테스트 프로세스
 

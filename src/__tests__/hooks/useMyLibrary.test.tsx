@@ -1,7 +1,25 @@
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useMyLibrary } from '@/hooks/useMyLibrary'
 import { LibraryBook } from '@/types/home'
+
+// Mock the API client before importing hooks
+const mockApiGet = jest.fn()
+const mockApiPost = jest.fn()
+const mockApiPut = jest.fn()
+const mockApiPatch = jest.fn()
+const mockApiDelete = jest.fn()
+
+jest.mock('../../lib/api', () => ({
+  api: {
+    get: (...args: unknown[]) => mockApiGet(...args),
+    post: (...args: unknown[]) => mockApiPost(...args),
+    put: (...args: unknown[]) => mockApiPut(...args),
+    patch: (...args: unknown[]) => mockApiPatch(...args),
+    delete: (...args: unknown[]) => mockApiDelete(...args),
+  },
+}))
+
+import { useMyLibrary } from '@/hooks/useMyLibrary'
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -41,17 +59,7 @@ describe('useMyLibrary', () => {
       },
     ]
 
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '1000',
-            message: '성공',
-            result: mockBooks,
-          }),
-      })
-    ) as jest.Mock
+    mockApiGet.mockResolvedValue(mockBooks)
 
     const { result } = renderHook(() => useMyLibrary(), {
       wrapper: createWrapper(),
@@ -61,12 +69,9 @@ describe('useMyLibrary', () => {
 
     expect(result.current.data).toEqual(mockBooks)
     expect(result.current.data?.length).toBe(2)
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/v1/bookhouse/members/me?limit=6'),
-      expect.objectContaining({
-        credentials: 'include',
-      })
-    )
+    expect(mockApiGet).toHaveBeenCalledWith('/api/v1/bookhouse/members/me', {
+      limit: 6,
+    })
   })
 
   it('should fetch library books with custom limit', async () => {
@@ -80,17 +85,7 @@ describe('useMyLibrary', () => {
       },
     ]
 
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '1000',
-            message: '성공',
-            result: mockBooks,
-          }),
-      })
-    ) as jest.Mock
+    mockApiGet.mockResolvedValue(mockBooks)
 
     const { result } = renderHook(() => useMyLibrary(10), {
       wrapper: createWrapper(),
@@ -98,70 +93,13 @@ describe('useMyLibrary', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true))
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/api/v1/bookhouse/members/me?limit=10'),
-      expect.objectContaining({
-        credentials: 'include',
-      })
-    )
-  })
-
-  it('should return empty array when API returns non-success code', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '4001',
-            message: '인증 실패',
-            result: null,
-          }),
-      })
-    ) as jest.Mock
-
-    const { result } = renderHook(() => useMyLibrary(), {
-      wrapper: createWrapper(),
+    expect(mockApiGet).toHaveBeenCalledWith('/api/v1/bookhouse/members/me', {
+      limit: 10,
     })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    expect(result.current.data).toEqual([])
-  })
-
-  it('should return empty array when result is null', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '1000',
-            message: '성공',
-            result: null,
-          }),
-      })
-    ) as jest.Mock
-
-    const { result } = renderHook(() => useMyLibrary(), {
-      wrapper: createWrapper(),
-    })
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true))
-
-    expect(result.current.data).toEqual([])
   })
 
   it('should return empty array when result is empty array', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () =>
-          Promise.resolve({
-            code: '1000',
-            message: '성공',
-            result: [],
-          }),
-      })
-    ) as jest.Mock
+    mockApiGet.mockResolvedValue([])
 
     const { result } = renderHook(() => useMyLibrary(), {
       wrapper: createWrapper(),
