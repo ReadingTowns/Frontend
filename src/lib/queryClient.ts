@@ -25,8 +25,8 @@ export function createQueryClient() {
           ) {
             return false
           }
-          // 최대 3번까지 재시도
-          return failureCount < 3
+          // 최대 1번까지 재시도
+          return failureCount < 1
         },
       },
       mutations: {

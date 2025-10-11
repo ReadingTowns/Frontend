@@ -36,8 +36,8 @@ const navigationItems: NavigationItem[] = [
     ActiveIcon: BookOpenIconSolid,
   },
   {
-    href: '/chat',
-    label: '채팅',
+    href: '/social',
+    label: '소셜',
     Icon: ChatBubbleLeftIcon,
     ActiveIcon: ChatBubbleLeftIconSolid,
   },
