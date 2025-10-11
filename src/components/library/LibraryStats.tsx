@@ -1,5 +1,7 @@
 'use client'
 
+import { BookOpenIcon, FireIcon } from '@heroicons/react/24/solid'
+
 interface LibraryStatsProps {
   totalBooks: number
   completionRate?: number
@@ -80,13 +82,15 @@ export function LibraryStats({
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center">
             <span className="text-gray-600">이번 달 독서</span>
-            <span className="ml-2 text-primary-600 font-semibold">
-              📚 {Math.floor(totalBooks / 4)}권
+            <span className="ml-2 text-primary-600 font-semibold flex items-center gap-1">
+              <BookOpenIcon className="w-4 h-4" />
+              {Math.floor(totalBooks / 4)}권
             </span>
           </div>
           {totalBooks > 0 && (
-            <div className="text-xs text-green-600 font-medium">
-              활발히 활동 중! 🔥
+            <div className="text-xs text-green-600 font-medium flex items-center gap-1">
+              활발히 활동 중!
+              <FireIcon className="w-4 h-4 text-orange-500" />
             </div>
           )}
         </div>

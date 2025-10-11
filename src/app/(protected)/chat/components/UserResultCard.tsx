@@ -1,5 +1,12 @@
 'use client'
 
+import {
+  UserCircleIcon,
+  MapPinIcon,
+  StarIcon,
+  ClockIcon,
+} from '@heroicons/react/24/solid'
+import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 import type { SearchUser } from '@/types/userSearch'
 
 interface UserResultCardProps {
@@ -25,27 +32,19 @@ export default function UserResultCard({
     const hasHalfStar = rating % 1 !== 0
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <span key={i} className="text-yellow-400">
-          ★
-        </span>
-      )
+      stars.push(<StarIcon key={i} className="w-4 h-4 text-yellow-400" />)
     }
 
     if (hasHalfStar) {
       stars.push(
-        <span key="half" className="text-yellow-400">
-          ☆
-        </span>
+        <StarOutlineIcon key="half" className="w-4 h-4 text-yellow-400" />
       )
     }
 
     const remainingStars = 5 - Math.ceil(rating)
     for (let i = 0; i < remainingStars; i++) {
       stars.push(
-        <span key={`empty-${i}`} className="text-gray-300">
-          ★
-        </span>
+        <StarIcon key={`empty-${i}`} className="w-4 h-4 text-gray-300" />
       )
     }
 
@@ -69,7 +68,7 @@ export default function UserResultCard({
                 className="w-full h-full rounded-full object-cover"
               />
             ) : (
-              <span className="text-xl">👤</span>
+              <UserCircleIcon className="w-7 h-7 text-gray-400" />
             )}
           </div>
 
@@ -86,7 +85,10 @@ export default function UserResultCard({
               )}
             </div>
 
-            <p className="text-sm text-gray-600 mb-1">📍 {user.town}</p>
+            <div className="flex items-center gap-1 mb-1 text-sm text-gray-600">
+              <MapPinIcon className="w-4 h-4" />
+              {user.town}
+            </div>
 
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
@@ -106,9 +108,9 @@ export default function UserResultCard({
 
           {/* Action Button */}
           <div className="flex-shrink-0">
-            <div className="bg-primary-400 text-white px-3 py-1.5 rounded-lg text-sm font-medium">
+            <div className="bg-primary-400 text-white px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1">
               {isLoading ? (
-                <span className="inline-block animate-spin">⏳</span>
+                <ClockIcon className="w-4 h-4 animate-spin" />
               ) : (
                 '대화 시작'
               )}

@@ -5,6 +5,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import MessageBubble from './MessageBubble'
 import MessageInput from './MessageInput'
 import type { Message } from '../ChatClient'
+import {
+  ArrowLeftIcon,
+  UserCircleIcon,
+  EllipsisVerticalIcon,
+  BookOpenIcon,
+  ClockIcon,
+} from '@heroicons/react/24/outline'
 
 interface ChatRoomProps {
   conversationId: string
@@ -148,7 +155,7 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="animate-spin text-4xl">⏳</div>
+        <ClockIcon className="w-8 h-8 animate-spin text-primary-400" />
       </div>
     )
   }
@@ -164,19 +171,22 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
                 onClick={onBack}
                 className="p-1 hover:bg-gray-100 rounded-lg lg:hidden"
               >
-                ←
+                <ArrowLeftIcon className="w-6 h-6" />
               </button>
             )}
             <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-lg">👤</span>
+              <UserCircleIcon className="w-6 h-6 text-gray-500" />
             </div>
             <div>
               <h2 className="font-medium text-gray-900">김독서</h2>
-              <p className="text-xs text-primary-600">📚 미움받을 용기</p>
+              <p className="text-xs text-primary-600 flex items-center gap-1">
+                <BookOpenIcon className="w-3 h-3" />
+                미움받을 용기
+              </p>
             </div>
           </div>
           <button className="p-2 hover:bg-gray-100 rounded-lg">
-            <span className="text-lg">⋮</span>
+            <EllipsisVerticalIcon className="w-6 h-6" />
           </button>
         </div>
       </div>
@@ -213,7 +223,7 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
         {isTyping && (
           <div className="flex items-center gap-2 mb-2">
             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-sm">👤</span>
+              <UserCircleIcon className="w-5 h-5 text-gray-500" />
             </div>
             <div className="bg-white rounded-2xl px-4 py-2 shadow-sm">
               <div className="flex gap-1">

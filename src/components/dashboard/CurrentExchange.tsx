@@ -1,3 +1,5 @@
+import { BookOpenIcon } from '@heroicons/react/24/outline'
+
 interface ExchangeData {
   chatRoomId: number
   myBook: {
@@ -47,7 +49,7 @@ export default function CurrentExchange({
         <h2 className="text-xl font-semibold mb-4">현재 교환</h2>
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <div className="text-center py-8 text-gray-500">
-            <div className="text-4xl mb-4">📚</div>
+            <BookOpenIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
             <p>진행 중인 교환이 없어요</p>
             <p className="text-sm mt-1">
               책방에서 마음에 드는 책을 찾아보세요!
@@ -77,8 +79,8 @@ export default function CurrentExchange({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center text-white text-xs">
-                📖
+              <div className="w-full h-full flex items-center justify-center text-white">
+                <BookOpenIcon className="w-8 h-8" />
               </div>
             )}
           </div>

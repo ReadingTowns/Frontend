@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { PhoneStepProps } from '@/types/onboarding'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 
 export default function PhoneStep({ value, onChange, onBack }: PhoneStepProps) {
   const [phoneNumber, setPhoneNumber] = useState(value)
@@ -37,8 +38,12 @@ export default function PhoneStep({ value, onChange, onBack }: PhoneStepProps) {
   return (
     <div className="px-4 py-8">
       {/* 이전 버튼 */}
-      <button onClick={onBack} className="btn-ghost text-left mb-4">
-        ← 이전
+      <button
+        onClick={onBack}
+        className="btn-ghost text-left mb-4 flex items-center gap-1"
+      >
+        <ArrowLeftIcon className="w-5 h-5" />
+        이전
       </button>
 
       <h2 className="text-xl font-bold text-gray-900 mb-2">

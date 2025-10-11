@@ -3,6 +3,7 @@
 import { LibraryBook } from '@/types/library'
 import Link from 'next/link'
 import { useState } from 'react'
+import { EllipsisVerticalIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 
 interface LibraryBookCardProps {
   book: LibraryBook
@@ -46,7 +47,7 @@ export function LibraryBookCard({
       >
         {!book.image && (
           <div className="w-full h-full bg-gradient-to-br from-primary-300 to-secondary-300 rounded flex items-center justify-center">
-            <span className="text-white text-xs">📚</span>
+            <BookOpenIcon className="w-8 h-8 text-white" />
           </div>
         )}
 
@@ -57,7 +58,7 @@ export function LibraryBookCard({
               onClick={() => setShowMenu(!showMenu)}
               className="w-6 h-6 bg-white bg-opacity-80 rounded-full flex items-center justify-center text-gray-600 hover:bg-opacity-100 transition-colors"
             >
-              ⋮
+              <EllipsisVerticalIcon className="w-4 h-4" />
             </button>
 
             {showMenu && (

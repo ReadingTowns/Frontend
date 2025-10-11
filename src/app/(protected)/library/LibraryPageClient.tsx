@@ -10,6 +10,7 @@ import { LibraryStats } from '@/components/library/LibraryStats'
 import { BookReviewModal } from '@/components/library/BookReviewModal'
 import { LibraryBook } from '@/types/library'
 import Link from 'next/link'
+import { BookOpenIcon } from '@heroicons/react/24/outline'
 
 interface LibraryPageClientProps {
   initialBooks: LibraryBook[]
@@ -115,7 +116,7 @@ export default function LibraryPageClient({
       <section>
         {books.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">📚</div>
+            <BookOpenIcon className="w-16 h-16 mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               서재가 비어있어요
             </h3>

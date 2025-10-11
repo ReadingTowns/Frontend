@@ -4,6 +4,12 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
+import NicknameInput from '@/components/common/NicknameInput'
+import {
+  ArrowLeftIcon,
+  ClockIcon,
+  UserCircleIcon,
+} from '@heroicons/react/24/outline'
 
 interface UserProfile {
   memberId: number
@@ -24,11 +30,7 @@ export default function ProfileEditClient() {
   const [nickname, setNickname] = useState('')
   const [availableTime, setAvailableTime] = useState('')
   const [profileImage, setProfileImage] = useState('')
-  const [isCheckingNickname, setIsCheckingNickname] = useState(false)
-  const [nicknameError, setNicknameError] = useState('')
-  const [nicknameAvailable, setNicknameAvailable] = useState<boolean | null>(
-    null
-  )
+  const [nicknameValid, setNicknameValid] = useState(false)
 
   useEffect(() => {
     setHeaderContent(
@@ -37,7 +39,7 @@ export default function ProfileEditClient() {
           onClick={() => router.back()}
           className="p-2 hover:bg-gray-100 rounded-lg"
         >
-          <span className="text-xl">←</span>
+          <ArrowLeftIcon className="w-6 h-6" />
         </button>
         <h1 className="text-xl font-bold">프로필 수정</h1>
       </header>
@@ -71,59 +73,10 @@ export default function ProfileEditClient() {
       setNickname(profile.nickname || '')
       setAvailableTime(profile.availableTime || '')
       setProfileImage(profile.profileImage || '')
+      // 초기에는 현재 닉네임이므로 valid로 설정
+      setNicknameValid(true)
     }
   }, [profile])
-
-  // 닉네임 중복 확인
-  const checkNickname = async (nicknameToCheck: string) => {
-    if (!nicknameToCheck || nicknameToCheck === profile?.nickname) {
-      setNicknameError('')
-      setNicknameAvailable(null)
-      return
-    }
-
-    if (nicknameToCheck.length < 2) {
-      setNicknameError('닉네임은 2자 이상이어야 합니다')
-      setNicknameAvailable(false)
-      return
-    }
-
-    setIsCheckingNickname(true)
-    setNicknameError('')
-
-    try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(
-        `${backendUrl}/api/v1/members/nickname/validate?nickname=${encodeURIComponent(nicknameToCheck)}`
-      )
-      const data = await response.json()
-
-      if (data.result?.isAvailable) {
-        setNicknameAvailable(true)
-        setNicknameError('')
-      } else {
-        setNicknameAvailable(false)
-        setNicknameError('이미 사용 중인 닉네임입니다')
-      }
-    } catch (error) {
-      setNicknameError('닉네임 확인 중 오류가 발생했습니다')
-      setNicknameAvailable(false)
-    } finally {
-      setIsCheckingNickname(false)
-    }
-  }
-
-  // 닉네임 변경 시 디바운싱
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (nickname && nickname !== profile?.nickname) {
-        checkNickname(nickname)
-      }
-    }, 500)
-
-    return () => clearTimeout(timer)
-  }, [nickname, profile?.nickname])
 
   // 프로필 수정 mutation
   const updateProfileMutation = useMutation({
@@ -163,8 +116,8 @@ export default function ProfileEditClient() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (nickname !== profile?.nickname && !nicknameAvailable) {
-      alert('닉네임을 확인해주세요')
+    if (!nicknameValid) {
+      alert('닉네임 중복 확인을 해주세요')
       return
     }
 
@@ -175,21 +128,10 @@ export default function ProfileEditClient() {
     })
   }
 
-  const timeSlots = [
-    '평일 오전',
-    '평일 오후',
-    '평일 저녁',
-    '주말 오전',
-    '주말 오후',
-    '주말 저녁',
-    '평일 저녁 / 주말 오전',
-    '평일 저녁 / 주말 오후',
-  ]
-
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="animate-spin text-4xl">⏳</div>
+        <ClockIcon className="w-8 h-8 animate-spin text-primary-400" />
       </div>
     )
   }
@@ -208,7 +150,7 @@ export default function ProfileEditClient() {
                   className="w-full h-full rounded-full object-cover"
                 />
               ) : (
-                <span className="text-4xl">👤</span>
+                <UserCircleIcon className="w-16 h-16 text-gray-400" />
               )}
             </div>
             <button
@@ -221,95 +163,27 @@ export default function ProfileEditClient() {
           </div>
 
           {/* 닉네임 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              닉네임
-            </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={nickname}
-                onChange={e => setNickname(e.target.value)}
-                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 ${
-                  nicknameError ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="닉네임을 입력하세요"
-              />
-              {isCheckingNickname && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  확인 중...
-                </span>
-              )}
-              {nicknameAvailable === true && (
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
-                  ✓
-                </span>
-              )}
-            </div>
-            {nicknameError && (
-              <p className="mt-1 text-sm text-red-500">{nicknameError}</p>
-            )}
-          </div>
-
-          {/* 동네 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              내 동네
-            </label>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-              <div>
-                <p className="font-medium">
-                  {profile?.currentTown || '동네 미설정'}
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  동네 인증 후 근처 이웃과 책을 교환할 수 있어요
-                </p>
-              </div>
-              <button
-                type="button"
-                className="text-primary-600 text-sm font-medium"
-                onClick={() => alert('동네 인증 기능은 준비 중입니다')}
-              >
-                인증하기
-              </button>
-            </div>
-          </div>
+          <NicknameInput
+            value={nickname}
+            onChange={setNickname}
+            onValidationChange={setNicknameValid}
+            currentNickname={profile?.nickname}
+          />
 
           {/* 교환 가능 시간대 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               교환 가능 시간대
             </label>
-            <select
+            <textarea
               value={availableTime}
               onChange={e => setAvailableTime(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400"
-            >
-              <option value="">시간대를 선택하세요</option>
-              {timeSlots.map(slot => (
-                <option key={slot} value={slot}>
-                  {slot}
-                </option>
-              ))}
-            </select>
-            <p className="mt-2 text-sm text-gray-500">
-              책 교환이 가능한 시간대를 선택해주세요
-            </p>
-          </div>
-
-          {/* 전화번호 */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              전화번호
-            </label>
-            <input
-              type="tel"
-              value={profile?.phoneNumber || ''}
-              disabled
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 resize-none"
+              rows={3}
+              placeholder="예: 평일 저녁 7시 이후, 주말 오전 가능"
             />
             <p className="mt-2 text-sm text-gray-500">
-              전화번호는 변경할 수 없습니다
+              책 교환이 가능한 시간대를 자유롭게 입력해주세요
             </p>
           </div>
         </div>
@@ -318,10 +192,7 @@ export default function ProfileEditClient() {
         <div className="p-4 border-t border-gray-200">
           <button
             type="submit"
-            disabled={
-              updateProfileMutation.isPending ||
-              (nickname !== profile?.nickname && !nicknameAvailable)
-            }
+            disabled={updateProfileMutation.isPending || !nicknameValid}
             className="w-full py-3 bg-primary-400 text-white rounded-lg font-medium hover:bg-primary-500 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
           >
             {updateProfileMutation.isPending ? '저장 중...' : '저장하기'}

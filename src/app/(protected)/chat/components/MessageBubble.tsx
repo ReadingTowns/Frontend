@@ -1,6 +1,12 @@
 'use client'
 
 import type { Message } from '../ChatClient'
+import {
+  UserCircleIcon,
+  BookOpenIcon,
+  MapPinIcon,
+  CheckIcon,
+} from '@heroicons/react/24/outline'
 
 interface MessageBubbleProps {
   message: Message
@@ -31,7 +37,7 @@ export default function MessageBubble({
         >
           {showAvatar && (
             <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-sm">👤</span>
+              <UserCircleIcon className="w-5 h-5 text-gray-500" />
             </div>
           )}
         </div>
@@ -84,7 +90,7 @@ export default function MessageBubble({
             {message.type === 'book_info' && (
               <div className="bg-white/10 rounded-lg p-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">📚</span>
+                  <BookOpenIcon className="w-6 h-6 flex-shrink-0" />
                   <div>
                     <p className="font-medium text-sm">{message.content}</p>
                     <p className="text-xs opacity-80">책 정보</p>
@@ -96,7 +102,7 @@ export default function MessageBubble({
             {message.type === 'location' && (
               <div className="bg-white/10 rounded-lg p-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-2xl">📍</span>
+                  <MapPinIcon className="w-6 h-6 flex-shrink-0" />
                   <div>
                     <p className="text-sm">{message.content}</p>
                     <p className="text-xs opacity-80">위치 공유</p>
@@ -114,8 +120,15 @@ export default function MessageBubble({
               {formatTime(message.timestamp)}
             </span>
             {isOwn && (
-              <span className="text-xs">
-                {message.readBy.length > 1 ? '✓✓' : '✓'}
+              <span className="text-xs flex items-center">
+                {message.readBy.length > 1 ? (
+                  <>
+                    <CheckIcon className="w-3 h-3 text-blue-500" />
+                    <CheckIcon className="w-3 h-3 text-blue-500 -ml-1.5" />
+                  </>
+                ) : (
+                  <CheckIcon className="w-3 h-3 text-gray-400" />
+                )}
               </span>
             )}
           </div>

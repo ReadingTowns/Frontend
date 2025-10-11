@@ -1,3 +1,9 @@
+import {
+  SparklesIcon,
+  BookOpenIcon,
+  StarIcon,
+} from '@heroicons/react/24/outline'
+
 interface RecommendedBook {
   id: number
   title: string
@@ -57,7 +63,7 @@ export default function BookRecommendations({
         <h2 className="text-xl font-semibold mb-4">오늘의 추천 도서</h2>
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <div className="text-center py-8 text-gray-500">
-            <div className="text-4xl mb-4">🤖</div>
+            <SparklesIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
             <p>추천할 도서가 없어요</p>
             <p className="text-sm mt-1">더 많은 책을 읽고 평가해보세요!</p>
           </div>
@@ -86,8 +92,8 @@ export default function BookRecommendations({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white text-xs">
-                    📖
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    <BookOpenIcon className="w-8 h-8" />
                   </div>
                 )}
               </div>
@@ -111,7 +117,7 @@ export default function BookRecommendations({
                 </div>
                 {book.rating && (
                   <div className="flex items-center gap-1 mt-2">
-                    <span className="text-yellow-500 text-sm">⭐</span>
+                    <StarIcon className="w-4 h-4 text-yellow-500 fill-yellow-500" />
                     <span className="text-sm text-gray-600">
                       {book.rating}/5
                     </span>

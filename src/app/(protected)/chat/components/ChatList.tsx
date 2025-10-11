@@ -3,6 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
+import {
+  MagnifyingGlassIcon,
+  ChatBubbleLeftIcon,
+  UserCircleIcon,
+  BookOpenIcon,
+} from '@heroicons/react/24/outline'
 import UserSearchModal from './UserSearchModal'
 import type { Conversation } from '../ChatClient'
 
@@ -98,6 +104,7 @@ export default function ChatList({
       {/* Search Bar */}
       <div className="p-4 border-b border-gray-200">
         <div className="relative">
+          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
             value={searchQuery}
@@ -105,9 +112,6 @@ export default function ChatList({
             placeholder="대화 검색..."
             className="w-full px-4 py-2 pl-10 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
           />
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-            🔍
-          </span>
         </div>
       </div>
 
@@ -116,7 +120,7 @@ export default function ChatList({
         {filteredConversations.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center">
-              <div className="text-5xl mb-4">💬</div>
+              <ChatBubbleLeftIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <p className="text-gray-600 font-medium">대화가 없습니다</p>
               <p className="text-sm text-gray-500 mt-2">
                 책을 교환하고 싶은 이웃과 대화를 시작해보세요
@@ -148,7 +152,7 @@ export default function ChatList({
                         className="w-full h-full rounded-full object-cover"
                       />
                     ) : (
-                      <span className="text-xl">👤</span>
+                      <UserCircleIcon className="w-7 h-7 text-gray-400" />
                     )}
                   </div>
 
@@ -160,8 +164,9 @@ export default function ChatList({
                           {otherParticipant?.name}
                         </h3>
                         {conversation.bookTitle && (
-                          <p className="text-xs text-primary-600 mt-0.5">
-                            📚 {conversation.bookTitle}
+                          <p className="text-xs text-primary-600 mt-0.5 flex items-center gap-1">
+                            <BookOpenIcon className="w-3 h-3" />
+                            {conversation.bookTitle}
                           </p>
                         )}
                       </div>

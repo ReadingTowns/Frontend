@@ -1,3 +1,5 @@
+import { UserGroupIcon, UserCircleIcon } from '@heroicons/react/24/outline'
+
 interface RecommendedUser {
   id: number
   nickname: string
@@ -52,7 +54,7 @@ export default function UserRecommendations({
         <h2 className="text-xl font-semibold mb-4">추천 이웃</h2>
         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
           <div className="text-center py-8 text-gray-500">
-            <div className="text-4xl mb-4">👥</div>
+            <UserGroupIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
             <p>추천할 이웃이 없어요</p>
             <p className="text-sm mt-1">더 많은 활동으로 이웃을 찾아보세요!</p>
           </div>
@@ -80,8 +82,8 @@ export default function UserRecommendations({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center text-white text-lg">
-                    👤
+                  <div className="w-full h-full flex items-center justify-center text-white">
+                    <UserCircleIcon className="w-6 h-6" />
                   </div>
                 )}
               </div>
