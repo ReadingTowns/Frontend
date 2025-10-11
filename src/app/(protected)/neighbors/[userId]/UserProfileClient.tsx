@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useHeader } from '@/contexts/HeaderContext'
+import { api } from '@/lib/api'
 import FollowButton from '@/components/neighbors/FollowButton'
 import UserProfileHeader from '@/components/neighbors/UserProfileHeader'
 
@@ -89,14 +89,11 @@ export default function UserProfileClient({ userId }: UserProfileClientProps) {
   // 팔로우/언팔로우
   const followMutation = useMutation({
     mutationFn: async (follow: boolean) => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const method = follow ? 'POST' : 'DELETE'
-      const res = await fetch(`${backendUrl}/api/v1/members/${userId}/follow`, {
-        method,
-      })
-      if (!res.ok) throw new Error('Failed to update follow status')
-      return res.json()
+      if (follow) {
+        return await api.post(`/api/v1/members/${userId}/follow`)
+      } else {
+        return await api.delete(`/api/v1/members/${userId}/follow`)
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users', userId, 'profile'] })

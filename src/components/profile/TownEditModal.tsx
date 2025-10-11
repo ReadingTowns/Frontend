@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { updateTown } from '@/services/townService'
+import { updateTown, getTownByCoordinates } from '@/services/townService'
 import type { UpdateTownRequest } from '@/types/town'
 import {
   XMarkIcon,
@@ -25,6 +25,7 @@ export default function TownEditModal({
   const queryClient = useQueryClient()
   const [latitude, setLatitude] = useState<number>(0)
   const [longitude, setLongitude] = useState<number>(0)
+  const [townName, setTownName] = useState<string>('')
   const [isGettingLocation, setIsGettingLocation] = useState(false)
 
   const updateTownMutation = useMutation({
@@ -50,11 +51,21 @@ export default function TownEditModal({
     setIsGettingLocation(true)
 
     navigator.geolocation.getCurrentPosition(
-      position => {
+      async position => {
         const lat = position.coords.latitude
         const lon = position.coords.longitude
         setLatitude(lat)
         setLongitude(lon)
+
+        // 위경도로 동네 이름 조회
+        try {
+          const townData = await getTownByCoordinates(lon, lat)
+          setTownName(townData.currentTown)
+        } catch (error) {
+          console.error('동네 정보를 가져올 수 없습니다:', error)
+          setTownName('동네 이름을 가져올 수 없습니다')
+        }
+
         setIsGettingLocation(false)
       },
       error => {
@@ -129,6 +140,11 @@ export default function TownEditModal({
                   <CheckCircleIcon className="w-5 h-5" />
                   GPS 위치 확인 완료
                 </p>
+                {townName && (
+                  <p className="text-base text-green-900 font-bold mt-2">
+                    📍 {townName}
+                  </p>
+                )}
                 <p className="text-xs text-green-600 mt-2">
                   위도: {latitude.toFixed(6)} / 경도: {longitude.toFixed(6)}
                 </p>

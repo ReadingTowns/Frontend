@@ -1,8 +1,8 @@
 'use client'
 
 import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { LibraryBook } from '@/types/home'
-import { ApiResponse } from '@/types/common'
 
 const myLibraryKeys = {
   all: ['myLibrary'] as const,
@@ -14,31 +14,17 @@ const myLibraryKeys = {
  * @param limit - 가져올 도서 수 (기본값: 6)
  */
 export function useMyLibrary(limit: number = 6) {
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-
   return useQuery({
     queryKey: myLibraryKeys.list(limit),
     queryFn: async (): Promise<LibraryBook[]> => {
-      const response = await fetch(
-        `${backendUrl}/api/v1/bookhouse/members/me?limit=${limit}`,
+      const result = await api.get<LibraryBook[]>(
+        '/api/v1/bookhouse/members/me',
         {
-          credentials: 'include',
+          limit,
         }
       )
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch library books')
-      }
-
-      const data: ApiResponse<LibraryBook[]> = await response.json()
-
-      // 성공 응답이 아니거나 result가 없으면 빈 배열 반환
-      if (data.code !== '1000' || !data.result) {
-        return []
-      }
-
-      return data.result
+      // API 응답이 배열이 아니거나 undefined인 경우 빈 배열 반환
+      return Array.isArray(result) ? result : []
     },
     staleTime: 1000 * 60 * 5, // 5분
     retry: 1,

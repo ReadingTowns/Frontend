@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import HomePage from '@/app/(protected)/home/page'
 
 // Mock next/navigation
 jest.mock('next/navigation', () => ({
@@ -10,6 +9,25 @@ jest.mock('next/navigation', () => ({
     back: jest.fn(),
   }),
 }))
+
+// Mock the API client before importing components
+const mockApiGet = jest.fn()
+const mockApiPost = jest.fn()
+const mockApiPut = jest.fn()
+const mockApiPatch = jest.fn()
+const mockApiDelete = jest.fn()
+
+jest.mock('../../../lib/api', () => ({
+  api: {
+    get: (...args: unknown[]) => mockApiGet(...args),
+    post: (...args: unknown[]) => mockApiPost(...args),
+    put: (...args: unknown[]) => mockApiPut(...args),
+    patch: (...args: unknown[]) => mockApiPatch(...args),
+    delete: (...args: unknown[]) => mockApiDelete(...args),
+  },
+}))
+
+import HomePage from '@/app/(protected)/home/page'
 
 const createWrapper = () => {
   const queryClient = new QueryClient({
@@ -28,46 +46,18 @@ const createWrapper = () => {
 
 describe('NewHomePage', () => {
   beforeEach(() => {
-    // Mock API responses
-    global.fetch = jest.fn((url: string) => {
-      // Mock user profile API
-      if (url.includes('/api/v1/members/me/profile')) {
-        return Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              code: '1000',
-              result: {
-                memberId: 1,
-                nickname: '테스트유저',
-              },
-            }),
-        })
-      }
+    // Mock API responses using api client
+    mockApiGet.mockImplementation((path: string) => {
       // Mock exchanged books API - return empty array
-      if (url.includes('/api/v1/members/me/exchanges')) {
-        return Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              code: '1000',
-              result: [],
-            }),
-        })
+      if (path.includes('/api/v1/members/me/exchanges')) {
+        return Promise.resolve([])
       }
       // Mock library books API - return empty array
-      if (url.includes('/api/v1/bookhouse/members/me')) {
-        return Promise.resolve({
-          ok: true,
-          json: () =>
-            Promise.resolve({
-              code: '1000',
-              result: [],
-            }),
-        })
+      if (path.includes('/api/v1/bookhouse/members/me')) {
+        return Promise.resolve([])
       }
       return Promise.reject(new Error('Unknown URL'))
-    }) as jest.Mock
+    })
   })
 
   afterEach(() => {
