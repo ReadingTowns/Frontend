@@ -153,7 +153,7 @@ export default function UserLibraryPage() {
             <div className="grid grid-cols-2 gap-4">
               {books.map((book: LibraryBook) => (
                 <LibraryBookCard
-                  key={book.id}
+                  key={book.bookId}
                   book={book}
                   showActions={false}
                   isOwner={isOwnLibrary}

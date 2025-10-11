@@ -28,14 +28,14 @@ export function LibraryBookCard({
 
   const handleDeleteClick = () => {
     if (onDelete) {
-      onDelete(book.id)
+      onDelete(String(book.bookId))
     }
     setShowMenu(false)
   }
 
   const handleReviewClick = () => {
     if (onReviewClick) {
-      onReviewClick(book.id, book.title)
+      onReviewClick(String(book.bookId), book.bookName)
     }
     setShowMenu(false)
   }
@@ -46,10 +46,10 @@ export function LibraryBookCard({
       <div
         className={`w-full ${compact ? 'aspect-[2/3]' : 'h-40'} bg-cover bg-center bg-gray-200 rounded-lg relative mb-2`}
         style={{
-          backgroundImage: book.image ? `url(${book.image})` : 'none',
+          backgroundImage: book.bookImage ? `url(${book.bookImage})` : 'none',
         }}
       >
-        {!book.image && (
+        {!book.bookImage && (
           <div className="w-full h-full bg-gradient-to-br from-primary-300 to-secondary-300 rounded-lg flex items-center justify-center">
             <BookOpenIcon
               className={compact ? 'w-6 h-6 text-white' : 'w-8 h-8 text-white'}
@@ -99,7 +99,7 @@ export function LibraryBookCard({
         <h3
           className={`font-medium ${compact ? 'text-xs' : 'text-sm'} text-gray-900 line-clamp-1`}
         >
-          {book.title}
+          {book.bookName}
         </h3>
 
         {/* Category Tags */}
@@ -112,7 +112,7 @@ export function LibraryBookCard({
       {!isOwner && (
         <div className="mt-2 pt-2 border-t border-gray-100">
           <Link
-            href={`/bookstore/${book.id}`}
+            href={`/bookstore/${book.bookId}`}
             className="text-xs text-primary-600 hover:text-primary-700 font-medium"
           >
             자세히 보기

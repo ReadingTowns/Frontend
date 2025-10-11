@@ -2,12 +2,12 @@
 
 import { ApiResponse, PaginationInfo } from './common'
 
-// 기본 서재 책 정보 (리스트 조회시)
+// 기본 서재 책 정보 (리스트 조회시) - API 응답 형식
 export interface LibraryBook {
-  id: string // 책 id
-  image: string // 이미지 조회 URI
-  title: string // 책 제목
-  authorName: string // 작가 이름
+  bookId: number // 책 id (API 응답)
+  bookImage: string // 이미지 조회 URI (API 응답)
+  bookName: string // 책 제목 (API 응답)
+  author: string // 작가 이름 (API 응답)
 
   // 🔴 UI 개선을 위한 확장 필드 (백엔드 미제공 시 프론트엔드에서 생성)
   categories?: string[] // 카테고리 태그 (예: ["드라마", "성장소설"])
