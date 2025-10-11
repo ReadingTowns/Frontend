@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import BookCoverUpload from './BookCoverUpload'
 import { fetchBookByISBN } from '@/lib/isbnService'
 import type { BookInfo } from '@/types/book'
+import { useAddLibraryBook } from '@/hooks/useLibrary'
 
 interface BookFormProps {
   initialISBN?: string
@@ -22,7 +23,7 @@ interface BookData {
 
 export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const addBookMutation = useAddLibraryBook()
 
   const [formData, setFormData] = useState<BookData>({
     isbn: initialISBN,
@@ -82,36 +83,24 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
     }
   }, [bookInfo])
 
-  // 책 등록 API
-  const registerBookMutation = useMutation({
-    mutationFn: async (data: BookData) => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(`${backendUrl}/api/v1/bookhouse/books`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || '책 등록에 실패했습니다')
-      }
-
-      return response.json()
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['library'] })
+  // 책 등록 성공 시 처리
+  useEffect(() => {
+    if (addBookMutation.isSuccess) {
       alert('책이 성공적으로 등록되었습니다!')
       router.push('/library')
-    },
-    onError: (error: Error) => {
-      alert(error.message || '책 등록에 실패했습니다. 다시 시도해주세요.')
-    },
-  })
+    }
+  }, [addBookMutation.isSuccess, router])
+
+  // 책 등록 실패 시 처리
+  useEffect(() => {
+    if (addBookMutation.error) {
+      alert(
+        addBookMutation.error instanceof Error
+          ? addBookMutation.error.message
+          : '책 등록에 실패했습니다. 다시 시도해주세요.'
+      )
+    }
+  }, [addBookMutation.error])
 
   // 폼 유효성 검사
   const validateForm = (): boolean => {
@@ -141,7 +130,14 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
       return
     }
 
-    registerBookMutation.mutate(formData)
+    // AddLibraryBookRequest 형식에 맞게 변환
+    addBookMutation.mutate({
+      isbn: formData.isbn || '',
+      image: formData.image || '',
+      title: formData.title,
+      author: formData.author,
+      publisher: formData.publisher,
+    })
   }
 
   // 입력 필드 변경 처리
@@ -367,10 +363,10 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
           <div className="pt-4">
             <button
               type="submit"
-              disabled={registerBookMutation.isPending}
+              disabled={addBookMutation.isPending}
               className="w-full bg-primary-500 text-white py-3 rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
-              {registerBookMutation.isPending ? (
+              {addBookMutation.isPending ? (
                 <div className="flex items-center justify-center">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
                   등록 중...

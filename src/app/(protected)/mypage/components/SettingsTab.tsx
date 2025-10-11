@@ -29,12 +29,6 @@ export default function SettingsTab({ onShowLogout }: SettingsTabProps) {
       onClick: () => router.push('/mypage/town'),
     },
     {
-      id: 'reading-habit',
-      title: '독서 습관 설정',
-      icon: <BookOpenIcon className="w-6 h-6" />,
-      onClick: () => router.push('/mypage/reading-habit'),
-    },
-    {
       id: 'about',
       title: '앱 정보',
       icon: <InformationCircleIcon className="w-6 h-6" />,

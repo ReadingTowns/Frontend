@@ -1,25 +1,33 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useQueryClient } from '@tanstack/react-query'
-import { useBookReviewActions } from '@/hooks/useLibrary'
+import { useMyLibraryBooks, useBookReviewActions } from '@/hooks/useLibrary'
 import { useHeader } from '@/contexts/HeaderContext'
 import { LibraryBookCard } from '@/components/library/LibraryBookCard'
 import { BookReviewModal } from '@/components/library/BookReviewModal'
-import { LibraryBook } from '@/types/library'
 import Link from 'next/link'
 import { BookOpenIcon } from '@heroicons/react/24/outline'
+import { api } from '@/lib/api'
 
 export default function LibraryPageClient() {
   const { setHeaderContent } = useHeader()
-  const queryClient = useQueryClient()
-  const [books, setBooks] = useState<LibraryBook[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [page, setPage] = useState(0)
   const [selectedBook, setSelectedBook] = useState<{
     id: string
     title: string
   } | null>(null)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+
+  // TanStack Query로 서재 데이터 fetch
+  const { data, isLoading, refetch } = useMyLibraryBooks({ page, size: 12 })
+  const books = data?.content || []
+  const pagination = data
+    ? {
+        curPage: data.curPage,
+        totalPages: data.totalPages,
+        last: data.last,
+      }
+    : null
 
   const bookReviewActions = useBookReviewActions(selectedBook?.id || '')
 
@@ -42,65 +50,14 @@ export default function LibraryPageClient() {
     }
   }, [setHeaderContent])
 
-  // 클라이언트에서 서재 데이터 fetch
-  useEffect(() => {
-    const fetchLibraryBooks = async () => {
-      try {
-        setIsLoading(true)
-        const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-        const response = await fetch(
-          `${backendUrl}/api/v1/bookhouse/members/me?page=0&size=10`,
-          {
-            credentials: 'include', // 쿠키 자동 전송
-          }
-        )
-
-        if (!response.ok) {
-          console.error('Failed to fetch library books:', response.status)
-          setBooks([])
-          return
-        }
-
-        const data = await response.json()
-        const fetchedBooks = data.result?.content || []
-        setBooks(fetchedBooks)
-
-        // TanStack Query 캐시 업데이트
-        queryClient.setQueryData(['library', 'books'], {
-          data: fetchedBooks,
-          pagination: { last: fetchedBooks.length < 10 },
-        })
-      } catch (error) {
-        console.error('Failed to fetch library books:', error)
-        setBooks([])
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchLibraryBooks()
-  }, [queryClient])
-
   const handleDeleteBook = async (bookId: string) => {
     if (confirm('정말로 이 책을 서재에서 삭제하시겠습니까?')) {
       try {
-        const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-        const response = await fetch(
-          `${backendUrl}/api/v1/bookhouse/books/${bookId}`,
-          {
-            method: 'DELETE',
-            credentials: 'include',
-          }
-        )
-
-        if (response.ok) {
-          setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId))
-          queryClient.invalidateQueries({ queryKey: ['library', 'books'] })
-        }
+        await api.delete(`/api/v1/bookhouse/books/${bookId}`)
+        refetch() // 삭제 후 목록 새로고침
       } catch (error) {
         console.error('Failed to delete book:', error)
+        alert('책 삭제에 실패했습니다.')
       }
     }
   }
@@ -166,9 +123,9 @@ export default function LibraryPageClient() {
           <>
             {/* 3열 그리드로 변경 */}
             <div className="grid grid-cols-3 gap-3">
-              {books.map((book: LibraryBook) => (
+              {books.map(book => (
                 <LibraryBookCard
-                  key={book.id}
+                  key={book.bookId}
                   book={book}
                   onDelete={handleDeleteBook}
                   onReviewClick={handleReviewClick}
@@ -179,17 +136,19 @@ export default function LibraryPageClient() {
               ))}
             </div>
 
-            {/* Load More Button */}
-            {books.length >= 10 && (
+            {/* Pagination Controls */}
+            {pagination && !pagination.last && (
               <div className="text-center mt-8">
                 <button
-                  className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors"
-                  onClick={() => {
-                    // 더 많은 데이터 로드 로직
-                  }}
+                  className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  onClick={() => setPage(prev => prev + 1)}
+                  disabled={isLoading}
                 >
-                  더 보기
+                  {isLoading ? '로딩 중...' : '더 보기'}
                 </button>
+                <p className="text-sm text-gray-500 mt-2">
+                  {pagination.curPage + 1} / {pagination.totalPages} 페이지
+                </p>
               </div>
             )}
           </>

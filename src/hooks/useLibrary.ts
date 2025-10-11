@@ -80,7 +80,7 @@ export function useUserLibraryBooks(
   })
 }
 
-// 서재에 책 등록
+// 서재에 책 등록 (낙관적 업데이트 적용)
 export function useAddLibraryBook() {
   const queryClient = useQueryClient()
 
@@ -102,14 +102,55 @@ export function useAddLibraryBook() {
       const data: AddLibraryBookApiResponse = await response.json()
       return data
     },
-    onSuccess: () => {
-      // 내 서재 책 리스트 무효화
+    // 낙관적 업데이트: 책 등록 요청 전에 UI에 즉시 추가
+    onMutate: async (bookData: AddLibraryBookRequest) => {
+      await queryClient.cancelQueries({ queryKey: ['library', 'my-books'] })
+
+      const previousData = queryClient.getQueriesData({
+        queryKey: ['library', 'my-books'],
+      })
+
+      // 임시 책 데이터 추가 (bookId는 임시로 Date.now() 사용)
+      queryClient.setQueriesData(
+        { queryKey: ['library', 'my-books'] },
+        (
+          old: (LibraryBooksResponse & PaginationInfo) | undefined
+        ): (LibraryBooksResponse & PaginationInfo) | undefined => {
+          if (!old) return old
+          return {
+            ...old,
+            content: [
+              {
+                bookId: Date.now(), // 임시 ID
+                bookImage: bookData.image,
+                bookName: bookData.title,
+                author: bookData.author,
+              },
+              ...old.content,
+            ],
+            curElements: old.curElements + 1,
+            totalElements: old.totalElements + 1,
+          }
+        }
+      )
+
+      return { previousData }
+    },
+    onError: (err, _bookData, context) => {
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+      console.error('Failed to add book:', err)
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['library', 'my-books'] })
     },
   })
 }
 
-// 서재에서 책 삭제
+// 서재에서 책 삭제 (낙관적 업데이트 적용)
 export function useDeleteLibraryBook() {
   const queryClient = useQueryClient()
 
@@ -130,8 +171,45 @@ export function useDeleteLibraryBook() {
       const data: DeleteLibraryBookApiResponse = await response.json()
       return data
     },
-    onSuccess: () => {
-      // 내 서재 책 리스트 무효화
+    // 낙관적 업데이트: 삭제 요청 전에 UI에서 즉시 제거
+    onMutate: async (bookId: string) => {
+      // 진행 중인 쿼리 취소 (충돌 방지)
+      await queryClient.cancelQueries({ queryKey: ['library', 'my-books'] })
+
+      // 이전 데이터 스냅샷 저장 (롤백용)
+      const previousData = queryClient.getQueriesData({
+        queryKey: ['library', 'my-books'],
+      })
+
+      // 캐시에서 해당 책 제거 (낙관적 업데이트)
+      queryClient.setQueriesData(
+        { queryKey: ['library', 'my-books'] },
+        (
+          old: (LibraryBooksResponse & PaginationInfo) | undefined
+        ): (LibraryBooksResponse & PaginationInfo) | undefined => {
+          if (!old) return old
+          return {
+            ...old,
+            content: old.content.filter(book => book.bookId !== Number(bookId)),
+            curElements: old.curElements - 1,
+            totalElements: old.totalElements - 1,
+          }
+        }
+      )
+
+      return { previousData }
+    },
+    // 에러 발생 시 이전 데이터로 롤백
+    onError: (err, _bookId, context) => {
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+      console.error('Failed to delete book:', err)
+    },
+    // 성공/실패 관계없이 최종적으로 서버 데이터 재조회
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['library', 'my-books'] })
     },
   })
@@ -186,7 +264,7 @@ export function useBookReview(bookId: string) {
   })
 }
 
-// 책 감상평 등록
+// 책 감상평 등록 (낙관적 업데이트 적용)
 export function useAddBookReview(bookId: string) {
   const queryClient = useQueryClient()
 
@@ -211,14 +289,40 @@ export function useAddBookReview(bookId: string) {
       const data: AddReviewApiResponse = await response.json()
       return data
     },
-    onSuccess: () => {
-      // 해당 책의 감상평 무효화
+    // 낙관적 업데이트: 감상평 작성 전에 UI에 즉시 표시
+    onMutate: async (reviewData: AddReviewRequest) => {
+      await queryClient.cancelQueries({ queryKey: ['book', 'review', bookId] })
+
+      const previousReview = queryClient.getQueryData<BookReview | null>([
+        'book',
+        'review',
+        bookId,
+      ])
+
+      // 임시 감상평 데이터 (reviewId는 임시로 0 사용)
+      queryClient.setQueryData<BookReview>(['book', 'review', bookId], {
+        reviewId: 0, // 임시 ID
+        content: reviewData.content,
+      })
+
+      return { previousReview }
+    },
+    onError: (err, _reviewData, context) => {
+      if (context?.previousReview !== undefined) {
+        queryClient.setQueryData(
+          ['book', 'review', bookId],
+          context.previousReview
+        )
+      }
+      console.error('Failed to add review:', err)
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['book', 'review', bookId] })
     },
   })
 }
 
-// 책 감상평 수정
+// 책 감상평 수정 (낙관적 업데이트 적용)
 export function useUpdateBookReview(bookId: string) {
   const queryClient = useQueryClient()
 
@@ -243,8 +347,36 @@ export function useUpdateBookReview(bookId: string) {
       const data: UpdateReviewApiResponse = await response.json()
       return data
     },
-    onSuccess: () => {
-      // 해당 책의 감상평 무효화
+    // 낙관적 업데이트: 감상평 수정 전에 UI에 즉시 반영
+    onMutate: async (reviewData: UpdateReviewRequest) => {
+      await queryClient.cancelQueries({ queryKey: ['book', 'review', bookId] })
+
+      const previousReview = queryClient.getQueryData<BookReview | null>([
+        'book',
+        'review',
+        bookId,
+      ])
+
+      // 기존 감상평 데이터를 업데이트
+      if (previousReview) {
+        queryClient.setQueryData<BookReview>(['book', 'review', bookId], {
+          ...previousReview,
+          content: reviewData.content,
+        })
+      }
+
+      return { previousReview }
+    },
+    onError: (err, _reviewData, context) => {
+      if (context?.previousReview) {
+        queryClient.setQueryData(
+          ['book', 'review', bookId],
+          context.previousReview
+        )
+      }
+      console.error('Failed to update review:', err)
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['book', 'review', bookId] })
     },
   })
