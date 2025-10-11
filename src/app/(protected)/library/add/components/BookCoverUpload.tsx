@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import {
   BookOpenIcon,
@@ -22,6 +22,13 @@ export default function BookCoverUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string>(imageUrl || '')
   const [isUploading, setIsUploading] = useState(false)
+
+  // imageUrl prop 변경 시 previewUrl 업데이트 (ISBN 검색 결과 반영)
+  useEffect(() => {
+    if (imageUrl) {
+      setPreviewUrl(imageUrl)
+    }
+  }, [imageUrl])
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]

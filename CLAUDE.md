@@ -217,6 +217,7 @@ src/app/api/             # API Routes 루트
 - `/api/v1/users/recommendations` - 사용자 추천
 - `/api/v1/books/recommendations` - 책 추천
 - `/api/v1/bookhouse/members/me` - 서재 정보
+- `/api/isbn/[isbn]` - ISBN 책 정보 조회 (알라딘 API 프록시)
 
 ## 프로젝트 기능 명세서
 
@@ -456,7 +457,10 @@ Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
 
 ### 환경변수
 - **NEXT_PUBLIC_BACKEND_URL**: 백엔드 API 서버 URL
-- **기본값**: `https://api.readingtown.site`
+  - **기본값**: `https://api.readingtown.site`
+- **NEXT_PUBLIC_ALADIN_API_KEY**: 알라딘 API TTB 키 (ISBN 검색용)
+  - **발급 방법**: [알라딘 개발자 센터](https://www.aladin.co.kr/ttb/wapi_guide.aspx)에서 무료 신청
+  - **필수 여부**: 책 등록 기능 사용 시 필수
 
 ### API 엔드포인트
 - **백엔드 서버**: `https://api.readingtown.site`
@@ -566,6 +570,7 @@ npm test -- src/__tests__/mocks.test.ts
 - `/api/auth/logout` - 로그아웃
 - `/api/v1/members/me/exchanges` - 사용자 교환 정보
 - `/api/v1/bookhouse/members/me` - 서재 정보
+- `/api/isbn/[isbn]` - ISBN 책 정보 조회 (알라딘 API 프록시)
 
 ### 5. 프로덕션 배포 전 체크리스트
 
