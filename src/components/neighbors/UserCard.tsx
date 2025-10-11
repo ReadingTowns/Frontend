@@ -25,11 +25,13 @@ interface User {
 interface UserCardProps {
   user: User
   showFollowButton?: boolean
+  onChatClick?: () => void
 }
 
 export default function UserCard({
   user,
   showFollowButton = false,
+  onChatClick,
 }: UserCardProps) {
   const queryClient = useQueryClient()
   const userId = user.memberId || user.id || 0
@@ -127,20 +129,32 @@ export default function UserCard({
             )}
           </div>
         </div>
-        {showFollowButton && (
-          <div
-            onClick={e => {
-              e.preventDefault()
-              handleFollowToggle()
-            }}
-            className="ml-3"
-          >
-            <FollowButton
-              isFollowing={isFollowing}
-              isLoading={followMutation.isPending}
-            />
-          </div>
-        )}
+        <div className="flex gap-2 ml-3">
+          {onChatClick && (
+            <button
+              onClick={e => {
+                e.preventDefault()
+                onChatClick()
+              }}
+              className="px-3 py-1 bg-primary-400 text-white text-sm rounded-lg hover:bg-primary-500 transition-colors"
+            >
+              채팅
+            </button>
+          )}
+          {showFollowButton && (
+            <div
+              onClick={e => {
+                e.preventDefault()
+                handleFollowToggle()
+              }}
+            >
+              <FollowButton
+                isFollowing={isFollowing}
+                isLoading={followMutation.isPending}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </Link>
   )
