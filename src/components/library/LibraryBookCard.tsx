@@ -4,6 +4,8 @@ import { LibraryBook } from '@/types/library'
 import Link from 'next/link'
 import { useState } from 'react'
 import { EllipsisVerticalIcon, BookOpenIcon } from '@heroicons/react/24/outline'
+import { StatusBadge } from './StatusBadge'
+import { CategoryTags } from './CategoryTags'
 
 interface LibraryBookCardProps {
   book: LibraryBook
@@ -11,6 +13,7 @@ interface LibraryBookCardProps {
   onReviewClick?: (bookId: string, bookTitle: string) => void
   showActions?: boolean
   isOwner?: boolean
+  compact?: boolean // 3열 모드
 }
 
 export function LibraryBookCard({
@@ -19,6 +22,7 @@ export function LibraryBookCard({
   onReviewClick,
   showActions = true,
   isOwner = true,
+  compact = false,
 }: LibraryBookCardProps) {
   const [showMenu, setShowMenu] = useState(false)
 
@@ -37,22 +41,31 @@ export function LibraryBookCard({
   }
 
   return (
-    <div className="relative bg-white border border-gray-200 rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
-      {/* Book Image */}
+    <div className="relative">
+      {/* Book Image with Aspect Ratio */}
       <div
-        className="w-full h-32 bg-cover bg-center bg-gray-100 rounded mb-3 relative"
+        className={`w-full ${compact ? 'aspect-[2/3]' : 'h-40'} bg-cover bg-center bg-gray-200 rounded-lg relative mb-2`}
         style={{
           backgroundImage: book.image ? `url(${book.image})` : 'none',
         }}
       >
         {!book.image && (
-          <div className="w-full h-full bg-gradient-to-br from-primary-300 to-secondary-300 rounded flex items-center justify-center">
-            <BookOpenIcon className="w-8 h-8 text-white" />
+          <div className="w-full h-full bg-gradient-to-br from-primary-300 to-secondary-300 rounded-lg flex items-center justify-center">
+            <BookOpenIcon
+              className={compact ? 'w-6 h-6 text-white' : 'w-8 h-8 text-white'}
+            />
           </div>
         )}
 
-        {/* Actions Menu for Owner */}
-        {showActions && isOwner && (
+        {/* Status Badge (if exists) */}
+        {book.statusLabel && book.statusColor && (
+          <div className="absolute top-2 right-2">
+            <StatusBadge label={book.statusLabel} color={book.statusColor} />
+          </div>
+        )}
+
+        {/* Actions Menu for Owner (점 3개) */}
+        {showActions && isOwner && !book.statusLabel && (
           <div className="absolute top-2 right-2">
             <button
               onClick={() => setShowMenu(!showMenu)}
@@ -83,15 +96,21 @@ export function LibraryBookCard({
 
       {/* Book Info */}
       <div className="space-y-1">
-        <h3 className="font-medium text-sm text-gray-900 line-clamp-2">
+        <h3
+          className={`font-medium ${compact ? 'text-xs' : 'text-sm'} text-gray-900 line-clamp-1`}
+        >
           {book.title}
         </h3>
-        <p className="text-xs text-gray-600">{book.authorName}</p>
+
+        {/* Category Tags */}
+        {book.categories && (
+          <CategoryTags categories={book.categories} maxDisplay={2} />
+        )}
       </div>
 
       {/* Action Buttons for non-owner */}
       {!isOwner && (
-        <div className="mt-3 pt-2 border-t border-gray-100">
+        <div className="mt-2 pt-2 border-t border-gray-100">
           <Link
             href={`/bookstore/${book.id}`}
             className="text-xs text-primary-600 hover:text-primary-700 font-medium"

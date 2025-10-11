@@ -1,9 +1,11 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import BookCoverUpload from './BookCoverUpload'
+import { fetchBookByISBN } from '@/lib/isbnService'
+import type { BookInfo } from '@/types/book'
 
 interface BookFormProps {
   initialISBN?: string
@@ -31,45 +33,54 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
   })
 
   const [errors, setErrors] = useState<Partial<BookData>>({})
+  const [manualISBN, setManualISBN] = useState('')
+  const [isManualSearch, setIsManualSearch] = useState(false)
 
-  // ISBN으로 책 정보 조회 (초기 ISBN이 있을 경우)
-  const { data: bookInfo, isLoading: isLookingUp } = useQuery({
-    queryKey: ['isbn-lookup', initialISBN],
+  // ISBN으로 책 정보 조회 (알라딘 API 사용)
+  const currentISBN = isManualSearch ? manualISBN : initialISBN
+
+  const {
+    data: bookInfo,
+    isLoading: isLookingUp,
+    error: lookupError,
+    refetch: refetchBookInfo,
+  } = useQuery<BookInfo | null>({
+    queryKey: ['isbn-lookup', currentISBN],
     queryFn: async () => {
-      // 실제로는 외부 API (알라딘 등) 호출
-      // 여기서는 모의 데이터 반환
-      if (initialISBN === '9788936433598') {
-        return {
-          title: '채식주의자',
-          author: '한강',
-          publisher: '창비',
-          image:
-            'https://image.aladin.co.kr/product/19287/47/cover500/8936433598_1.jpg',
-        }
-      } else if (initialISBN === '9791190090018') {
-        return {
-          title: '아몬드',
-          author: '손원평',
-          publisher: '창비',
-          image:
-            'https://image.aladin.co.kr/product/19113/50/cover500/k152635813_1.jpg',
-        }
+      if (!currentISBN) return null
+      try {
+        const result = await fetchBookByISBN(currentISBN)
+        return result
+      } catch (error) {
+        console.error('ISBN 조회 실패:', error)
+        throw error
       }
-      return null
     },
-    enabled: !!initialISBN && initialISBN.length >= 10,
+    enabled: !!currentISBN && currentISBN.length >= 10,
+    retry: 1,
   })
+
+  // 수동 ISBN 검색 핸들러
+  const handleManualISBNSearch = () => {
+    if (manualISBN.length >= 10) {
+      setIsManualSearch(true)
+      refetchBookInfo()
+    }
+  }
 
   // ISBN 조회 결과로 폼 자동 채우기
   useEffect(() => {
     if (bookInfo) {
       setFormData(prev => ({
         ...prev,
-        ...bookInfo,
-        isbn: initialISBN,
+        title: bookInfo.title,
+        author: bookInfo.author,
+        publisher: bookInfo.publisher,
+        isbn: bookInfo.isbn,
+        image: bookInfo.coverImage,
       }))
     }
-  }, [bookInfo, initialISBN])
+  }, [bookInfo])
 
   // 책 등록 API
   const registerBookMutation = useMutation({
@@ -158,11 +169,109 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
           ← 뒤로
         </button>
 
+        {/* ISBN 수동 입력 섹션 (스캔하지 않은 경우) */}
+        {!initialISBN && (
+          <div className="bg-white rounded-lg shadow-sm p-6 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              ISBN으로 책 찾기
+            </h3>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={manualISBN}
+                onChange={e =>
+                  setManualISBN(e.target.value.replace(/[^0-9]/g, ''))
+                }
+                placeholder="ISBN 10자리 또는 13자리 입력"
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+                maxLength={13}
+              />
+              <button
+                type="button"
+                onClick={handleManualISBNSearch}
+                disabled={manualISBN.length < 10 || isLookingUp}
+                className="px-6 py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                검색
+              </button>
+            </div>
+            <p className="text-sm text-gray-500 mt-2">
+              책 뒷면의 바코드 아래 숫자를 입력하세요
+            </p>
+          </div>
+        )}
+
+        {/* 로딩 상태 */}
         {isLookingUp && (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <div className="flex items-center">
               <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-3" />
               <p className="text-blue-800">ISBN 정보를 조회하고 있습니다...</p>
+            </div>
+          </div>
+        )}
+
+        {/* 에러 상태 */}
+        {lookupError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-red-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">
+                  ISBN 조회 실패
+                </h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>
+                    {lookupError instanceof Error
+                      ? lookupError.message
+                      : '책 정보를 가져올 수 없습니다. 직접 입력해주세요.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 검색 결과 없음 */}
+        {!isLookingUp && !lookupError && currentISBN && bookInfo === null && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-yellow-400"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-yellow-800">
+                  검색 결과 없음
+                </h3>
+                <div className="mt-2 text-sm text-yellow-700">
+                  <p>
+                    해당 ISBN으로 책을 찾을 수 없습니다. 아래에 직접
+                    입력해주세요.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}

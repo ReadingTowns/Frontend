@@ -8,6 +8,12 @@ export interface LibraryBook {
   image: string // 이미지 조회 URI
   title: string // 책 제목
   authorName: string // 작가 이름
+
+  // 🔴 UI 개선을 위한 확장 필드 (백엔드 미제공 시 프론트엔드에서 생성)
+  categories?: string[] // 카테고리 태그 (예: ["드라마", "성장소설"])
+  status?: 'available' | 'lending' | 'borrowing' // 책 상태
+  statusLabel?: string // 상태 라벨 텍스트 (예: "가양동")
+  statusColor?: 'blue' | 'pink' | 'gray' // 배지 색상
 }
 
 // 서재 책 리스트 응답

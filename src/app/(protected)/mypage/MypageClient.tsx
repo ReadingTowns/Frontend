@@ -37,20 +37,8 @@ export default function MypageClient() {
     }
   }, [setHeaderContent])
 
-  // Mock data for testing
-  const mockProfile: UserProfile = {
-    memberId: 1,
-    nickname: '테스트사용자',
-    profileImage: 'https://picsum.photos/seed/user1/200',
-    phoneNumber: '010-1234-5678',
-    currentTown: '강남구 삼성동',
-    availableTime: '평일 저녁 / 주말 오전',
-    userRating: 4.5,
-    userRatingCount: 10,
-  }
-
   const {
-    data: profile = mockProfile, // Use mock data as fallback
+    data: profile,
     isLoading,
     error,
   } = useQuery<UserProfile>({
@@ -61,28 +49,25 @@ export default function MypageClient() {
       const response = await fetch(`${backendUrl}/api/v1/members/me/profile`, {
         credentials: 'include',
       })
+
+      if (!response.ok) {
+        throw new Error('프로필을 불러오는데 실패했습니다')
+      }
+
       const data = await response.json()
 
       // Check for API error codes
       if (data.code && data.code !== '1000' && data.code !== 1000) {
-        // In test/demo mode, return mock data instead of throwing error
-        if (process.env.NODE_ENV === 'development') {
-          return mockProfile
-        }
         throw new Error(data.message || '프로필을 불러오는데 실패했습니다')
       }
 
-      if (!response.ok) {
-        // In test/demo mode, return mock data instead of throwing error
-        if (process.env.NODE_ENV === 'development') {
-          return mockProfile
-        }
-        throw new Error('프로필을 불러오는데 실패했습니다')
+      if (!data.result) {
+        throw new Error('프로필 데이터가 없습니다')
       }
 
-      return data.result || mockProfile
+      return data.result
     },
-    retry: false, // Disable retry in development
+    retry: 1, // Retry once on failure
   })
 
   const logoutMutation = useMutation({
