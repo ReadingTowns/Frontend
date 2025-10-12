@@ -10,6 +10,7 @@ import {
 } from '@heroicons/react/24/outline'
 import ISBNScanner from './components/ISBNScanner'
 import BookForm from './components/BookForm'
+import type { BookInfo } from '@/types/book'
 
 type RegistrationMethod = 'select' | 'scan' | 'manual'
 
@@ -19,6 +20,7 @@ export default function AddBookClient() {
   const [registrationMethod, setRegistrationMethod] =
     useState<RegistrationMethod>('select')
   const [scannedISBN, setScannedISBN] = useState<string>('')
+  const [bookInfo, setBookInfo] = useState<BookInfo | null>(null)
 
   // 헤더 설정
   useEffect(() => {
@@ -42,14 +44,16 @@ export default function AddBookClient() {
     }
   }, [setHeaderContent, router])
 
-  const handleISBNScanned = (isbn: string) => {
+  const handleISBNScanned = (isbn: string, info: BookInfo | null) => {
     setScannedISBN(isbn)
+    setBookInfo(info)
     setRegistrationMethod('manual')
   }
 
   const handleBackToSelection = () => {
     setRegistrationMethod('select')
     setScannedISBN('')
+    setBookInfo(null)
   }
 
   // 등록 방법 선택 화면
@@ -140,5 +144,11 @@ export default function AddBookClient() {
   }
 
   // 책 정보 입력 폼
-  return <BookForm initialISBN={scannedISBN} onBack={handleBackToSelection} />
+  return (
+    <BookForm
+      initialISBN={scannedISBN}
+      initialBookInfo={bookInfo}
+      onBack={handleBackToSelection}
+    />
+  )
 }

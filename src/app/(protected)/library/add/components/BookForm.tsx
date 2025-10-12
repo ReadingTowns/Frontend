@@ -11,6 +11,7 @@ import { useAddLibraryBook } from '@/hooks/useLibrary'
 
 interface BookFormProps {
   initialISBN?: string
+  initialBookInfo?: BookInfo | null
   onBack: () => void
 }
 
@@ -22,25 +23,29 @@ interface BookData {
   image?: string
 }
 
-export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
+export default function BookForm({
+  initialISBN = '',
+  initialBookInfo = null,
+  onBack,
+}: BookFormProps) {
   const router = useRouter()
   const addBookMutation = useAddLibraryBook()
   const { showSuccess, showError } = useSnackbar()
 
   const [formData, setFormData] = useState<BookData>({
     isbn: initialISBN,
-    title: '',
-    author: '',
-    publisher: '',
-    image: '',
+    title: initialBookInfo?.title || '',
+    author: initialBookInfo?.author || '',
+    publisher: initialBookInfo?.publisher || '',
+    image: initialBookInfo?.coverImage || '',
   })
 
   const [errors, setErrors] = useState<Partial<BookData>>({})
   const [manualISBN, setManualISBN] = useState('')
   const [isManualSearch, setIsManualSearch] = useState(false)
 
-  // ISBN으로 책 정보 조회 (알라딘 API 사용)
-  const currentISBN = isManualSearch ? manualISBN : initialISBN
+  // ISBN으로 책 정보 조회 (알라딘 API 사용) - 수동 검색용
+  const currentISBN = isManualSearch ? manualISBN : ''
 
   const {
     data: bookInfo,
@@ -59,7 +64,7 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
         throw error
       }
     },
-    enabled: !!currentISBN && currentISBN.length >= 10,
+    enabled: false, // 수동으로만 실행
     retry: 1,
   })
 
@@ -71,7 +76,7 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
     }
   }
 
-  // ISBN 조회 결과로 폼 자동 채우기
+  // ISBN 조회 결과로 폼 자동 채우기 (수동 검색 결과)
   useEffect(() => {
     if (bookInfo) {
       setFormData(prev => ({

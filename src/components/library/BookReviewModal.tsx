@@ -48,10 +48,7 @@ export function BookReviewModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black bg-opacity-50"
-        onClick={handleClose}
-      />
+      <div className="absolute inset-0 bg-black/50" onClick={handleClose} />
 
       {/* Modal */}
       <div className="relative bg-white rounded-lg shadow-lg w-full max-w-md mx-auto max-h-[90vh] overflow-hidden">

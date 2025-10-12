@@ -96,7 +96,7 @@ export default function TownEditModal({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white rounded-2xl w-[90%] max-w-md p-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">동네 인증</h2>
