@@ -5,7 +5,12 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function AuthRedirectPage() {
-  const { isAuthenticated, isOnboardingCompleted, isLoading } = useAuth()
+  const {
+    isAuthenticated,
+    isOnboardingCompleted,
+    isLoading,
+    isOnboardingLoading,
+  } = useAuth()
   const router = useRouter()
   const [retryCount, setRetryCount] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -14,8 +19,8 @@ export default function AuthRedirectPage() {
     // 이미 처리 중이면 중복 실행 방지
     if (isProcessing) return
 
-    // 로딩 중이면 대기
-    if (isLoading) return
+    // 로딩 중이면 대기 (인증 또는 온보딩 데이터)
+    if (isLoading || isOnboardingLoading) return
 
     // 인증된 경우 라우팅 처리
     if (isAuthenticated) {
@@ -48,6 +53,7 @@ export default function AuthRedirectPage() {
     isAuthenticated,
     isOnboardingCompleted,
     isLoading,
+    isOnboardingLoading,
     router,
     retryCount,
     isProcessing,

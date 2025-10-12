@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
 import FollowButton from './FollowButton'
+import LibraryButton from './LibraryButton'
 
 interface User {
   memberId?: number
@@ -26,14 +28,15 @@ interface User {
 interface UserCardProps {
   user: User
   showFollowButton?: boolean
-  onChatClick?: () => void
+  showLibraryButton?: boolean
 }
 
 export default function UserCard({
   user,
   showFollowButton = false,
-  onChatClick,
+  showLibraryButton = false,
 }: UserCardProps) {
+  const router = useRouter()
   const queryClient = useQueryClient()
   const userId = user.memberId || user.id || 0
   const [isFollowing, setIsFollowing] = useState(
@@ -94,6 +97,10 @@ export default function UserCard({
 
   const handleFollowToggle = () => {
     followMutation.mutate(!isFollowing)
+  }
+
+  const handleLibraryClick = () => {
+    router.push(`/library/${userId}`)
   }
 
   return (
@@ -157,16 +164,15 @@ export default function UserCard({
           </div>
         </div>
         <div className="flex gap-2 ml-3">
-          {onChatClick && (
-            <button
+          {showLibraryButton && (
+            <div
               onClick={e => {
                 e.preventDefault()
-                onChatClick()
+                handleLibraryClick()
               }}
-              className="px-3 py-1 bg-primary-400 text-white text-sm rounded-lg hover:bg-primary-500 transition-colors"
             >
-              채팅
-            </button>
+              <LibraryButton size="sm" />
+            </div>
           )}
           {showFollowButton && (
             <div
@@ -178,6 +184,7 @@ export default function UserCard({
               <FollowButton
                 isFollowing={isFollowing}
                 isLoading={followMutation.isPending}
+                size="sm"
               />
             </div>
           )}

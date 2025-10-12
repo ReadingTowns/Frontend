@@ -39,7 +39,7 @@ export function useAuth() {
   })
 
   // 온보딩 완료 여부 확인
-  const { data: onboardingData } = useQuery({
+  const { data: onboardingData, isLoading: isOnboardingLoading } = useQuery({
     queryKey: authKeys.onboarding(),
     queryFn: async (): Promise<ApiResponse<OnboardingCheckResponse>> => {
       const backendUrl =
@@ -58,57 +58,29 @@ export function useAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
+      // 백엔드 로그아웃 API 호출 (쿠키 삭제)
       const backendUrl =
         process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+      const response = await fetch(`${backendUrl}/api/v1/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      })
 
-      try {
-        const response = await fetch(`${backendUrl}/api/v1/auth/logout`, {
-          method: 'POST',
-          credentials: 'include',
-        })
-
-        // 401이나 다른 에러여도 무시 (로그아웃은 항상 성공 처리)
-        if (response.ok) {
-          return response.json()
-        }
-
-        // 401 등의 에러여도 성공으로 처리
-        return { success: true }
-      } catch {
-        // 네트워크 에러여도 성공으로 처리
-        return { success: true }
-      }
-    },
-    onSuccess: () => {
-      // 1. 쿠키 강제 삭제 (HttpOnly 쿠키는 백엔드에서 삭제되지만, 클라이언트에서도 시도)
-      if (typeof document !== 'undefined') {
-        // 쿠키 삭제 시도 (HttpOnly가 아닌 쿠키만 삭제 가능)
-        document.cookie =
-          'access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.readingtown.site'
-        document.cookie =
-          'refresh_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.readingtown.site'
+      if (!response.ok) {
+        throw new Error('Logout failed')
       }
 
-      // 2. localStorage 완전 정리
+      // 1. localStorage 정리
       if (typeof window !== 'undefined') {
         localStorage.removeItem('lastProvider')
-        // 추가로 다른 인증 관련 데이터가 있다면 여기서 삭제
+        sessionStorage.setItem('justLoggedOut', 'true')
       }
 
-      // 3. TanStack Query 캐시 완전 초기화
-      queryClient.setQueryData(authKeys.me(), {
-        code: API_CODES.UNAUTHORIZED,
-        message: '로그아웃되었습니다',
-        result: null,
-      })
-      // 모든 쿼리 무효화 (전체 캐시 정리)
-      queryClient.invalidateQueries({ queryKey: authKeys.all })
-      // 추가: 모든 쿼리 제거 (완전 초기화)
-      queryClient.removeQueries()
+      // 2. 로그인 페이지로 즉시 리다이렉트 (백엔드가 이미 쿠키 삭제함)
+      // replace()를 사용하여 브라우저 히스토리를 대체하고 페이지 완전 리로드
+      window.location.replace('/login?logout=true')
 
-      // 4. 로그인 페이지로 강제 리다이렉트
-      // window.location.href로 전체 페이지 새로고침
-      window.location.href = '/login'
+      return response.json()
     },
   })
 
@@ -130,8 +102,9 @@ export function useAuth() {
   return {
     user: authData?.result,
     isAuthenticated: authData?.code === API_CODES.SUCCESS && !!authData?.result,
-    isOnboardingCompleted: onboardingData?.result?.onboardingCompleted ?? false,
+    isOnboardingCompleted: onboardingData?.result?.isOnboarded ?? false, // 백엔드 필드명 isOnboarded 사용
     isLoading,
+    isOnboardingLoading,
     logout: logoutMutation.mutate,
     refreshToken: refreshTokenMutation.mutate,
     isLoggingOut: logoutMutation.isPending,

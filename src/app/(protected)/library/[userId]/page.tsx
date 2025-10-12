@@ -5,12 +5,21 @@ import { useUserLibraryBooks, useUserProfile } from '@/hooks/useLibrary'
 import { LibraryBookCard } from '@/components/library/LibraryBookCard'
 import { LibraryStats } from '@/components/library/LibraryStats'
 import { useAuth } from '@/hooks/useAuth'
+import { useCreateChatRoom } from '@/hooks/useChatRoom'
+import { useState } from 'react'
 import {
   BookCardSkeleton,
   ProfileSkeleton,
   HeaderSkeleton,
 } from '@/components/ui/Skeleton'
 import { LibraryBook } from '@/types/library'
+import {
+  UserCircleIcon,
+  BookOpenIcon,
+  FaceFrownIcon,
+  MapPinIcon,
+  StarIcon,
+} from '@heroicons/react/24/outline'
 
 export default function UserLibraryPage() {
   const params = useParams()
@@ -23,6 +32,52 @@ export default function UserLibraryPage() {
 
   const books = libraryData?.content || []
   const isOwnLibrary = currentUser?.memberId?.toString() === userId
+
+  // 교환 신청 상태 관리
+  const [showExchangeModal, setShowExchangeModal] = useState(false)
+  const [selectedBook, setSelectedBook] = useState<{
+    bookId: number
+    bookTitle: string
+  } | null>(null)
+
+  // 교환 신청 (채팅룸 생성) mutation
+  const createChatRoomMutation = useCreateChatRoom()
+
+  // 교환 신청 핸들러
+  const handleExchangeRequest = (bookId: number, bookTitle: string) => {
+    setSelectedBook({ bookId, bookTitle })
+    setShowExchangeModal(true)
+  }
+
+  // 교환 신청 확정
+  const handleConfirmExchange = () => {
+    if (!selectedBook || !profile) return
+
+    createChatRoomMutation.mutate(
+      {
+        memberId: profile.memberId,
+        bookId: selectedBook.bookId,
+      },
+      {
+        onSuccess: data => {
+          setShowExchangeModal(false)
+          // 채팅방으로 이동 - 개발 환경 URL 사용
+          window.location.href = `https://dev.readingtown.site/chat/${data.chatRoomId}`
+        },
+        onError: error => {
+          console.error('Failed to create chatroom:', error)
+          alert('교환 신청에 실패했습니다. 다시 시도해주세요.')
+        },
+      }
+    )
+  }
+
+  // 모달 닫기
+  const handleCloseModal = () => {
+    if (createChatRoomMutation.isPending) return
+    setShowExchangeModal(false)
+    setSelectedBook(null)
+  }
 
   if (profileLoading || booksLoading) {
     return (
@@ -41,7 +96,7 @@ export default function UserLibraryPage() {
   if (!profile) {
     return (
       <div className="bg-white text-center py-12">
-        <div className="text-6xl mb-4">😕</div>
+        <FaceFrownIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           사용자를 찾을 수 없습니다
         </h3>
@@ -85,7 +140,7 @@ export default function UserLibraryPage() {
           >
             {!profile.profileImage && (
               <div className="w-full h-full bg-gradient-to-br from-primary-300 to-secondary-300 rounded-full flex items-center justify-center">
-                <span className="text-white text-lg">👤</span>
+                <UserCircleIcon className="w-10 h-10 text-white" />
               </div>
             )}
           </div>
@@ -93,12 +148,14 @@ export default function UserLibraryPage() {
             <h3 className="font-semibold text-gray-900 mb-1">
               {profile.nickname}
             </h3>
-            <p className="text-sm text-gray-600 mb-1">
-              📍 {profile.currentTown || '위치 정보 없음'}
+            <p className="text-sm text-gray-600 mb-1 flex items-center gap-1">
+              <MapPinIcon className="w-4 h-4" />
+              {profile.currentTown || '위치 정보 없음'}
             </p>
             {profile.userRating && (
               <div className="flex items-center text-xs text-gray-500">
-                <span>⭐ {profile.userRating.toFixed(1)}</span>
+                <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span className="ml-1">{profile.userRating.toFixed(1)}</span>
                 <span className="mx-1">•</span>
                 <span>리뷰 {profile.userRatingCount}개</span>
               </div>
@@ -132,7 +189,7 @@ export default function UserLibraryPage() {
       <section>
         {books.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4">📚</div>
+            <BookOpenIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {isOwnLibrary ? '서재가 비어있어요' : '등록된 책이 없어요'}
             </h3>
@@ -157,6 +214,8 @@ export default function UserLibraryPage() {
                   book={book}
                   showActions={false}
                   isOwner={isOwnLibrary}
+                  ownerId={profile?.memberId}
+                  onExchangeRequest={handleExchangeRequest}
                 />
               ))}
             </div>
@@ -172,6 +231,45 @@ export default function UserLibraryPage() {
           </>
         )}
       </section>
+
+      {/* 교환 신청 확인 모달 */}
+      {showExchangeModal && selectedBook && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              교환 신청 확인
+            </h3>
+            <p className="text-gray-600 mb-4">
+              <span className="font-medium">{profile?.nickname}</span>님에게{' '}
+              <span className="font-medium text-primary-600">
+                &quot;{selectedBook.bookTitle}&quot;
+              </span>{' '}
+              책의 교환을 신청하시겠습니까?
+            </p>
+            <p className="text-sm text-gray-500 mb-6">
+              교환 신청 시 채팅방이 생성되며, 상대방과 대화를 시작할 수
+              있습니다.
+            </p>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleCloseModal}
+                disabled={createChatRoomMutation.isPending}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                취소
+              </button>
+              <button
+                onClick={handleConfirmExchange}
+                disabled={createChatRoomMutation.isPending}
+                className="flex-1 px-4 py-2 bg-primary-400 text-white rounded-lg font-medium hover:bg-primary-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {createChatRoomMutation.isPending ? '신청 중...' : '신청하기'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

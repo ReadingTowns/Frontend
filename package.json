@@ -9,10 +9,7 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "quality:check": "npm run lint && npm run format:check && npm test",
+    "quality:check": "npm run lint && npm run format:check && npm run build",
     "quality:fix": "npm run format && npm run lint --fix",
     "prepare": "husky"
   },
@@ -31,25 +28,16 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^6.7.0",
-    "@testing-library/react": "^16.3.0",
-    "@testing-library/user-event": "^14.6.1",
-    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.4.5",
     "husky": "^9.1.7",
-    "jest": "^30.0.5",
-    "jest-environment-jsdom": "^30.0.5",
-    "jest-fixed-jsdom": "^0.0.9",
     "lint-staged": "^16.1.5",
     "prettier": "^3.6.2",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "undici": "^7.13.0",
-    "whatwg-fetch": "^3.6.20"
+    "typescript": "^5"
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx}": [

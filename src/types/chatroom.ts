@@ -12,12 +12,12 @@
  * GET /api/v1/chatrooms
  */
 export interface ChatRoomListItem {
-  chatRoomId: number
+  chatroomId: number // API returns lowercase 'r'
   partnerName: string
   myBookImage?: string
   partnerBookImage?: string
-  lastMessage?: string
-  lastMessageTime?: string
+  lastMessage?: string | null
+  lastMessageTime?: string | null
 }
 
 /**

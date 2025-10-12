@@ -1,12 +1,22 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
+import { useAuth } from '@/hooks/useAuth'
+import {
+  useChatRoomMessages,
+  usePartnerProfile,
+  useExchangeBooks,
+} from '@/hooks/useChatRoom'
+import type { Message } from '@/types/chatroom'
 import MessageBubble from '../components/MessageBubble'
 import MessageInput from '../components/MessageInput'
-import type { Message } from '../ChatClient'
+import {
+  ChatBubbleLeftIcon,
+  BookOpenIcon,
+  ArrowPathIcon,
+} from '@heroicons/react/24/outline'
 
 interface ChatRoomClientProps {
   conversationId: string
@@ -16,81 +26,44 @@ export default function ChatRoomClient({
   conversationId,
 }: ChatRoomClientProps) {
   const router = useRouter()
-  const queryClient = useQueryClient()
   const { setHeaderContent } = useHeader()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const [isTyping, setIsTyping] = useState(false)
+  const { user } = useAuth()
 
-  // Mock current user
-  const currentUserId = '2'
+  const chatroomId = parseInt(conversationId)
 
-  // Mock messages for development
-  const mockMessages: Message[] = [
-    {
-      id: '1',
-      conversationId,
-      senderId: '1',
-      senderName: '김독서',
-      content: '안녕하세요! 미움받을 용기 책 교환 가능할까요?',
-      timestamp: '2024-01-20T10:00:00',
-      type: 'text',
-      readBy: ['1', '2'],
-    },
-    {
-      id: '2',
-      conversationId,
-      senderId: '2',
-      senderName: '나',
-      content: '네, 가능합니다! 책 상태는 양호한 편이에요.',
-      timestamp: '2024-01-20T10:05:00',
-      type: 'text',
-      readBy: ['1', '2'],
-    },
-    {
-      id: '3',
-      conversationId,
-      senderId: '1',
-      senderName: '김독서',
-      content: '좋아요! 언제 시간 되시나요?',
-      timestamp: '2024-01-20T10:10:00',
-      type: 'text',
-      readBy: ['1', '2'],
-    },
-    {
-      id: '4',
-      conversationId,
-      senderId: '2',
-      senderName: '나',
-      content: '주말 오후가 괜찮은데, 토요일 2시 어떠신가요?',
-      timestamp: '2024-01-20T10:15:00',
-      type: 'text',
-      readBy: ['1', '2'],
-    },
-    {
-      id: '5',
-      conversationId,
-      senderId: '1',
-      senderName: '김독서',
-      content: '내일 오후 2시에 만날까요?',
-      timestamp: '2024-01-20T10:20:00',
-      type: 'text',
-      readBy: ['1'],
-    },
-  ]
+  // Fetch partner profile
+  const { data: partner } = usePartnerProfile(chatroomId)
 
-  // Set header with back button
+  // Fetch exchange books info
+  const { data: exchangeBooks } = useExchangeBooks(chatroomId)
+
+  // Fetch messages
+  const { data: messagesData, isLoading } = useChatRoomMessages(chatroomId)
+
+  // Get current user ID from first page response
+  const myMemberId = messagesData?.pages[0]?.myMemberId
+
+  // Set header with partner info
   useEffect(() => {
+    if (!partner) return
+
     setHeaderContent(
       <header className="flex items-center gap-3">
         <button
-          onClick={() => router.push('/chat')}
+          onClick={() => router.push('/social')}
           className="p-2 hover:bg-gray-100 rounded-lg"
         >
           <span className="text-xl">←</span>
         </button>
         <div>
-          <h1 className="text-xl font-bold">김독서</h1>
-          <p className="text-xs text-primary-600">📚 미움받을 용기</p>
+          <h1 className="text-xl font-bold">{partner.nickname}</h1>
+          {exchangeBooks && exchangeBooks[0]?.myBook?.bookName && (
+            <p className="text-xs text-primary-600 flex items-center gap-1">
+              <BookOpenIcon className="w-3 h-3" />
+              {exchangeBooks[0].myBook.bookName}
+            </p>
+          )}
         </div>
       </header>
     )
@@ -98,67 +71,31 @@ export default function ChatRoomClient({
     return () => {
       setHeaderContent(null)
     }
-  }, [setHeaderContent, router])
-
-  const { data: messages = mockMessages, isLoading } = useQuery({
-    queryKey: ['messages', conversationId],
-    queryFn: async () => {
-      // TODO: Replace with actual API call
-      return mockMessages
-    },
-    refetchInterval: 2000, // Poll every 2 seconds for new messages
-  })
-
-  const sendMessageMutation = useMutation({
-    mutationFn: async (content: string) => {
-      // TODO: Replace with actual API call
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        conversationId,
-        senderId: currentUserId,
-        senderName: '나',
-        content,
-        timestamp: new Date().toISOString(),
-        type: 'text',
-        readBy: [currentUserId],
-      }
-      return newMessage
-    },
-    onSuccess: newMessage => {
-      queryClient.setQueryData(
-        ['messages', conversationId],
-        (old: Message[] = []) => [...old, newMessage]
-      )
-      scrollToBottom()
-    },
-  })
+  }, [setHeaderContent, router, partner, exchangeBooks])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
+  // Extract all messages from infinite query pages
+  const messages =
+    messagesData?.pages.flatMap(page => page.message).reverse() || []
+
   useEffect(() => {
     scrollToBottom()
   }, [messages])
 
-  // Simulate typing indicator
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIsTyping(Math.random() > 0.8)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
-
   const handleSendMessage = (content: string) => {
     if (content.trim()) {
-      sendMessageMutation.mutate(content)
+      // TODO: Implement message sending API
+      console.log('Sending message:', content)
     }
   }
 
   // Group messages by date
   const groupedMessages = messages.reduce(
     (groups, message) => {
-      const date = new Date(message.timestamp).toLocaleDateString('ko-KR', {
+      const date = new Date(message.sentTime).toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -175,7 +112,7 @@ export default function ChatRoomClient({
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
-        <div className="animate-spin text-4xl">⏳</div>
+        <ArrowPathIcon className="w-12 h-12 text-gray-400 animate-spin" />
       </div>
     )
   }
@@ -184,52 +121,43 @@ export default function ChatRoomClient({
     <div className="flex-1 flex flex-col bg-gray-50">
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto px-4 py-4">
-        {Object.entries(groupedMessages).map(([date, dateMessages]) => (
-          <div key={date}>
-            {/* Date Separator */}
-            <div className="flex items-center my-4">
-              <div className="flex-1 border-t border-gray-200" />
-              <span className="px-3 text-xs text-gray-500 bg-gray-50">
-                {date}
-              </span>
-              <div className="flex-1 border-t border-gray-200" />
+        {messages.length === 0 ? (
+          <div className="flex-1 flex items-center justify-center h-full">
+            <div className="text-center py-12">
+              <ChatBubbleLeftIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                메시지가 없습니다
+              </h3>
+              <p className="text-gray-600">첫 메시지를 보내보세요!</p>
             </div>
-
-            {/* Messages */}
-            {dateMessages.map((message, index) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                isOwn={message.senderId === currentUserId}
-                showAvatar={
-                  index === 0 ||
-                  dateMessages[index - 1]?.senderId !== message.senderId
-                }
-              />
-            ))}
           </div>
-        ))}
-
-        {/* Typing Indicator */}
-        {isTyping && (
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <span className="text-sm">👤</span>
-            </div>
-            <div className="bg-white rounded-2xl px-4 py-2 shadow-sm">
-              <div className="flex gap-1">
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
-                <span
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: '0.1s' }}
-                />
-                <span
-                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
-                  style={{ animationDelay: '0.2s' }}
-                />
+        ) : (
+          Object.entries(groupedMessages).map(([date, dateMessages]) => (
+            <div key={date}>
+              {/* Date Separator */}
+              <div className="flex items-center my-4">
+                <div className="flex-1 border-t border-gray-200" />
+                <span className="px-3 text-xs text-gray-500 bg-gray-50">
+                  {date}
+                </span>
+                <div className="flex-1 border-t border-gray-200" />
               </div>
+
+              {/* Messages */}
+              {dateMessages.map((message, index) => (
+                <MessageBubble
+                  key={message.messageId}
+                  message={message}
+                  isOwn={message.senderId === myMemberId}
+                  showAvatar={
+                    index === 0 ||
+                    dateMessages[index - 1]?.senderId !== message.senderId
+                  }
+                  partnerName={partner?.nickname}
+                />
+              ))}
             </div>
-          </div>
+          ))
         )}
 
         {/* Scroll to bottom ref */}
@@ -237,10 +165,7 @@ export default function ChatRoomClient({
       </div>
 
       {/* Message Input */}
-      <MessageInput
-        onSendMessage={handleSendMessage}
-        isLoading={sendMessageMutation.isPending}
-      />
+      <MessageInput onSendMessage={handleSendMessage} isLoading={false} />
     </div>
   )
 }

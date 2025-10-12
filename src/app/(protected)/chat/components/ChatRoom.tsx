@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import MessageBubble from './MessageBubble'
 import MessageInput from './MessageInput'
-import type { Message } from '../ChatClient'
+import type { Message } from '@/types/chatroom'
 import {
   ArrowLeftIcon,
   UserCircleIcon,
@@ -24,59 +24,39 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
   const [isTyping, setIsTyping] = useState(false)
 
   // Mock current user
-  const currentUserId = '2'
+  const currentUserId = 2
 
   // Mock messages for development
   const mockMessages: Message[] = [
     {
-      id: '1',
-      conversationId,
-      senderId: '1',
-      senderName: '김독서',
-      content: '안녕하세요! 미움받을 용기 책 교환 가능할까요?',
-      timestamp: '2024-01-20T10:00:00',
-      type: 'text',
-      readBy: ['1', '2'],
+      messageId: 1,
+      senderId: 1,
+      messageText: '안녕하세요! 미움받을 용기 책 교환 가능할까요?',
+      sentTime: '2024-01-20T10:00:00',
     },
     {
-      id: '2',
-      conversationId,
-      senderId: '2',
-      senderName: '나',
-      content: '네, 가능합니다! 책 상태는 양호한 편이에요.',
-      timestamp: '2024-01-20T10:05:00',
-      type: 'text',
-      readBy: ['1', '2'],
+      messageId: 2,
+      senderId: 2,
+      messageText: '네, 가능합니다! 책 상태는 양호한 편이에요.',
+      sentTime: '2024-01-20T10:05:00',
     },
     {
-      id: '3',
-      conversationId,
-      senderId: '1',
-      senderName: '김독서',
-      content: '좋아요! 언제 시간 되시나요?',
-      timestamp: '2024-01-20T10:10:00',
-      type: 'text',
-      readBy: ['1', '2'],
+      messageId: 3,
+      senderId: 1,
+      messageText: '좋아요! 언제 시간 되시나요?',
+      sentTime: '2024-01-20T10:10:00',
     },
     {
-      id: '4',
-      conversationId,
-      senderId: '2',
-      senderName: '나',
-      content: '주말 오후가 괜찮은데, 토요일 2시 어떠신가요?',
-      timestamp: '2024-01-20T10:15:00',
-      type: 'text',
-      readBy: ['1', '2'],
+      messageId: 4,
+      senderId: 2,
+      messageText: '주말 오후가 괜찮은데, 토요일 2시 어떠신가요?',
+      sentTime: '2024-01-20T10:15:00',
     },
     {
-      id: '5',
-      conversationId,
-      senderId: '1',
-      senderName: '김독서',
-      content: '내일 오후 2시에 만날까요?',
-      timestamp: '2024-01-20T10:20:00',
-      type: 'text',
-      readBy: ['1'],
+      messageId: 5,
+      senderId: 1,
+      messageText: '내일 오후 2시에 만날까요?',
+      sentTime: '2024-01-20T10:20:00',
     },
   ]
 
@@ -90,17 +70,13 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
   })
 
   const sendMessageMutation = useMutation({
-    mutationFn: async (content: string) => {
+    mutationFn: async (messageText: string) => {
       // TODO: Replace with actual API call
       const newMessage: Message = {
-        id: Date.now().toString(),
-        conversationId,
+        messageId: Date.now(),
         senderId: currentUserId,
-        senderName: '나',
-        content,
-        timestamp: new Date().toISOString(),
-        type: 'text',
-        readBy: [currentUserId],
+        messageText,
+        sentTime: new Date().toISOString(),
       }
       return newMessage
     },
@@ -138,7 +114,7 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
   // Group messages by date
   const groupedMessages = messages.reduce(
     (groups, message) => {
-      const date = new Date(message.timestamp).toLocaleDateString('ko-KR', {
+      const date = new Date(message.sentTime).toLocaleDateString('ko-KR', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -207,7 +183,7 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
             {/* Messages */}
             {dateMessages.map((message, index) => (
               <MessageBubble
-                key={message.id}
+                key={message.messageId}
                 message={message}
                 isOwn={message.senderId === currentUserId}
                 showAvatar={

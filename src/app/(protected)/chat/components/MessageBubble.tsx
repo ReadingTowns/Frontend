@@ -1,23 +1,20 @@
 'use client'
 
-import type { Message } from '../ChatClient'
-import {
-  UserCircleIcon,
-  BookOpenIcon,
-  MapPinIcon,
-  CheckIcon,
-} from '@heroicons/react/24/outline'
+import type { Message } from '@/types/chatroom'
+import { UserCircleIcon } from '@heroicons/react/24/outline'
 
 interface MessageBubbleProps {
   message: Message
   isOwn: boolean
   showAvatar: boolean
+  partnerName?: string
 }
 
 export default function MessageBubble({
   message,
   isOwn,
   showAvatar,
+  partnerName,
 }: MessageBubbleProps) {
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('ko-KR', {
@@ -48,10 +45,8 @@ export default function MessageBubble({
         className={`max-w-[70%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col`}
       >
         {/* Sender name (only for others and first message in group) */}
-        {!isOwn && showAvatar && (
-          <span className="text-xs text-gray-600 mb-1 ml-2">
-            {message.senderName}
-          </span>
+        {!isOwn && showAvatar && partnerName && (
+          <span className="text-xs text-gray-600 mb-1 ml-2">{partnerName}</span>
         )}
 
         <div
@@ -65,72 +60,18 @@ export default function MessageBubble({
                 : 'bg-white text-gray-900 shadow-sm'
             }`}
           >
-            {message.type === 'text' && (
-              <p className="text-sm whitespace-pre-wrap break-words">
-                {message.content}
-              </p>
-            )}
-
-            {message.type === 'image' && message.attachments && (
-              <div className="space-y-2">
-                {message.attachments.map((url, index) => (
-                  <img
-                    key={index}
-                    src={url}
-                    alt="Shared image"
-                    className="rounded-lg max-w-full"
-                  />
-                ))}
-                {message.content && (
-                  <p className="text-sm mt-2">{message.content}</p>
-                )}
-              </div>
-            )}
-
-            {message.type === 'book_info' && (
-              <div className="bg-white/10 rounded-lg p-2">
-                <div className="flex items-center gap-2">
-                  <BookOpenIcon className="w-6 h-6 flex-shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm">{message.content}</p>
-                    <p className="text-xs opacity-80">책 정보</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {message.type === 'location' && (
-              <div className="bg-white/10 rounded-lg p-2">
-                <div className="flex items-center gap-2">
-                  <MapPinIcon className="w-6 h-6 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm">{message.content}</p>
-                    <p className="text-xs opacity-80">위치 공유</p>
-                  </div>
-                </div>
-              </div>
-            )}
+            <p className="text-sm whitespace-pre-wrap break-words">
+              {message.messageText}
+            </p>
           </div>
 
-          {/* Time & Read Status */}
+          {/* Time */}
           <div
             className={`flex items-center gap-1 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}
           >
             <span className="text-xs text-gray-500">
-              {formatTime(message.timestamp)}
+              {formatTime(message.sentTime)}
             </span>
-            {isOwn && (
-              <span className="text-xs flex items-center">
-                {message.readBy.length > 1 ? (
-                  <>
-                    <CheckIcon className="w-3 h-3 text-blue-500" />
-                    <CheckIcon className="w-3 h-3 text-blue-500 -ml-1.5" />
-                  </>
-                ) : (
-                  <CheckIcon className="w-3 h-3 text-gray-400" />
-                )}
-              </span>
-            )}
           </div>
         </div>
       </div>
