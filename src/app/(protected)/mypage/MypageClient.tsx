@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
+import { useMyRating } from '@/hooks/useUserRating'
 import ProfileSection from './components/ProfileSection'
 import SettingsTab from './components/SettingsTab'
 import LogoutModal from './components/LogoutModal'
@@ -52,6 +53,18 @@ export default function MypageClient() {
     retry: 1, // Retry once on failure
   })
 
+  // 실시간 별점 데이터 조회
+  const { data: myRating } = useMyRating()
+
+  // 별점 데이터 우선순위: useMyRating hook > profile 데이터
+  const displayProfile = profile
+    ? {
+        ...profile,
+        userRating: myRating?.userRating ?? profile.userRating,
+        userRatingCount: myRating?.userRatingCount ?? profile.userRatingCount,
+      }
+    : profile
+
   const handleLogout = () => {
     logout()
     setShowLogoutModal(false)
@@ -88,9 +101,9 @@ export default function MypageClient() {
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
       <div className="flex-1 overflow-y-auto">
-        {profile && (
+        {displayProfile && (
           <>
-            <ProfileSection profile={profile} />
+            <ProfileSection profile={displayProfile} />
             <div className="bg-white">
               <SettingsTab onShowLogout={() => setShowLogoutModal(true)} />
             </div>

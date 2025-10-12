@@ -78,9 +78,9 @@ export default function ProfileSection({ profile }: ProfileSectionProps) {
           </div>
         )}
 
-        {/* 리뷰 수 */}
+        {/* 후기 수 */}
         <p className="text-sm text-gray-500 mb-4">
-          받은 리뷰 {profile.userRatingCount}개
+          받은 후기 {profile.userRatingCount}개
         </p>
 
         {/* 추가 정보 */}
