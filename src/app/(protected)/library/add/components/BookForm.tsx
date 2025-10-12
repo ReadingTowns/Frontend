@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import BookCoverUpload from './BookCoverUpload'
 import { fetchBookByISBN } from '@/lib/isbnService'
 import type { BookInfo } from '@/types/book'
@@ -24,6 +25,7 @@ interface BookData {
 export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
   const router = useRouter()
   const addBookMutation = useAddLibraryBook()
+  const { showSuccess, showError } = useSnackbar()
 
   const [formData, setFormData] = useState<BookData>({
     isbn: initialISBN,
@@ -86,21 +88,21 @@ export default function BookForm({ initialISBN = '', onBack }: BookFormProps) {
   // 책 등록 성공 시 처리
   useEffect(() => {
     if (addBookMutation.isSuccess) {
-      alert('책이 성공적으로 등록되었습니다!')
+      showSuccess('책이 성공적으로 등록되었습니다!')
       router.push('/library')
     }
-  }, [addBookMutation.isSuccess, router])
+  }, [addBookMutation.isSuccess, router, showSuccess])
 
   // 책 등록 실패 시 처리
   useEffect(() => {
     if (addBookMutation.error) {
-      alert(
+      showError(
         addBookMutation.error instanceof Error
           ? addBookMutation.error.message
           : '책 등록에 실패했습니다. 다시 시도해주세요.'
       )
     }
-  }, [addBookMutation.error])
+  }, [addBookMutation.error, showError])
 
   // 폼 유효성 검사
   const validateForm = (): boolean => {

@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import {
   BookOpenIcon,
   CameraIcon,
@@ -20,6 +21,7 @@ export default function BookCoverUpload({
   onImageChange,
 }: BookCoverUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { showWarning } = useSnackbar()
   const [previewUrl, setPreviewUrl] = useState<string>(imageUrl || '')
 
   // imageUrl prop 변경 시 previewUrl 업데이트 (ISBN 검색 결과 반영)
@@ -35,13 +37,13 @@ export default function BookCoverUpload({
 
     // 파일 크기 체크 (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      alert('파일 크기는 5MB 이하여야 합니다.')
+      showWarning('파일 크기는 5MB 이하여야 합니다.')
       return
     }
 
     // 이미지 파일 타입 체크
     if (!file.type.startsWith('image/')) {
-      alert('이미지 파일만 업로드 가능합니다.')
+      showWarning('이미지 파일만 업로드 가능합니다.')
       return
     }
 
