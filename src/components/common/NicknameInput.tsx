@@ -4,6 +4,7 @@ import {
   CheckCircleIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/solid'
+import { api } from '@/lib/api'
 
 interface NicknameInputProps {
   value: string
@@ -46,17 +47,12 @@ export default function NicknameInput({
     setNicknameError('')
 
     try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(
-        `${backendUrl}/api/v1/members/nickname/validate?nickname=${encodeURIComponent(nick)}`,
-        {
-          credentials: 'include',
-        }
+      const data = await api.get<{ isAvailable: boolean }>(
+        '/api/v1/members/nickname/validate',
+        { nickname: nick }
       )
-      const data = await response.json()
 
-      if (data.result.isAvailable) {
+      if (data.isAvailable) {
         setNicknameStatus('available')
         setNicknameError('')
         onValidationChange(true)

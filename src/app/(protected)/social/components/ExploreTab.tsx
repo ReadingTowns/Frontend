@@ -13,6 +13,7 @@ import UserSearch from '@/components/neighbors/UserSearch'
 import { socialKeys } from '@/types/social'
 import { createChatRoom } from '@/services/userSearchService'
 import type { CreateChatRequest } from '@/types/userSearch'
+import { api } from '@/lib/api'
 
 interface User {
   memberId: number
@@ -31,20 +32,12 @@ export default function ExploreTab() {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-
   // 추천 유저 조회
   // API endpoint doesn't exist yet - disabled for now
   const { data: recommendations, isLoading } = useQuery({
     queryKey: socialKeys.recommendations(),
     queryFn: async () => {
-      const res = await fetch(`${backendUrl}/api/v1/users/recommendations`, {
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to fetch recommendations')
-      const data = await res.json()
-      return data.result as User[]
+      return await api.get<User[]>('/api/v1/users/recommendations')
     },
     enabled: false, // Disabled: API endpoint not available yet
   })
@@ -53,15 +46,9 @@ export default function ExploreTab() {
   const { data: searchResults, isLoading: searchLoading } = useQuery({
     queryKey: socialKeys.search(searchQuery),
     queryFn: async () => {
-      const res = await fetch(
-        `${backendUrl}/api/v1/members/search?nickname=${searchQuery}`,
-        {
-          credentials: 'include',
-        }
-      )
-      if (!res.ok) throw new Error('Failed to search users')
-      const data = await res.json()
-      return data.result as User[]
+      return await api.get<User[]>('/api/v1/members/search', {
+        nickname: searchQuery,
+      })
     },
     enabled: searchQuery.length >= 2,
   })

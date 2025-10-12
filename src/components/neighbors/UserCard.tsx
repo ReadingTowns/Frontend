@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -40,6 +40,11 @@ export default function UserCard({
     user.followed ?? user.isFollowing ?? false
   )
 
+  // Sync local state when user prop changes (after refetch)
+  useEffect(() => {
+    setIsFollowing(user.followed ?? user.isFollowing ?? false)
+  }, [user.followed, user.isFollowing])
+
   // 팔로우/언팔로우 Mutation
   const followMutation = useMutation({
     mutationFn: async (follow: boolean) => {
@@ -50,16 +55,40 @@ export default function UserCard({
       }
     },
     onMutate: async follow => {
-      // Optimistic Update
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['users'] })
+
+      // Snapshot the previous value
+      const previousData = queryClient.getQueriesData({ queryKey: ['users'] })
+
+      // Optimistically update all user lists
+      queryClient.setQueriesData<User[]>({ queryKey: ['users'] }, old => {
+        if (!old) return old
+        return old.map(u =>
+          u.memberId === userId || u.id === userId
+            ? { ...u, followed: follow, isFollowing: follow }
+            : u
+        )
+      })
+
+      // Update local state
       setIsFollowing(follow)
+
+      return { previousData }
     },
-    onSuccess: () => {
-      // 관련 쿼리 무효화
-      queryClient.invalidateQueries({ queryKey: ['users'] })
-    },
-    onError: () => {
-      // 에러 시 롤백
+    onError: (_error, _follow, context) => {
+      // Rollback to previous data on error
+      if (context?.previousData) {
+        context.previousData.forEach(([queryKey, data]) => {
+          queryClient.setQueryData(queryKey, data)
+        })
+      }
+      // Rollback local state
       setIsFollowing(!isFollowing)
+    },
+    onSettled: () => {
+      // Always refetch after error or success to ensure consistency
+      queryClient.invalidateQueries({ queryKey: ['users'] })
     },
   })
 

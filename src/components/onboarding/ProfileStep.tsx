@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ProfileStepProps } from '@/types/onboarding'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import NicknameInput from '@/components/common/NicknameInput'
+import { api } from '@/lib/api'
 
 export default function ProfileStep({
   nickname,
@@ -26,22 +27,17 @@ export default function ProfileStep({
       if (nickname || profileImage) return
 
       try {
-        const backendUrl =
-          process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-        const response = await fetch(
-          `${backendUrl}/api/v1/members/onboarding/default-profile`,
-          {
-            credentials: 'include',
-          }
-        )
-        const data = await response.json()
+        const data = await api.get<{
+          defaultUsername: string
+          defaultProfileImage: string
+        }>('/api/v1/members/onboarding/default-profile')
 
-        if (data.result) {
-          setLocalNickname(data.result.defaultUsername)
-          setLocalProfileImage(data.result.defaultProfileImage)
+        if (data) {
+          setLocalNickname(data.defaultUsername)
+          setLocalProfileImage(data.defaultProfileImage)
           // 부모 컴포넌트에 기본값 전달
-          onNicknameChange(data.result.defaultUsername)
-          onProfileImageChange(data.result.defaultProfileImage)
+          onNicknameChange(data.defaultUsername)
+          onProfileImageChange(data.defaultProfileImage)
         }
       } catch (error) {
         console.error('기본 프로필 로드 실패:', error)

@@ -41,12 +41,7 @@ export default function UserProfileClient({ userId }: UserProfileClientProps) {
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ['users', userId, 'profile'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const res = await fetch(`${backendUrl}/api/v1/members/${userId}/profile`)
-      if (!res.ok) throw new Error('Failed to fetch profile')
-      const data = await res.json()
-      return data.result as UserProfile
+      return await api.get<UserProfile>(`/api/v1/members/${userId}/profile`)
     },
   })
 
@@ -54,14 +49,9 @@ export default function UserProfileClient({ userId }: UserProfileClientProps) {
   const { data: rating } = useQuery({
     queryKey: ['users', userId, 'rating'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const res = await fetch(
-        `${backendUrl}/api/v1/members/star-rating?memberId=${userId}`
-      )
-      if (!res.ok) throw new Error('Failed to fetch rating')
-      const data = await res.json()
-      return data.result as UserRating
+      return await api.get<UserRating>('/api/v1/members/star-rating', {
+        memberId: userId,
+      })
     },
   })
 

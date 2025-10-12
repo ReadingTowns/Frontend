@@ -7,6 +7,7 @@ import UserCard from '@/components/neighbors/UserCard'
 import UserTabs from '@/components/neighbors/UserTabs'
 import NeighborsHeader from '@/components/layout/NeighborsHeader'
 import { useHeader } from '@/contexts/HeaderContext'
+import { api } from '@/lib/api'
 
 type TabType = 'recommend' | 'following' | 'followers'
 
@@ -41,12 +42,7 @@ export default function NeighborsPageClient() {
   const { data: recommendations, isLoading: recommendLoading } = useQuery({
     queryKey: ['users', 'recommendations'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const res = await fetch(`${backendUrl}/api/v1/users/recommendations`)
-      if (!res.ok) throw new Error('Failed to fetch recommendations')
-      const data = await res.json()
-      return data.result as User[]
+      return await api.get<User[]>('/api/v1/users/recommendations')
     },
     enabled: activeTab === 'recommend' && !searchQuery,
   })
@@ -55,12 +51,9 @@ export default function NeighborsPageClient() {
   const { data: following, isLoading: followingLoading } = useQuery({
     queryKey: ['users', 'following'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const res = await fetch(`${backendUrl}/api/v1/members/me/following`)
-      if (!res.ok) throw new Error('Failed to fetch following')
-      const data = await res.json()
-      return data.result as User[]
+      const users = await api.get<User[]>('/api/v1/members/me/following')
+      // 팔로잉 리스트의 모든 유저는 이미 팔로우 상태
+      return users.map(user => ({ ...user, followed: true, isFollowing: true }))
     },
     enabled: activeTab === 'following' && !searchQuery,
   })
@@ -69,12 +62,7 @@ export default function NeighborsPageClient() {
   const { data: followers, isLoading: followersLoading } = useQuery({
     queryKey: ['users', 'followers'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const res = await fetch(`${backendUrl}/api/v1/members/me/followers`)
-      if (!res.ok) throw new Error('Failed to fetch followers')
-      const data = await res.json()
-      return data.result as User[]
+      return await api.get<User[]>('/api/v1/members/me/followers')
     },
     enabled: activeTab === 'followers' && !searchQuery,
   })
@@ -83,14 +71,9 @@ export default function NeighborsPageClient() {
   const { data: searchResults, isLoading: searchLoading } = useQuery({
     queryKey: ['users', 'search', searchQuery],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const res = await fetch(
-        `${backendUrl}/api/v1/members/search?nickname=${searchQuery}`
-      )
-      if (!res.ok) throw new Error('Failed to search users')
-      const data = await res.json()
-      return data.result as User[]
+      return await api.get<User[]>('/api/v1/members/search', {
+        nickname: searchQuery,
+      })
     },
     enabled: !!searchQuery,
   })

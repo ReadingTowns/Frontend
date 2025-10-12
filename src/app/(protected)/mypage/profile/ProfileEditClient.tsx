@@ -10,6 +10,7 @@ import {
   ClockIcon,
   UserCircleIcon,
 } from '@heroicons/react/24/outline'
+import { api } from '@/lib/api'
 
 interface UserProfile {
   memberId: number
@@ -54,16 +55,7 @@ export default function ProfileEditClient() {
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ['members', 'me', 'profile'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(`${backendUrl}/api/v1/members/me/profile`, {
-        credentials: 'include',
-      })
-      if (!response.ok) {
-        throw new Error('프로필을 불러오는데 실패했습니다')
-      }
-      const data = await response.json()
-      return data.result
+      return await api.get<UserProfile>('/api/v1/members/me/profile')
     },
   })
 
@@ -85,22 +77,7 @@ export default function ProfileEditClient() {
       availableTime: string
       profileImage: string
     }) => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(`${backendUrl}/api/v1/members/profile`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      })
-
-      if (!response.ok) {
-        throw new Error('프로필 수정에 실패했습니다')
-      }
-
-      return response.json()
+      return await api.patch('/api/v1/members/profile', data)
     },
     onSuccess: () => {
       // 캐시 무효화
