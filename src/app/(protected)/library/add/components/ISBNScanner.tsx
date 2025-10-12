@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { CameraIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import { BrowserMultiFormatReader } from '@zxing/browser'
+import { BarcodeFormat, DecodeHintType } from '@zxing/library'
 import { fetchBookByISBN } from '@/lib/isbnService'
 import type { BookInfo } from '@/types/book'
 
@@ -103,10 +104,15 @@ export default function ISBNScanner({
     try {
       console.log('[ISBNScanner] getUserMedia 호출 시작')
 
-      // 카메라 스트림 가져오기
+      // 카메라 스트림 가져오기 (고해상도 + 자동 초점)
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: { ideal: 'environment' }, // 후면 카메라 우선
+          width: { ideal: 1920 }, // 고해상도
+          height: { ideal: 1080 }, // 고해상도
+          aspectRatio: { ideal: 16 / 9 },
+          // @ts-expect-error - focusMode는 일부 브라우저에서 지원
+          focusMode: { ideal: 'continuous' }, // 자동 초점
         },
       })
 
@@ -118,9 +124,14 @@ export default function ISBNScanner({
         videoRef.current.srcObject = stream
       }
 
-      // BrowserMultiFormatReader 초기화
+      // EAN-13 전용 BrowserMultiFormatReader 초기화 (ISBN-13 바코드)
       if (!codeReaderRef.current) {
-        codeReaderRef.current = new BrowserMultiFormatReader()
+        const hints = new Map()
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+          BarcodeFormat.EAN_13, // ISBN-13
+          BarcodeFormat.EAN_8, // ISBN-10 (일부)
+        ])
+        codeReaderRef.current = new BrowserMultiFormatReader(hints)
       }
 
       const codeReader = codeReaderRef.current
@@ -215,18 +226,34 @@ export default function ISBNScanner({
     setIsScanning(true)
     setError(null)
 
+    let imageUrl = ''
+
     try {
-      // BrowserMultiFormatReader 초기화
+      // EAN-13 전용 BrowserMultiFormatReader 초기화 (ISBN-13 바코드)
       if (!codeReaderRef.current) {
-        codeReaderRef.current = new BrowserMultiFormatReader()
+        const hints = new Map()
+        hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+          BarcodeFormat.EAN_13, // ISBN-13
+          BarcodeFormat.EAN_8, // ISBN-10 (일부)
+        ])
+        codeReaderRef.current = new BrowserMultiFormatReader(hints)
       }
 
       const codeReader = codeReaderRef.current
 
+      // 이미지 URL 생성
+      imageUrl = URL.createObjectURL(file)
+
+      // HTMLImageElement 생성 및 이미지 로드
+      const image = new Image()
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve()
+        image.onerror = () => reject(new Error('이미지 로드에 실패했습니다.'))
+        image.src = imageUrl
+      })
+
       // 이미지에서 바코드 디코딩
-      const result = await codeReader.decodeFromImageUrl(
-        URL.createObjectURL(file)
-      )
+      const result = await codeReader.decodeFromImageElement(image)
 
       const scannedText = result.getText()
 
@@ -247,6 +274,11 @@ export default function ISBNScanner({
           : '이미지에서 바코드를 인식할 수 없습니다. 다시 시도해주세요.'
       )
       setIsScanning(false)
+    } finally {
+      // Object URL 정리
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl)
+      }
     }
   }
 
