@@ -15,10 +15,7 @@ import {
   completeExchange,
   returnExchange,
 } from '@/services/chatRoomService'
-import type {
-  CreateChatRoomRequest,
-  CreateChatRoomResponse,
-} from '@/types/chatroom'
+import type { CreateChatRoomResponse } from '@/types/chatroom'
 
 // ============================================================================
 // Query Keys

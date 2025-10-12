@@ -17,10 +17,7 @@ interface ChatListProps {
   onSelectConversation: (conversationId: string) => void
 }
 
-export default function ChatList({
-  selectedId,
-  onSelectConversation,
-}: ChatListProps) {
+export default function ChatList({ selectedId }: ChatListProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
   const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false)

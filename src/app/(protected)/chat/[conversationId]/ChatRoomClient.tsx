@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
-import { useAuth } from '@/hooks/useAuth'
 import {
   useChatRoomMessages,
   usePartnerProfile,
@@ -28,7 +27,6 @@ export default function ChatRoomClient({
   const router = useRouter()
   const { setHeaderContent } = useHeader()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { user } = useAuth()
 
   const chatroomId = parseInt(conversationId)
 
@@ -82,8 +80,10 @@ export default function ChatRoomClient({
     messagesData?.pages.flatMap(page => page.message).reverse() || []
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (messages.length > 0) {
+      scrollToBottom()
+    }
+  }, [messages.length])
 
   const handleSendMessage = (content: string) => {
     if (content.trim()) {

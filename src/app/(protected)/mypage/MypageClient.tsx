@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
@@ -9,7 +8,6 @@ import { useMyRating } from '@/hooks/useUserRating'
 import ProfileSection from './components/ProfileSection'
 import SettingsTab from './components/SettingsTab'
 import LogoutModal from './components/LogoutModal'
-import { useState } from 'react'
 import { api } from '@/lib/api'
 
 interface UserProfile {
@@ -24,7 +22,6 @@ interface UserProfile {
 }
 
 export default function MypageClient() {
-  const router = useRouter()
   const { setHeaderContent } = useHeader()
   const { logout, isLoggingOut } = useAuth()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
