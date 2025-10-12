@@ -62,7 +62,7 @@ export default function UserLibraryPage() {
         onSuccess: data => {
           setShowExchangeModal(false)
           // 채팅방으로 이동 - 개발 환경 URL 사용
-          window.location.href = `https://dev.readingtown.site/chat/${data.chatRoomId}`
+          window.location.href = `https://dev.readingtown.site/chat/${data.chatroomId}`
         },
         onError: error => {
           console.error('Failed to create chatroom:', error)
