@@ -8,41 +8,21 @@ import {
   BookReview,
   AddReviewRequest,
   UpdateReviewRequest,
-  LibraryBooksApiResponse,
   AddLibraryBookApiResponse,
   DeleteLibraryBookApiResponse,
-  UserProfileApiResponse,
-  GetReviewApiResponse,
-  AddReviewApiResponse,
-  UpdateReviewApiResponse,
 } from '@/types/library'
 import { PaginationInfo } from '@/types/common'
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+import { api } from '@/lib/api'
 
 // 내 서재 책 리스트 조회
 export function useMyLibraryBooks(params?: { page?: number; size?: number }) {
   return useQuery({
     queryKey: ['library', 'my-books', params],
     queryFn: async (): Promise<LibraryBooksResponse & PaginationInfo> => {
-      const searchParams = new URLSearchParams()
-      if (params?.page !== undefined)
-        searchParams.set('page', params.page.toString())
-      if (params?.size) searchParams.set('size', params.size.toString())
-
-      const response = await fetch(
-        `${BASE_URL}/api/v1/bookhouse/members/me?${searchParams.toString()}`,
-        {
-          credentials: 'include',
-        }
+      return await api.get<LibraryBooksResponse & PaginationInfo>(
+        '/api/v1/bookhouse/members/me',
+        params
       )
-      if (!response.ok) {
-        throw new Error('Failed to fetch my library books')
-      }
-
-      const data: LibraryBooksApiResponse = await response.json()
-      return data.result
     },
   })
 }
@@ -58,23 +38,10 @@ export function useUserLibraryBooks(
   return useQuery({
     queryKey: ['library', 'user-books', userId, params],
     queryFn: async (): Promise<LibraryBooksResponse & PaginationInfo> => {
-      const searchParams = new URLSearchParams()
-      if (params?.page !== undefined)
-        searchParams.set('page', params.page.toString())
-      if (params?.size) searchParams.set('size', params.size.toString())
-
-      const response = await fetch(
-        `${BASE_URL}/api/v1/bookhouse/members/${userId}?${searchParams.toString()}`,
-        {
-          credentials: 'include',
-        }
+      return await api.get<LibraryBooksResponse & PaginationInfo>(
+        `/api/v1/bookhouse/members/${userId}`,
+        params
       )
-      if (!response.ok) {
-        throw new Error('Failed to fetch user library books')
-      }
-
-      const data: LibraryBooksApiResponse = await response.json()
-      return data.result
     },
     enabled: !!userId,
   })
@@ -85,22 +52,13 @@ export function useAddLibraryBook() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (bookData: AddLibraryBookRequest) => {
-      const response = await fetch(`${BASE_URL}/api/v1/bookhouse/books`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(bookData),
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to add library book')
-      }
-
-      const data: AddLibraryBookApiResponse = await response.json()
-      return data
+    mutationFn: async (
+      bookData: AddLibraryBookRequest
+    ): Promise<AddLibraryBookApiResponse> => {
+      return await api.post<AddLibraryBookApiResponse>(
+        '/api/v1/bookhouse/books',
+        bookData
+      )
     },
     // 낙관적 업데이트: 책 등록 요청 전에 UI에 즉시 추가
     onMutate: async (bookData: AddLibraryBookRequest) => {
@@ -155,21 +113,12 @@ export function useDeleteLibraryBook() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: async (bookId: string) => {
-      const response = await fetch(
-        `${BASE_URL}/api/v1/bookhouse/books/${bookId}`,
-        {
-          method: 'DELETE',
-          credentials: 'include',
-        }
+    mutationFn: async (
+      bookId: string
+    ): Promise<DeleteLibraryBookApiResponse> => {
+      return await api.delete<DeleteLibraryBookApiResponse>(
+        `/api/v1/bookhouse/books/${bookId}`
       )
-
-      if (!response.ok) {
-        throw new Error('Failed to delete library book')
-      }
-
-      const data: DeleteLibraryBookApiResponse = await response.json()
-      return data
     },
     // 낙관적 업데이트: 삭제 요청 전에 UI에서 즉시 제거
     onMutate: async (bookId: string) => {
@@ -220,18 +169,7 @@ export function useUserProfile(userId: string) {
   return useQuery({
     queryKey: ['user', 'profile', userId],
     queryFn: async (): Promise<UserProfile> => {
-      const response = await fetch(
-        `${BASE_URL}/api/v1/members/${userId}/profile`,
-        {
-          credentials: 'include',
-        }
-      )
-      if (!response.ok) {
-        throw new Error('Failed to fetch user profile')
-      }
-
-      const data: UserProfileApiResponse = await response.json()
-      return data.result
+      return await api.get<UserProfile>(`/api/v1/members/${userId}/profile`)
     },
     enabled: !!userId,
   })
@@ -242,23 +180,15 @@ export function useBookReview(bookId: string) {
   return useQuery({
     queryKey: ['book', 'review', bookId],
     queryFn: async (): Promise<BookReview | null> => {
-      const response = await fetch(
-        `${BASE_URL}/api/v1/books/${bookId}/reviews/me`,
-        {
-          credentials: 'include',
+      try {
+        return await api.get<BookReview>(`/api/v1/books/${bookId}/reviews/me`)
+      } catch (error) {
+        // 404 에러는 감상평이 없는 경우이므로 null 반환
+        if (error instanceof Error && error.message.includes('404')) {
+          return null
         }
-      )
-
-      if (response.status === 404) {
-        return null // 감상평이 없는 경우
+        throw error
       }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch book review')
-      }
-
-      const data: GetReviewApiResponse = await response.json()
-      return data.result
     },
     enabled: !!bookId,
   })
@@ -270,24 +200,7 @@ export function useAddBookReview(bookId: string) {
 
   return useMutation({
     mutationFn: async (reviewData: AddReviewRequest) => {
-      const response = await fetch(
-        `${BASE_URL}/api/v1/books/${bookId}/review`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(reviewData),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to add book review')
-      }
-
-      const data: AddReviewApiResponse = await response.json()
-      return data
+      return await api.post(`/api/v1/books/${bookId}/review`, reviewData)
     },
     // 낙관적 업데이트: 감상평 작성 전에 UI에 즉시 표시
     onMutate: async (reviewData: AddReviewRequest) => {
@@ -328,24 +241,7 @@ export function useUpdateBookReview(bookId: string) {
 
   return useMutation({
     mutationFn: async (reviewData: UpdateReviewRequest) => {
-      const response = await fetch(
-        `${BASE_URL}/api/v1/books/${bookId}/review`,
-        {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify(reviewData),
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to update book review')
-      }
-
-      const data: UpdateReviewApiResponse = await response.json()
-      return data
+      return await api.patch(`/api/v1/books/${bookId}/review`, reviewData)
     },
     // 낙관적 업데이트: 감상평 수정 전에 UI에 즉시 반영
     onMutate: async (reviewData: UpdateReviewRequest) => {

@@ -15,6 +15,40 @@ export interface BookInfo {
 }
 
 /**
+ * 책 상세 정보 (백엔드 API)
+ */
+export interface BookDetail {
+  bookId: number
+  isbn: string
+  bookName: string
+  author: string
+  publisher: string
+  bookImage: string
+  description?: string
+  publicationDate?: string
+}
+
+/**
+ * 책 리뷰 정보
+ */
+export interface BookReviewItem {
+  reviewId: number
+  memberId: number
+  memberName: string
+  memberImage: string
+  content: string
+  createdAt: string
+}
+
+/**
+ * 내 리뷰 정보
+ */
+export interface MyBookReview {
+  reviewId: number
+  content: string
+}
+
+/**
  * 알라딘 API 응답 타입
  */
 export interface AladinApiResponse {

@@ -3,29 +3,15 @@ import type {
   ExchangeData,
   RecommendedUser,
   RecommendedBook,
-  ExchangeApiResponse,
-  UserRecommendationApiResponse,
-  BookRecommendationApiResponse,
 } from '@/types/dashboard'
-
-const BASE_URL =
-  process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
+import { api } from '@/lib/api'
 
 // 교환 중인 책 조회
 export function useCurrentExchange() {
   return useQuery<ExchangeData | null>({
     queryKey: ['dashboard', 'current-exchange'],
     queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/api/v1/members/me/exchanges`, {
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch current exchange')
-      }
-
-      const data: ExchangeApiResponse = await response.json()
-      return data.result
+      return await api.get<ExchangeData | null>('/api/v1/members/me/exchanges')
     },
     staleTime: 1000 * 60 * 5, // 5분
   })
@@ -36,16 +22,7 @@ export function useRecommendedUsers() {
   return useQuery<RecommendedUser[]>({
     queryKey: ['dashboard', 'recommended-users'],
     queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/api/v1/users/recommendations`, {
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch recommended users')
-      }
-
-      const data: UserRecommendationApiResponse = await response.json()
-      return data.result
+      return await api.get<RecommendedUser[]>('/api/v1/users/recommendations')
     },
     staleTime: 1000 * 60 * 10, // 10분
   })
@@ -56,16 +33,7 @@ export function useRecommendedBooks() {
   return useQuery<RecommendedBook[]>({
     queryKey: ['dashboard', 'recommended-books'],
     queryFn: async () => {
-      const response = await fetch(`${BASE_URL}/api/v1/books/recommendations`, {
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch recommended books')
-      }
-
-      const data: BookRecommendationApiResponse = await response.json()
-      return data.result
+      return await api.get<RecommendedBook[]>('/api/v1/books/recommendations')
     },
     staleTime: 1000 * 60 * 30, // 30분
   })
@@ -83,19 +51,11 @@ export function useFollowUser() {
       userId: number
       isFollowing: boolean
     }) => {
-      const response = await fetch(
-        `${BASE_URL}/api/v1/users/${userId}/follow`,
-        {
-          method: isFollowing ? 'DELETE' : 'POST',
-          credentials: 'include',
-        }
-      )
-
-      if (!response.ok) {
-        throw new Error('Failed to toggle follow')
+      if (isFollowing) {
+        return await api.delete(`/api/v1/users/${userId}/follow`)
+      } else {
+        return await api.post(`/api/v1/users/${userId}/follow`)
       }
-
-      return response.json()
     },
     onSuccess: () => {
       // 추천 사용자 목록 다시 조회

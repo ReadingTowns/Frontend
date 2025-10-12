@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
 export default function AuthRedirectPage() {
-  const { isAuthenticated, isNewUser, isLoading } = useAuth()
+  const { isAuthenticated, isOnboardingCompleted, isLoading } = useAuth()
   const router = useRouter()
   const [retryCount, setRetryCount] = useState(0)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -20,7 +20,7 @@ export default function AuthRedirectPage() {
     // 인증된 경우 라우팅 처리
     if (isAuthenticated) {
       setIsProcessing(true)
-      if (isNewUser) {
+      if (!isOnboardingCompleted) {
         router.push('/onboarding')
       } else {
         router.push('/home')
@@ -44,7 +44,14 @@ export default function AuthRedirectPage() {
       setIsProcessing(true)
       router.push('/login')
     }
-  }, [isAuthenticated, isNewUser, isLoading, router, retryCount, isProcessing])
+  }, [
+    isAuthenticated,
+    isOnboardingCompleted,
+    isLoading,
+    router,
+    retryCount,
+    isProcessing,
+  ])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

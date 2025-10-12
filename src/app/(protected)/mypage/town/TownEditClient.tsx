@@ -14,6 +14,7 @@ import {
   GlobeAltIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline'
+import { api } from '@/lib/api'
 
 interface UserProfile {
   memberId: number
@@ -53,16 +54,7 @@ export default function TownEditClient() {
   const { data: profile, isLoading } = useQuery<UserProfile>({
     queryKey: ['members', 'me', 'profile'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(`${backendUrl}/api/v1/members/me/profile`, {
-        credentials: 'include',
-      })
-      if (!response.ok) {
-        throw new Error('프로필을 불러오는데 실패했습니다')
-      }
-      const data = await response.json()
-      return data.result
+      return await api.get<UserProfile>('/api/v1/members/me/profile')
     },
   })
 

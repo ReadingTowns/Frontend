@@ -3,6 +3,7 @@
 import { LibraryBook } from '@/types/library'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { EllipsisVerticalIcon, BookOpenIcon } from '@heroicons/react/24/outline'
 import { StatusBadge } from './StatusBadge'
 import { CategoryTags } from './CategoryTags'
@@ -24,24 +25,38 @@ export function LibraryBookCard({
   isOwner = true,
   compact = false,
 }: LibraryBookCardProps) {
+  const router = useRouter()
   const [showMenu, setShowMenu] = useState(false)
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // 카드 클릭 이벤트 방지
     if (onDelete) {
       onDelete(String(book.bookId))
     }
     setShowMenu(false)
   }
 
-  const handleReviewClick = () => {
+  const handleReviewClick = (e: React.MouseEvent) => {
+    e.stopPropagation() // 카드 클릭 이벤트 방지
     if (onReviewClick) {
       onReviewClick(String(book.bookId), book.bookName)
     }
     setShowMenu(false)
   }
 
+  const handleCardClick = () => {
+    // 책 상세 페이지로 이동
+    router.push(`/books/${book.bookId}`)
+  }
+
+  const handleMenuButtonClick = (e: React.MouseEvent) => {
+    // 메뉴 버튼 클릭 시 카드 클릭 이벤트 방지
+    e.stopPropagation()
+    setShowMenu(!showMenu)
+  }
+
   return (
-    <div className="relative">
+    <div className="relative cursor-pointer" onClick={handleCardClick}>
       {/* Book Image with Aspect Ratio */}
       <div
         className={`w-full ${compact ? 'aspect-[2/3]' : 'h-40'} bg-cover bg-center bg-gray-200 rounded-lg relative mb-2`}
@@ -68,7 +83,7 @@ export function LibraryBookCard({
         {showActions && isOwner && !book.statusLabel && (
           <div className="absolute top-2 right-2">
             <button
-              onClick={() => setShowMenu(!showMenu)}
+              onClick={handleMenuButtonClick}
               className="w-6 h-6 bg-white bg-opacity-80 rounded-full flex items-center justify-center text-gray-600 hover:bg-opacity-100 transition-colors"
             >
               <EllipsisVerticalIcon className="w-4 h-4" />

@@ -8,6 +8,7 @@ import ProfileSection from './components/ProfileSection'
 import SettingsTab from './components/SettingsTab'
 import LogoutModal from './components/LogoutModal'
 import { useState } from 'react'
+import { api } from '@/lib/api'
 
 interface UserProfile {
   memberId: number
@@ -44,44 +45,14 @@ export default function MypageClient() {
   } = useQuery<UserProfile>({
     queryKey: ['members', 'me', 'profile'],
     queryFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(`${backendUrl}/api/v1/members/me/profile`, {
-        credentials: 'include',
-      })
-
-      if (!response.ok) {
-        throw new Error('프로필을 불러오는데 실패했습니다')
-      }
-
-      const data = await response.json()
-
-      // Check for API error codes
-      if (data.code && data.code !== '1000' && data.code !== 1000) {
-        throw new Error(data.message || '프로필을 불러오는데 실패했습니다')
-      }
-
-      if (!data.result) {
-        throw new Error('프로필 데이터가 없습니다')
-      }
-
-      return data.result
+      return await api.get<UserProfile>('/api/v1/members/me/profile')
     },
     retry: 1, // Retry once on failure
   })
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(`${backendUrl}/api/v1/auth/logout`, {
-        method: 'POST',
-        credentials: 'include',
-      })
-      if (!response.ok) {
-        throw new Error('로그아웃 실패')
-      }
-      return response.json()
+      return await api.post('/api/v1/auth/logout')
     },
     onSuccess: () => {
       router.push('/login')

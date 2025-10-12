@@ -1,7 +1,6 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
 import { AuthMeApiResponse, OnboardingCheckResponse } from '@/types/auth'
 import { API_CODES } from '@/constants/apiCodes'
 import { ApiResponse } from '@/types/common'
@@ -14,13 +13,8 @@ const authKeys = {
 
 export function useAuth() {
   const queryClient = useQueryClient()
-  const router = useRouter()
 
-  const {
-    data: authData,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data: authData, isLoading } = useQuery({
     queryKey: authKeys.me(),
     queryFn: async (): Promise<AuthMeApiResponse> => {
       const backendUrl =
@@ -80,7 +74,7 @@ export function useAuth() {
 
         // 401 등의 에러여도 성공으로 처리
         return { success: true }
-      } catch (error) {
+      } catch {
         // 네트워크 에러여도 성공으로 처리
         return { success: true }
       }
@@ -136,13 +130,8 @@ export function useAuth() {
   return {
     user: authData?.result,
     isAuthenticated: authData?.code === API_CODES.SUCCESS && !!authData?.result,
-    isNewUser:
-      authData?.code === API_CODES.SUCCESS &&
-      !!authData?.result &&
-      onboardingData?.code === API_CODES.SUCCESS &&
-      !onboardingData?.result?.onboardingCompleted,
+    isOnboardingCompleted: onboardingData?.result?.onboardingCompleted ?? false,
     isLoading,
-    error,
     logout: logoutMutation.mutate,
     refreshToken: refreshTokenMutation.mutate,
     isLoggingOut: logoutMutation.isPending,

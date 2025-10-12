@@ -13,6 +13,7 @@ import UserSearch from '@/components/neighbors/UserSearch'
 import { socialKeys } from '@/types/social'
 import { createChatRoom } from '@/services/userSearchService'
 import type { CreateChatRequest } from '@/types/userSearch'
+import { api } from '@/lib/api'
 
 interface User {
   memberId: number
@@ -31,19 +32,13 @@ export default function FollowingTab() {
   const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
 
-  const backendUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-
   // 팔로잉 리스트 조회
   const { data: following, isLoading } = useQuery({
     queryKey: socialKeys.following(),
     queryFn: async () => {
-      const res = await fetch(`${backendUrl}/api/v1/members/me/following`, {
-        credentials: 'include',
-      })
-      if (!res.ok) throw new Error('Failed to fetch following')
-      const data = await res.json()
-      return data.result as User[]
+      const users = await api.get<User[]>('/api/v1/members/me/following')
+      // 팔로잉 리스트의 모든 유저는 이미 팔로우 상태
+      return users.map(user => ({ ...user, followed: true, isFollowing: true }))
     },
     enabled: !searchQuery,
   })
@@ -52,15 +47,9 @@ export default function FollowingTab() {
   const { data: searchResults, isLoading: searchLoading } = useQuery({
     queryKey: socialKeys.search(searchQuery),
     queryFn: async () => {
-      const res = await fetch(
-        `${backendUrl}/api/v1/members/search?nickname=${searchQuery}`,
-        {
-          credentials: 'include',
-        }
-      )
-      if (!res.ok) throw new Error('Failed to search users')
-      const data = await res.json()
-      return data.result as User[]
+      return await api.get<User[]>('/api/v1/members/search', {
+        nickname: searchQuery,
+      })
     },
     enabled: searchQuery.length >= 2,
   })

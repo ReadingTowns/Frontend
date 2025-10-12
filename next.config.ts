@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         hostname: 'image.aladin.co.kr',
         pathname: '/product/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'contents.kyobobook.co.kr',
+      },
     ],
   },
 }

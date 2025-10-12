@@ -12,6 +12,7 @@ import LocationStep from '@/components/onboarding/LocationStep'
 import PreferencesStep from '@/components/onboarding/PreferencesStep'
 import CompleteStep from '@/components/onboarding/CompleteStep'
 import { OnboardingStep, OnboardingData } from '@/types/onboarding'
+import { api } from '@/lib/api'
 
 // 온보딩 단계 정의
 const steps: OnboardingStep[] = [
@@ -26,7 +27,7 @@ const steps: OnboardingStep[] = [
 export default function OnboardingPage() {
   const router = useRouter()
   const { setHeaderContent } = useHeader()
-  const { isAuthenticated, isNewUser, isLoading } = useAuth()
+  const { isAuthenticated, isOnboardingCompleted, isLoading } = useAuth()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('start')
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -43,11 +44,11 @@ export default function OnboardingPage() {
     }
 
     // 이미 온보딩 완료한 경우 홈으로
-    if (isAuthenticated && !isNewUser) {
+    if (isAuthenticated && isOnboardingCompleted) {
       router.push('/home')
       return
     }
-  }, [isAuthenticated, isNewUser, isLoading, router])
+  }, [isAuthenticated, isOnboardingCompleted, isLoading, router])
 
   // Update header when step changes
   useEffect(() => {
@@ -110,35 +111,19 @@ export default function OnboardingPage() {
     setIsSubmitting(true)
 
     try {
-      const backendUrl =
-        process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
-      const response = await fetch(
-        `${backendUrl}/api/v1/members/onboarding/complete`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({
-            phoneNumber: onboardingData.phoneNumber,
-            latitude: onboardingData.latitude,
-            longitude: onboardingData.longitude,
-            nickname: onboardingData.nickname,
-            profileImage: onboardingData.profileImage,
-            availableTime:
-              onboardingData.availableTime === '나중에 설정하기'
-                ? null
-                : onboardingData.availableTime,
-          }),
-        }
-      )
+      await api.post('/api/v1/members/onboarding/complete', {
+        phoneNumber: onboardingData.phoneNumber,
+        latitude: onboardingData.latitude,
+        longitude: onboardingData.longitude,
+        nickname: onboardingData.nickname,
+        profileImage: onboardingData.profileImage,
+        availableTime:
+          onboardingData.availableTime === '나중에 설정하기'
+            ? null
+            : onboardingData.availableTime,
+      })
 
-      if (response.ok) {
-        router.push('/home')
-      } else {
-        throw new Error('온보딩 저장에 실패했습니다')
-      }
+      router.push('/home')
     } catch (error) {
       console.error('온보딩 완료 오류:', error)
       alert('온보딩 저장 중 오류가 발생했습니다. 다시 시도해주세요.')
@@ -241,8 +226,8 @@ export default function OnboardingPage() {
     }
   }
 
-  // 로딩 중이거나 리다이렉트 중일 때
-  if (isLoading || !isAuthenticated || !isNewUser) {
+  // 로딩 중일 때만 로딩 표시
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">

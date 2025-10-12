@@ -2,86 +2,30 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
 import {
   MagnifyingGlassIcon,
   ChatBubbleLeftIcon,
   UserCircleIcon,
-  BookOpenIcon,
 } from '@heroicons/react/24/outline'
-import type { Conversation } from '../ChatClient'
+import { useChatRoomList } from '@/hooks/useChatRoom'
 
 interface ChatListProps {
   selectedId: string | null
-  onSelectConversation: (conversationId: string) => void
 }
 
-export default function ChatList({
-  selectedId,
-  onSelectConversation,
-}: ChatListProps) {
+export default function ChatList({ selectedId }: ChatListProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
 
-  // Mock data for development
-  const mockConversations: Conversation[] = [
-    {
-      id: '1',
-      participants: [
-        { id: '1', name: '김독서', profileImage: undefined },
-        { id: '2', name: '나' },
-      ],
-      bookTitle: '미움받을 용기',
-      bookId: 'book1',
-      lastMessage: '내일 오후 2시에 만날까요?',
-      lastMessageTime: '방금 전',
-      unreadCount: 2,
-      status: 'active',
-    },
-    {
-      id: '2',
-      participants: [
-        { id: '3', name: '이책방', profileImage: undefined },
-        { id: '2', name: '나' },
-      ],
-      bookTitle: '사피엔스',
-      bookId: 'book2',
-      lastMessage: '책 상태가 정말 좋네요!',
-      lastMessageTime: '10분 전',
-      unreadCount: 0,
-      status: 'active',
-    },
-    {
-      id: '3',
-      participants: [
-        { id: '4', name: '박문학', profileImage: undefined },
-        { id: '2', name: '나' },
-      ],
-      bookTitle: '1984',
-      bookId: 'book3',
-      lastMessage: '교환 완료했습니다. 감사합니다!',
-      lastMessageTime: '어제',
-      unreadCount: 0,
-      status: 'completed',
-    },
-  ]
+  // Real API integration
+  const { data: chatRooms = [], isLoading } = useChatRoomList()
 
-  const { data: conversations = mockConversations, isLoading } = useQuery({
-    queryKey: ['conversations'],
-    queryFn: async () => {
-      // TODO: Replace with actual API call
-      return mockConversations
-    },
-    refetchInterval: 5000, // Poll every 5 seconds
-  })
-
-  const filteredConversations = conversations.filter(conv => {
+  const filteredConversations = chatRooms.filter(room => {
     if (!searchQuery) return true
     const query = searchQuery.toLowerCase()
     return (
-      conv.participants.some(p => p.name.toLowerCase().includes(query)) ||
-      conv.bookTitle?.toLowerCase().includes(query) ||
-      conv.lastMessage.toLowerCase().includes(query)
+      room.partnerName.toLowerCase().includes(query) ||
+      room.lastMessage?.toLowerCase().includes(query)
     )
   })
 
@@ -126,16 +70,13 @@ export default function ChatList({
             </div>
           </div>
         ) : (
-          filteredConversations.map(conversation => {
-            const otherParticipant = conversation.participants.find(
-              p => p.name !== '나'
-            )
-            const isSelected = selectedId === conversation.id
+          filteredConversations.map(room => {
+            const isSelected = selectedId === String(room.chatRoomId)
 
             return (
               <button
-                key={conversation.id}
-                onClick={() => router.push(`/social/${conversation.id}`)}
+                key={room.chatRoomId}
+                onClick={() => router.push(`/social/${room.chatRoomId}`)}
                 className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left ${
                   isSelected ? 'bg-primary-50' : ''
                 }`}
@@ -143,15 +84,7 @@ export default function ChatList({
                 <div className="flex items-start gap-3">
                   {/* Profile Image */}
                   <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    {otherParticipant?.profileImage ? (
-                      <img
-                        src={otherParticipant.profileImage}
-                        alt={otherParticipant.name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <UserCircleIcon className="w-7 h-7 text-gray-400" />
-                    )}
+                    <UserCircleIcon className="w-7 h-7 text-gray-400" />
                   </div>
 
                   {/* Content */}
@@ -159,34 +92,18 @@ export default function ChatList({
                     <div className="flex items-start justify-between mb-1">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">
-                          {otherParticipant?.name}
+                          {room.partnerName}
                         </h3>
-                        {conversation.bookTitle && (
-                          <p className="text-xs text-primary-600 mt-0.5 flex items-center gap-1">
-                            <BookOpenIcon className="w-3 h-3" />
-                            {conversation.bookTitle}
-                          </p>
-                        )}
                       </div>
                       <span className="text-xs text-gray-500">
-                        {conversation.lastMessageTime}
+                        {room.lastMessageTime || ''}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600 truncate pr-2">
-                        {conversation.lastMessage}
+                        {room.lastMessage || '메시지가 없습니다'}
                       </p>
-                      {conversation.unreadCount > 0 && (
-                        <span className="bg-primary-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
-                          {conversation.unreadCount}
-                        </span>
-                      )}
                     </div>
-                    {conversation.status === 'completed' && (
-                      <span className="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                        교환 완료
-                      </span>
-                    )}
                   </div>
                 </div>
               </button>
@@ -197,3 +114,5 @@ export default function ChatList({
     </div>
   )
 }
+
+ChatList.displayName = 'ChatList'
