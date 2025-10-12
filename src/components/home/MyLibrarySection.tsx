@@ -1,89 +1,78 @@
 'use client'
 
-import { LibraryBook } from '@/types/home'
-
-interface MyLibrarySectionProps {
-  books: LibraryBook[]
-  isLoading?: boolean
-}
+import { useMyLibraryBooks } from '@/hooks/useLibrary'
+import { LibraryBookCard } from '@/components/library/LibraryBookCard'
+import Link from 'next/link'
+import { BookOpenIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 
 /**
  * 나의 서재 섹션 컴포넌트
- * - 최근 도서 6권 표시 (2x3 그리드)
- * - 책 표지, 제목, 카테고리 태그 표시
- * - 클릭 시 서재 상세 페이지로 이동
+ * - 최근 도서 6권 표시 (3열 그리드)
+ * - LibraryBookCard 재사용으로 서재 탭과 동일한 UI
+ * - 클릭 시 책 상세 페이지로 이동
+ * - "전체 보기" 버튼으로 서재 페이지 이동
  */
-export default function MyLibrarySection({
-  books,
-  isLoading,
-}: MyLibrarySectionProps) {
+export default function MyLibrarySection() {
+  const { data, isLoading } = useMyLibraryBooks({ page: 0, size: 6 })
+  const books = data?.content || []
+
   if (isLoading) {
     return (
-      <div className="grid grid-cols-2 gap-4">
-        {[1, 2, 3, 4, 5, 6].map(i => (
-          <div key={i} className="animate-pulse">
-            <div className="aspect-[3/4] bg-gray-200 rounded-lg mb-2" />
-            <div className="h-4 bg-gray-200 rounded mb-1" />
-            <div className="h-3 bg-gray-200 rounded w-2/3" />
-          </div>
-        ))}
+      <div className="space-y-4">
+        {/* 로딩 스켈레톤 */}
+        <div className="grid grid-cols-3 gap-3">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="animate-pulse">
+              <div className="aspect-[2/3] bg-gray-200 rounded-lg mb-2" />
+              <div className="h-3 bg-gray-200 rounded mb-1" />
+              <div className="h-2 bg-gray-200 rounded w-2/3" />
+            </div>
+          ))}
+        </div>
       </div>
     )
   }
 
   if (!books || books.length === 0) {
     return (
-      <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-        <p className="text-gray-500 text-sm">아직 등록된 도서가 없습니다</p>
+      <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+        <BookOpenIcon className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+        <p className="text-gray-600 text-sm mb-4">
+          아직 등록된 도서가 없습니다
+        </p>
+        <Link href="/library/add">
+          <button className="bg-primary-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-500 transition-colors">
+            첫 책 등록하기
+          </button>
+        </Link>
       </div>
     )
   }
 
-  // 최대 6권만 표시
-  const displayBooks = books.slice(0, 6)
-
   return (
-    <div className="grid grid-cols-2 gap-4">
-      {displayBooks.map(book => (
-        <div
-          key={book.id}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
-        >
-          {/* 책 표지 */}
-          <div className="aspect-[3/4] bg-gray-200 rounded-lg mb-2 overflow-hidden">
-            {book.coverImage ? (
-              <img
-                src={book.coverImage}
-                alt={book.title}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                표지 없음
-              </div>
-            )}
-          </div>
+    <div className="space-y-4">
+      {/* 3열 그리드 - 서재 탭과 동일한 레이아웃 */}
+      <div className="grid grid-cols-3 gap-3">
+        {books.map(book => (
+          <LibraryBookCard
+            key={book.bookId}
+            book={book}
+            showActions={false} // 홈에서는 액션 버튼 숨김
+            isOwner={true}
+            compact={true} // 3열 모드
+          />
+        ))}
+      </div>
 
-          {/* 책 제목 */}
-          <h3 className="text-sm font-medium line-clamp-2 mb-1">
-            {book.title}
-          </h3>
-
-          {/* 카테고리 태그 */}
-          {book.categories && book.categories.length > 0 && (
-            <div className="flex flex-wrap gap-1">
-              {book.categories.slice(0, 2).map((category, index) => (
-                <span
-                  key={index}
-                  className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded"
-                >
-                  #{category}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+      {/* 전체 보기 버튼 */}
+      {books.length > 0 && (
+        <Link href="/library">
+          <button className="w-full py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+            <span>서재 전체 보기</span>
+            <ArrowRightIcon className="w-4 h-4" />
+          </button>
+        </Link>
+      )}
     </div>
   )
 }

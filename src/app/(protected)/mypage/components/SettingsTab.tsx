@@ -2,7 +2,6 @@ import { useRouter } from 'next/navigation'
 import {
   UserIcon,
   MapPinIcon,
-  BookOpenIcon,
   InformationCircleIcon,
   ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline'

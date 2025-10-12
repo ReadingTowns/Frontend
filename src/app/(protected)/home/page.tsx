@@ -7,12 +7,12 @@ import MyLibrarySection from '@/components/home/MyLibrarySection'
 import { HomeTab } from '@/types/home'
 import { useAuth } from '@/hooks/useAuth'
 import { useExchangedBooks } from '@/hooks/useExchangedBooks'
-import { useMyLibrary } from '@/hooks/useMyLibrary'
 
 /**
  * 홈 화면 페이지
  * - 상단 탭바로 "나의 리딩타운" / "추천 도서" 탭 전환
  * - 각 탭별 콘텐츠 영역 표시
+ * - 사용자 닉네임과 동네 정보를 동적으로 표시
  */
 export default function HomePage() {
   const [activeTab, setActiveTab] = useState<HomeTab>('myTown')
@@ -33,7 +33,7 @@ export default function HomePage() {
       {/* 탭별 콘텐츠 영역 */}
       <main className="max-w-[430px] mx-auto">
         {activeTab === 'myTown' ? (
-          <MyTownTab />
+          <MyTownTab nickname={nickname} />
         ) : (
           <RecommendationsTab nickname={nickname} />
         )}
@@ -45,17 +45,16 @@ export default function HomePage() {
 /**
  * "---님의 리딩타운" 탭 콘텐츠
  */
-function MyTownTab() {
+function MyTownTab({ nickname }: { nickname: string }) {
   const { data: exchangedBooks, isLoading: isLoadingExchanges } =
     useExchangedBooks()
-  const { data: libraryBooks, isLoading: isLoadingLibrary } = useMyLibrary(6)
 
   return (
     <div className="px-4 py-6 space-y-8">
-      {/* 1. 동네 인기 도서 Top 10 섹션 */}
+      {/* 1. 인기 도서 Top 10 섹션 */}
       <section>
         <div className="mb-4">
-          <h2 className="text-xl font-bold">가양동 인기 도서 Top 10</h2>
+          <h2 className="text-xl font-bold">인기 도서 Top 10</h2>
         </div>
         {/* TODO: PopularBooksSection 컴포넌트 추가 */}
         <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
@@ -66,7 +65,7 @@ function MyTownTab() {
       {/* 2. 추천 도서 섹션 */}
       <section>
         <div className="mb-4">
-          <h2 className="text-xl font-bold">---님에게 추천하는 도서</h2>
+          <h2 className="text-xl font-bold">{nickname}님에게 추천하는 도서</h2>
         </div>
         {/* TODO: RecommendedBooksPreview 컴포넌트 추가 */}
         <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
@@ -86,10 +85,7 @@ function MyTownTab() {
       {/* 4. 나의 서재 섹션 */}
       <section>
         <h2 className="text-xl font-bold mb-4">나의 서재</h2>
-        <MyLibrarySection
-          books={libraryBooks || []}
-          isLoading={isLoadingLibrary}
-        />
+        <MyLibrarySection />
       </section>
     </div>
   )

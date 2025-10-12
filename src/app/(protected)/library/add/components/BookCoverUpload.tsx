@@ -21,7 +21,6 @@ export default function BookCoverUpload({
 }: BookCoverUploadProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string>(imageUrl || '')
-  const [isUploading, setIsUploading] = useState(false)
 
   // imageUrl prop 변경 시 previewUrl 업데이트 (ISBN 검색 결과 반영)
   useEffect(() => {
@@ -138,20 +137,10 @@ export default function BookCoverUpload({
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm flex items-center justify-center gap-2"
           >
-            {isUploading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                업로드 중...
-              </>
-            ) : (
-              <>
-                <FolderIcon className="w-5 h-5" />
-                파일 선택
-              </>
-            )}
+            <FolderIcon className="w-5 h-5" />
+            파일 선택
           </button>
 
           <button
