@@ -6,6 +6,7 @@ import { LibraryBookCard } from '@/components/library/LibraryBookCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
 import { useState } from 'react'
+import RatingModal from '@/components/user/RatingModal'
 import {
   BookCardSkeleton,
   ProfileSkeleton,
@@ -39,6 +40,9 @@ export default function UserLibraryPage() {
     bookhouseId: number
     bookTitle: string
   } | null>(null)
+
+  // 별점 모달 상태 관리
+  const [showRatingModal, setShowRatingModal] = useState(false)
 
   // 교환 신청 (채팅룸 생성) mutation
   const createChatRoomMutation = useCreateChatRoom()
@@ -167,9 +171,18 @@ export default function UserLibraryPage() {
             )}
           </div>
           {!isOwnLibrary && (
-            <button className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors">
-              {profile.following ? '팔로잉' : '팔로우'}
-            </button>
+            <div className="flex flex-col gap-2">
+              <button className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors">
+                {profile.following ? '팔로잉' : '팔로우'}
+              </button>
+              <button
+                onClick={() => setShowRatingModal(true)}
+                className="px-4 py-2 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1"
+              >
+                <StarIcon className="w-4 h-4" />
+                별점 남기기
+              </button>
+            </div>
           )}
         </div>
 
@@ -229,6 +242,16 @@ export default function UserLibraryPage() {
           </>
         )}
       </section>
+
+      {/* 별점 모달 */}
+      {!isOwnLibrary && profile && (
+        <RatingModal
+          isOpen={showRatingModal}
+          onClose={() => setShowRatingModal(false)}
+          userId={userId}
+          userName={profile.nickname}
+        />
+      )}
 
       {/* 교환 신청 확인 모달 */}
       {showExchangeModal && selectedBook && (
