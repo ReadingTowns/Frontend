@@ -95,7 +95,7 @@ export interface CreateChatRoomRequest {
  * 채팅룸 생성 응답
  */
 export interface CreateChatRoomResponse {
-  chatRoomId: number
+  chatroomId: number // API returns lowercase 'r'
 }
 
 // ============================================================================

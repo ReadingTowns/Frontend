@@ -7,8 +7,6 @@ import {
   MapPinIcon,
   PaperAirplaneIcon,
   ClockIcon,
-  CalendarIcon,
-  BookOpenIcon,
 } from '@heroicons/react/24/outline'
 
 interface MessageInputProps {
@@ -130,17 +128,6 @@ export default function MessageInput({
             ) : (
               <PaperAirplaneIcon className="w-5 h-5" />
             )}
-          </button>
-        </div>
-
-        {/* Book Exchange Action Bar */}
-        <div className="mt-3 flex gap-2">
-          <button className="flex-1 py-2 px-3 bg-secondary-100 hover:bg-secondary-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-            <CalendarIcon className="w-4 h-4" />
-            교환 일정 제안
-          </button>
-          <button className="flex-1 py-2 px-3 bg-secondary-100 hover:bg-secondary-200 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-            <BookOpenIcon className="w-4 h-4" />책 정보 공유
           </button>
         </div>
       </div>
