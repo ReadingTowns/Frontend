@@ -192,6 +192,21 @@ export function useDeleteBookReview(bookId: string, reviewId: number) {
 }
 
 /**
+ * 책 리뷰 목록 조회
+ * GET /api/v1/books/{bookId}/reviews
+ */
+export function useBookReviews(bookId: string) {
+  return useQuery({
+    queryKey: ['book', 'reviews', bookId],
+    queryFn: async (): Promise<BookReviewItem[]> => {
+      return await api.get<BookReviewItem[]>(`/api/v1/books/${bookId}/reviews`)
+    },
+    enabled: !!bookId,
+    staleTime: 1000 * 60 * 5, // 5분
+  })
+}
+
+/**
  * 책 상세 페이지 통합 훅
  */
 export function useBookDetailPage(bookId: string) {

@@ -4,7 +4,8 @@ import { ApiResponse, PaginationInfo } from './common'
 
 // 기본 서재 책 정보 (리스트 조회시) - API 응답 형식
 export interface LibraryBook {
-  bookId: number // 책 id (API 응답)
+  bookhouseId: number // 책방 ID (API 응답) - 교환 요청에 사용
+  bookId: number // 책 ID (API 응답)
   bookImage: string // 이미지 조회 URI (API 응답)
   bookName: string // 책 제목 (API 응답)
   author: string // 작가 이름 (API 응답)

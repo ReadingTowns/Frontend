@@ -1,6 +1,6 @@
 // Social tab types and interfaces
 
-export type SocialTab = 'messages' | 'following' | 'explore'
+export type SocialTab = 'messages' | 'following' | 'followers' | 'explore'
 
 export interface SocialUser {
   memberId: string

@@ -16,6 +16,7 @@ export default function SocialTabs({
   const tabs = [
     { id: 'messages' as const, label: '채팅', badge: unreadCount > 0 },
     { id: 'following' as const, label: '팔로잉' },
+    { id: 'followers' as const, label: '팔로워' },
     { id: 'explore' as const, label: '둘러보기' },
   ]
 
