@@ -79,6 +79,7 @@ export function useAddLibraryBook() {
             ...old,
             content: [
               {
+                bookhouseId: 0, // 임시 ID (서버 응답 후 실제 ID로 대체)
                 bookId: Date.now(), // 임시 ID
                 bookImage: bookData.image,
                 bookName: bookData.title,
