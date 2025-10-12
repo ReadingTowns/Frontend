@@ -98,7 +98,7 @@ export default function UserSearchModal({
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="absolute inset-0 bg-black/50 transition-opacity"
         onClick={handleClose}
       />
 
