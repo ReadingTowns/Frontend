@@ -5,6 +5,7 @@ import { useUserLibraryBooks, useUserProfile } from '@/hooks/useLibrary'
 import { LibraryBookCard } from '@/components/library/LibraryBookCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
+import { useUserRating } from '@/hooks/useUserRating'
 import { useState } from 'react'
 import RatingModal from '@/components/user/RatingModal'
 import {
@@ -29,9 +30,15 @@ export default function UserLibraryPage() {
   const { data: profile, isLoading: profileLoading } = useUserProfile(userId)
   const { data: libraryData, isLoading: booksLoading } =
     useUserLibraryBooks(userId)
+  const { data: userRating } = useUserRating(userId)
 
   const books = libraryData?.content || []
   const isOwnLibrary = currentUser?.memberId?.toString() === userId
+
+  // 별점 데이터 우선순위: useUserRating hook > profile 데이터
+  const displayRating = userRating?.userRating ?? profile?.userRating
+  const displayRatingCount =
+    userRating?.userRatingCount ?? profile?.userRatingCount
 
   // 교환 신청 상태 관리
   const [showExchangeModal, setShowExchangeModal] = useState(false)
@@ -161,12 +168,12 @@ export default function UserLibraryPage() {
               <MapPinIcon className="w-4 h-4" />
               {profile.currentTown || '위치 정보 없음'}
             </p>
-            {profile.userRating && (
+            {displayRating && (
               <div className="flex items-center text-xs text-gray-500">
                 <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                <span className="ml-1">{profile.userRating.toFixed(1)}</span>
+                <span className="ml-1">{displayRating.toFixed(1)}</span>
                 <span className="mx-1">•</span>
-                <span>리뷰 {profile.userRatingCount}개</span>
+                <span>후기 {displayRatingCount}개</span>
               </div>
             )}
           </div>

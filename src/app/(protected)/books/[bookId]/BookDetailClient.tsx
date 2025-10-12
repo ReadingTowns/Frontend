@@ -206,7 +206,7 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
                             {ownerProfile.userRating.toFixed(1)}
                           </span>
                           <span className="mx-1">•</span>
-                          <span>리뷰 {ownerProfile.userRatingCount}개</span>
+                          <span>후기 {ownerProfile.userRatingCount}개</span>
                         </div>
                       )}
                     </div>
