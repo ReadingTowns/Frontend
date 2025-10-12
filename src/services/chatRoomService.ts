@@ -6,6 +6,8 @@ import type {
   ExchangeBooksInfo,
   CreateChatRoomRequest,
   CreateChatRoomResponse,
+  CreateExchangeRequestRequest,
+  CreateExchangeRequestResponse,
 } from '@/types/chatroom'
 
 // ============================================================================
@@ -83,6 +85,20 @@ export const createChatRoom = async (
 ): Promise<CreateChatRoomResponse> => {
   const response = await api.post<CreateChatRoomResponse>(
     '/api/v1/chatrooms',
+    data
+  )
+  return response
+}
+
+/**
+ * 교환 요청 생성
+ * POST /api/v1/exchange-requests
+ */
+export const createExchangeRequest = async (
+  data: CreateExchangeRequestRequest
+): Promise<CreateExchangeRequestResponse> => {
+  const response = await api.post<CreateExchangeRequestResponse>(
+    '/api/v1/exchange-requests',
     data
   )
   return response

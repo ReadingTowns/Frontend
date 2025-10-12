@@ -3,7 +3,6 @@
 import { useParams } from 'next/navigation'
 import { useUserLibraryBooks, useUserProfile } from '@/hooks/useLibrary'
 import { LibraryBookCard } from '@/components/library/LibraryBookCard'
-import { LibraryStats } from '@/components/library/LibraryStats'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
 import { useState } from 'react'
@@ -37,6 +36,7 @@ export default function UserLibraryPage() {
   const [showExchangeModal, setShowExchangeModal] = useState(false)
   const [selectedBook, setSelectedBook] = useState<{
     bookId: number
+    bookhouseId: number
     bookTitle: string
   } | null>(null)
 
@@ -44,8 +44,12 @@ export default function UserLibraryPage() {
   const createChatRoomMutation = useCreateChatRoom()
 
   // 교환 신청 핸들러
-  const handleExchangeRequest = (bookId: number, bookTitle: string) => {
-    setSelectedBook({ bookId, bookTitle })
+  const handleExchangeRequest = (
+    bookId: number,
+    bookhouseId: number,
+    bookTitle: string
+  ) => {
+    setSelectedBook({ bookId, bookhouseId, bookTitle })
     setShowExchangeModal(true)
   }
 
@@ -57,6 +61,7 @@ export default function UserLibraryPage() {
       {
         memberId: profile.memberId,
         bookId: selectedBook.bookId,
+        bookhouseId: selectedBook.bookhouseId,
       },
       {
         onSuccess: data => {
@@ -177,13 +182,6 @@ export default function UserLibraryPage() {
           </div>
         )}
       </div>
-
-      {/* Library Stats */}
-      <LibraryStats
-        totalBooks={books.length}
-        completionRate={Math.random() * 60 + 20} // 임시 완독률
-        isLoading={false}
-      />
 
       {/* Books Section */}
       <section>

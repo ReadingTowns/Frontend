@@ -29,15 +29,11 @@ export interface BookDetail {
 }
 
 /**
- * 책 리뷰 정보
+ * 책 리뷰 정보 (실제 API 응답)
  */
 export interface BookReviewItem {
-  reviewId: number
-  memberId: number
-  memberName: string
-  memberImage: string
+  authorName: string
   content: string
-  createdAt: string
 }
 
 /**

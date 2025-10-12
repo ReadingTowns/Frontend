@@ -175,7 +175,7 @@ export function useUserProfile(userId: string) {
   })
 }
 
-// 책 감상평 조회
+// 책 감상평 조회 (내 감상평)
 export function useBookReview(bookId: string) {
   return useQuery({
     queryKey: ['book', 'review', bookId],
@@ -191,6 +191,27 @@ export function useBookReview(bookId: string) {
       }
     },
     enabled: !!bookId,
+  })
+}
+
+// 특정 유저의 책 감상평 조회
+export function useUserBookReview(bookId: string, memberId: string) {
+  return useQuery({
+    queryKey: ['book', 'review', bookId, 'user', memberId],
+    queryFn: async (): Promise<BookReview | null> => {
+      try {
+        return await api.get<BookReview>(
+          `/api/v1/books/${bookId}/reviews/${memberId}`
+        )
+      } catch (error) {
+        // 404 에러는 감상평이 없는 경우이므로 null 반환
+        if (error instanceof Error && error.message.includes('404')) {
+          return null
+        }
+        throw error
+      }
+    },
+    enabled: !!bookId && !!memberId,
   })
 }
 

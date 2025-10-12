@@ -15,6 +15,7 @@ interface User {
   nickname: string
   profileImage: string
   followed?: boolean
+  following?: boolean // 검색 API 응답 필드
   currentTown?: string
   userRating?: number | null
   userRatingCount?: number
@@ -40,15 +41,15 @@ export default function UserCard({
   const queryClient = useQueryClient()
   const userId = user.memberId || user.id || 0
   const [isFollowing, setIsFollowing] = useState(
-    user.followed ?? user.isFollowing ?? false
+    user.followed ?? user.following ?? user.isFollowing ?? false
   )
 
   // Sync local state when user prop changes (after refetch)
   useEffect(() => {
-    setIsFollowing(user.followed ?? user.isFollowing ?? false)
-  }, [user.followed, user.isFollowing])
+    setIsFollowing(user.followed ?? user.following ?? user.isFollowing ?? false)
+  }, [user.followed, user.following, user.isFollowing])
 
-  // 팔로우/언팔로우 Mutation
+  // 팔로우/언팔로우 Mutation (낙관적 업데이트 적용)
   const followMutation = useMutation({
     mutationFn: async (follow: boolean) => {
       if (follow) {
@@ -58,39 +59,42 @@ export default function UserCard({
       }
     },
     onMutate: async follow => {
-      // Cancel any outgoing refetches
+      // 진행 중인 쿼리 취소 (낙관적 업데이트와 충돌 방지)
       await queryClient.cancelQueries({ queryKey: ['users'] })
 
-      // Snapshot the previous value
+      // 이전 데이터 스냅샷 저장 (롤백용)
       const previousData = queryClient.getQueriesData({ queryKey: ['users'] })
 
-      // Optimistically update all user lists
+      // 낙관적 업데이트: 모든 유저 리스트에서 해당 유저의 팔로우 상태 즉시 변경
       queryClient.setQueriesData<User[]>({ queryKey: ['users'] }, old => {
         if (!old) return old
         return old.map(u =>
           u.memberId === userId || u.id === userId
-            ? { ...u, followed: follow, isFollowing: follow }
+            ? { ...u, followed: follow, following: follow, isFollowing: follow }
             : u
         )
       })
 
-      // Update local state
+      // 로컬 상태도 즉시 업데이트 (빠른 UI 반응)
       setIsFollowing(follow)
 
       return { previousData }
     },
     onError: (_error, _follow, context) => {
-      // Rollback to previous data on error
+      // 에러 발생 시 이전 데이터로 롤백
       if (context?.previousData) {
         context.previousData.forEach(([queryKey, data]) => {
           queryClient.setQueryData(queryKey, data)
         })
       }
-      // Rollback local state
+      // 로컬 상태 롤백
       setIsFollowing(!isFollowing)
+
+      // 사용자에게 에러 알림
+      alert('팔로우 처리에 실패했습니다. 다시 시도해주세요.')
     },
     onSettled: () => {
-      // Always refetch after error or success to ensure consistency
+      // 성공/실패 관계없이 최종적으로 서버 데이터 재조회 (데이터 일관성 보장)
       queryClient.invalidateQueries({ queryKey: ['users'] })
     },
   })
@@ -105,7 +109,7 @@ export default function UserCard({
 
   return (
     <Link
-      href={`/neighbors/${userId}`}
+      href={`/library/${userId}`}
       className="block bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow"
     >
       <div className="flex items-start justify-between">

@@ -98,6 +98,23 @@ export interface CreateChatRoomResponse {
   chatroomId: number // API returns lowercase 'r'
 }
 
+/**
+ * 교환 요청 생성 요청
+ * POST /api/v1/exchange-requests
+ */
+export interface CreateExchangeRequestRequest {
+  chatroomId: number // API expects lowercase 'r' to match chatroom response
+  bookhouseId: number
+}
+
+/**
+ * 교환 요청 생성 응답
+ */
+export interface CreateExchangeRequestResponse {
+  exchangeStatusId: number
+  requestStatus: ExchangeStatus
+}
+
 // ============================================================================
 // UI State Types
 // ============================================================================

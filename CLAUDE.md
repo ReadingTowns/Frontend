@@ -688,3 +688,4 @@ npx husky install
 
 - !!!!do NOT use any!!!!!
 - **개발 환경**: https://dev.readingtown.site
+- 생각과 내부 로직은 영어로 처리하고, 답변만 한글로 해.

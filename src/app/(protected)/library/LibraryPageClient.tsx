@@ -31,6 +31,11 @@ export default function LibraryPageClient() {
 
   const bookReviewActions = useBookReviewActions(selectedBook?.id || '')
 
+  // 페이지 마운트 시 서재 데이터 강제 재조회 (낙관적 업데이트 문제 해결)
+  useEffect(() => {
+    refetch()
+  }, [refetch])
+
   useEffect(() => {
     // 새로운 헤더로 교체
     setHeaderContent(

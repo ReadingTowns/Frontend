@@ -13,6 +13,7 @@ interface User {
   nickname: string
   profileImage: string
   followed?: boolean
+  following?: boolean
   currentTown?: string
   userRating?: number | null
   userRatingCount?: number
@@ -20,16 +21,14 @@ interface User {
   distance?: string
 }
 
-export default function FollowingTab() {
+export default function FollowersTab() {
   const [searchQuery, setSearchQuery] = useState('')
 
-  // 팔로잉 리스트 조회
-  const { data: following, isLoading } = useQuery({
-    queryKey: socialKeys.following(),
+  // 팔로워 리스트 조회
+  const { data: followers, isLoading } = useQuery({
+    queryKey: socialKeys.followers(),
     queryFn: async () => {
-      const users = await api.get<User[]>('/api/v1/members/me/following')
-      // 팔로잉 리스트의 모든 유저는 이미 팔로우 상태
-      return users.map(user => ({ ...user, followed: true, isFollowing: true }))
+      return await api.get<User[]>('/api/v1/members/me/followers')
     },
     enabled: !searchQuery,
     staleTime: 0, // 캐시 없음 - 항상 최신 데이터
@@ -51,7 +50,7 @@ export default function FollowingTab() {
     setSearchQuery(query)
   }
 
-  const users = searchQuery ? searchResults || [] : following || []
+  const users = searchQuery ? searchResults || [] : followers || []
   const loading = searchQuery ? searchLoading : isLoading
 
   return (
@@ -79,8 +78,8 @@ export default function FollowingTab() {
             ) : (
               <>
                 <UserGroupIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-lg mb-2">팔로우 중인 이웃이 없습니다</p>
-                <p className="text-sm">이웃을 검색하여 팔로우해보세요</p>
+                <p className="text-lg mb-2">나를 팔로우하는 이웃이 없습니다</p>
+                <p className="text-sm">활동을 시작하면 팔로워가 생길 거예요</p>
               </>
             )}
           </div>
@@ -101,4 +100,4 @@ export default function FollowingTab() {
   )
 }
 
-FollowingTab.displayName = 'FollowingTab'
+FollowersTab.displayName = 'FollowersTab'

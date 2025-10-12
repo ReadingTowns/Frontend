@@ -10,11 +10,15 @@ import {
   getPartnerProfile,
   getExchangeBooks,
   createChatRoom,
+  createExchangeRequest,
   deleteChatRoom,
   completeExchange,
   returnExchange,
 } from '@/services/chatRoomService'
-import type { CreateChatRoomRequest } from '@/types/chatroom'
+import type {
+  CreateChatRoomRequest,
+  CreateChatRoomResponse,
+} from '@/types/chatroom'
 
 // ============================================================================
 // Query Keys
@@ -93,13 +97,40 @@ export const useExchangeBooks = (chatroomId: number) => {
 }
 
 /**
- * 채팅룸 생성 (교환 요청)
+ * 채팅룸 생성 + 교환 요청
+ * 1. 채팅룸 생성 (/api/v1/chatrooms)
+ * 2. 교환 요청 생성 (/api/v1/exchange-requests)
  */
 export const useCreateChatRoom = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (data: CreateChatRoomRequest) => createChatRoom(data),
+    mutationFn: async (data: {
+      memberId: number
+      bookId: number
+      bookhouseId: number
+    }): Promise<CreateChatRoomResponse> => {
+      // 1단계: 채팅룸 생성 (bookhouseId 제외)
+      const chatroomResponse = await createChatRoom({
+        memberId: data.memberId,
+        bookId: data.bookId,
+      })
+
+      // 2단계: 교환 요청 생성
+      // 서재 API는 bookhouseId를 포함하여 반환
+      // 교환 요청 API는 bookhouseId를 필요로 함
+      try {
+        await createExchangeRequest({
+          chatroomId: chatroomResponse.chatroomId,
+          bookhouseId: data.bookhouseId, // bookhouseId 사용
+        })
+      } catch (error) {
+        console.error('Failed to create exchange request:', error)
+        // 교환 요청 실패해도 채팅룸 ID는 반환 (채팅방은 생성됨)
+      }
+
+      return chatroomResponse
+    },
     onSuccess: () => {
       // 채팅룸 리스트 갱신
       queryClient.invalidateQueries({ queryKey: chatRoomKeys.list() })

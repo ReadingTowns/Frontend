@@ -12,7 +12,11 @@ interface LibraryBookCardProps {
   book: LibraryBook
   onDelete?: (bookId: string) => void
   onReviewClick?: (bookId: string, bookTitle: string) => void
-  onExchangeRequest?: (bookId: number, bookTitle: string) => void
+  onExchangeRequest?: (
+    bookId: number,
+    bookhouseId: number,
+    bookTitle: string
+  ) => void
   showActions?: boolean
   isOwner?: boolean
   compact?: boolean // 3열 모드
@@ -50,7 +54,12 @@ export function LibraryBookCard({
 
   const handleCardClick = () => {
     // 책 상세 페이지로 이동
-    router.push(`/books/${book.bookId}`)
+    // 다른 유저의 서재에서 온 경우 ownerId를 쿼리 파라미터로 전달
+    if (!isOwner && ownerId) {
+      router.push(`/books/${book.bookId}?from=library&ownerId=${ownerId}`)
+    } else {
+      router.push(`/books/${book.bookId}`)
+    }
   }
 
   const handleMenuButtonClick = (e: React.MouseEvent) => {
@@ -134,7 +143,7 @@ export function LibraryBookCard({
             onClick={e => {
               e.stopPropagation()
               if (onExchangeRequest && ownerId) {
-                onExchangeRequest(book.bookId, book.bookName)
+                onExchangeRequest(book.bookId, book.bookhouseId, book.bookName)
               }
             }}
             className="flex-1 text-xs bg-primary-400 text-white px-3 py-2 rounded-lg font-medium hover:bg-primary-500 transition-colors"
@@ -142,7 +151,7 @@ export function LibraryBookCard({
             교환 신청
           </button>
           <Link
-            href={`/bookstore/${book.bookId}`}
+            href={`/books/${book.bookId}?from=library&ownerId=${ownerId}`}
             onClick={e => e.stopPropagation()}
             className="flex-1 text-center text-xs border border-primary-400 text-primary-600 px-3 py-2 rounded-lg font-medium hover:bg-primary-50 transition-colors"
           >
