@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import type { MyBookReview } from '@/types/book'
 import {
   useCreateBookReview,
@@ -21,6 +22,7 @@ export default function BookReviewSection({
   myReview,
   isLoading,
 }: BookReviewSectionProps) {
+  const { showWarning, showError } = useSnackbar()
   const [isEditing, setIsEditing] = useState(false)
   const [reviewContent, setReviewContent] = useState(myReview?.content || '')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -31,7 +33,7 @@ export default function BookReviewSection({
 
   const handleSave = async () => {
     if (!reviewContent.trim()) {
-      alert('감상평을 입력해주세요.')
+      showWarning('감상평을 입력해주세요.')
       return
     }
 
@@ -44,7 +46,7 @@ export default function BookReviewSection({
       setIsEditing(false)
     } catch (error) {
       console.error('Failed to save review:', error)
-      alert('감상평 저장에 실패했습니다.')
+      showError('감상평 저장에 실패했습니다.')
     }
   }
 
@@ -55,7 +57,7 @@ export default function BookReviewSection({
       setReviewContent('')
     } catch (error) {
       console.error('Failed to delete review:', error)
-      alert('감상평 삭제에 실패했습니다.')
+      showError('감상평 삭제에 실패했습니다.')
     }
   }
 

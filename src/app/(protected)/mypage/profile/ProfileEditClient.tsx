@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import NicknameInput from '@/components/common/NicknameInput'
 import {
   ArrowLeftIcon,
@@ -27,6 +28,7 @@ export default function ProfileEditClient() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const { setHeaderContent } = useHeader()
+  const { showWarning, showError, showInfo } = useSnackbar()
 
   const [nickname, setNickname] = useState('')
   const [availableTime, setAvailableTime] = useState('')
@@ -86,7 +88,7 @@ export default function ProfileEditClient() {
     },
     onError: error => {
       console.error('프로필 수정 오류:', error)
-      alert('프로필 수정 중 오류가 발생했습니다')
+      showError('프로필 수정 중 오류가 발생했습니다')
     },
   })
 
@@ -94,7 +96,7 @@ export default function ProfileEditClient() {
     e.preventDefault()
 
     if (!nicknameValid) {
-      alert('닉네임 중복 확인을 해주세요')
+      showWarning('닉네임 중복 확인을 해주세요')
       return
     }
 
@@ -133,7 +135,7 @@ export default function ProfileEditClient() {
             <button
               type="button"
               className="text-primary-600 text-sm font-medium"
-              onClick={() => alert('이미지 업로드 기능은 준비 중입니다')}
+              onClick={() => showInfo('이미지 업로드 기능은 준비 중입니다')}
             >
               프로필 사진 변경
             </button>

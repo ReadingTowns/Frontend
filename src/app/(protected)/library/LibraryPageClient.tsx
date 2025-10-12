@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useMyLibraryBooks, useBookReviewActions } from '@/hooks/useLibrary'
 import { useHeader } from '@/contexts/HeaderContext'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import { LibraryBookCard } from '@/components/library/LibraryBookCard'
 import { BookReviewModal } from '@/components/library/BookReviewModal'
 import Link from 'next/link'
@@ -11,6 +12,7 @@ import { api } from '@/lib/api'
 
 export default function LibraryPageClient() {
   const { setHeaderContent } = useHeader()
+  const { showError } = useSnackbar()
   const [page, setPage] = useState(0)
   const [selectedBook, setSelectedBook] = useState<{
     id: string
@@ -62,7 +64,7 @@ export default function LibraryPageClient() {
         refetch() // 삭제 후 목록 새로고침
       } catch (error) {
         console.error('Failed to delete book:', error)
-        alert('책 삭제에 실패했습니다.')
+        showError('책 삭제에 실패했습니다.')
       }
     }
   }

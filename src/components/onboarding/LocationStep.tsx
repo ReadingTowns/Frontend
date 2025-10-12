@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { LocationStepProps } from '@/types/onboarding'
 import { MapPinIcon, MapIcon } from '@heroicons/react/24/solid'
 import { getTownByCoordinates } from '@/services/townService'
+import { useSnackbar } from '@/hooks/useSnackbar'
 
 export default function LocationStep({
   latitude,
@@ -9,6 +10,7 @@ export default function LocationStep({
   onLocationChange,
   onBack,
 }: LocationStepProps) {
+  const { showError } = useSnackbar()
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     latitude && longitude ? { lat: latitude, lng: longitude } : null
   )
@@ -19,7 +21,7 @@ export default function LocationStep({
     setIsLoading(true)
 
     if (!navigator.geolocation) {
-      alert('위치 서비스를 지원하지 않는 브라우저입니다')
+      showError('위치 서비스를 지원하지 않는 브라우저입니다')
       setIsLoading(false)
       return
     }
@@ -58,7 +60,7 @@ export default function LocationStep({
             break
         }
 
-        alert(errorMessage)
+        showError(errorMessage)
         setIsLoading(false)
       },
       {

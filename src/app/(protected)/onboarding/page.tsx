@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import ProgressHeader from '@/components/layout/ProgressHeader'
 import StartStep from '@/components/onboarding/StartStep'
 import PhoneStep from '@/components/onboarding/PhoneStep'
@@ -28,6 +29,7 @@ export default function OnboardingPage() {
   const router = useRouter()
   const { setHeaderContent } = useHeader()
   const { isAuthenticated, isOnboardingCompleted, isLoading } = useAuth()
+  const { showError } = useSnackbar()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('start')
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -126,7 +128,7 @@ export default function OnboardingPage() {
       router.push('/home')
     } catch (error) {
       console.error('온보딩 완료 오류:', error)
-      alert('온보딩 저장 중 오류가 발생했습니다. 다시 시도해주세요.')
+      showError('온보딩 저장 중 오류가 발생했습니다. 다시 시도해주세요.')
     } finally {
       setIsSubmitting(false)
     }

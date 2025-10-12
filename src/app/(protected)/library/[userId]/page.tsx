@@ -6,6 +6,7 @@ import { LibraryBookCard } from '@/components/library/LibraryBookCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
 import { useUserRating } from '@/hooks/useUserRating'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import { useState } from 'react'
 import RatingModal from '@/components/user/RatingModal'
 import {
@@ -26,6 +27,7 @@ export default function UserLibraryPage() {
   const params = useParams()
   const userId = params.userId as string
   const { user: currentUser } = useAuth()
+  const { showError } = useSnackbar()
 
   const { data: profile, isLoading: profileLoading } = useUserProfile(userId)
   const { data: libraryData, isLoading: booksLoading } =
@@ -82,7 +84,7 @@ export default function UserLibraryPage() {
         },
         onError: error => {
           console.error('Failed to create chatroom:', error)
-          alert('교환 신청에 실패했습니다. 다시 시도해주세요.')
+          showError('교환 신청에 실패했습니다. 다시 시도해주세요.')
         },
       }
     )

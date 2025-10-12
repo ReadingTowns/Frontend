@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import {
   XMarkIcon,
   MagnifyingGlassIcon,
@@ -26,6 +27,7 @@ export default function UserSearchModal({
 }: UserSearchModalProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { showError } = useSnackbar()
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
   const [selectedUser, setSelectedUser] = useState<SearchUser | null>(null)
@@ -64,7 +66,7 @@ export default function UserSearchModal({
     },
     onError: error => {
       console.error('Failed to create chat:', error)
-      alert('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
+      showError('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
     },
   })
 
