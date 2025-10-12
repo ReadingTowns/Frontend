@@ -32,9 +32,18 @@ export const getChatRoomMessages = async (
     before?: number
   }
 ): Promise<MessagesResponse> => {
+  // Remove undefined values from params
+  const cleanParams: Record<string, number> = {}
+  if (params?.limit !== undefined) {
+    cleanParams.limit = params.limit
+  }
+  if (params?.before !== undefined) {
+    cleanParams.before = params.before
+  }
+
   const response = await api.get<MessagesResponse>(
     `/api/v1/chatrooms/${chatroomId}/messages`,
-    params
+    Object.keys(cleanParams).length > 0 ? cleanParams : undefined
   )
   return response
 }

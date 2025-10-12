@@ -14,7 +14,7 @@ export interface User {
 
 // 온보딩 완료 여부 확인 API 응답
 export interface OnboardingCheckResponse {
-  onboardingCompleted: boolean
+  isOnboarded: boolean // 백엔드 필드명과 일치
 }
 
 // 인증 상태 확인 API 응답

@@ -1,18 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from 'next/navigation'
-import {
-  MagnifyingGlassIcon,
-  UserGroupIcon,
-  XCircleIcon,
-} from '@heroicons/react/24/outline'
+import { useQuery } from '@tanstack/react-query'
+import { MagnifyingGlassIcon, XCircleIcon } from '@heroicons/react/24/outline'
 import UserCard from '@/components/neighbors/UserCard'
 import UserSearch from '@/components/neighbors/UserSearch'
 import { socialKeys } from '@/types/social'
-import { createChatRoom } from '@/services/userSearchService'
-import type { CreateChatRequest } from '@/types/userSearch'
 import { api } from '@/lib/api'
 
 interface User {
@@ -28,8 +21,6 @@ interface User {
 }
 
 export default function ExploreTab() {
-  const router = useRouter()
-  const queryClient = useQueryClient()
   const [searchQuery, setSearchQuery] = useState('')
 
   // 추천 유저 조회
@@ -52,27 +43,6 @@ export default function ExploreTab() {
     },
     enabled: searchQuery.length >= 2,
   })
-
-  // 채팅방 생성 mutation
-  const createChatMutation = useMutation({
-    mutationFn: createChatRoom,
-    onSuccess: result => {
-      queryClient.invalidateQueries({ queryKey: socialKeys.conversations() })
-      router.push(`/social/${result.chatroomId}`)
-    },
-    onError: error => {
-      console.error('Failed to create chat:', error)
-      alert('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
-    },
-  })
-
-  const handleChatClick = (user: User) => {
-    const request: CreateChatRequest = {
-      partnerId: String(user.memberId),
-      initialMessage: `안녕하세요! ${user.nickname}님과 책에 대해 이야기하고 싶습니다.`,
-    }
-    createChatMutation.mutate(request)
-  }
 
   const handleSearch = (query: string) => {
     setSearchQuery(query)
@@ -118,7 +88,7 @@ export default function ExploreTab() {
                 key={user.memberId}
                 user={user}
                 showFollowButton
-                onChatClick={() => handleChatClick(user)}
+                showLibraryButton
               />
             ))}
           </div>

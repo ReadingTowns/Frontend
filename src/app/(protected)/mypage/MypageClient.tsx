@@ -2,8 +2,9 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { useHeader } from '@/contexts/HeaderContext'
+import { useAuth } from '@/hooks/useAuth'
 import ProfileSection from './components/ProfileSection'
 import SettingsTab from './components/SettingsTab'
 import LogoutModal from './components/LogoutModal'
@@ -24,6 +25,7 @@ interface UserProfile {
 export default function MypageClient() {
   const router = useRouter()
   const { setHeaderContent } = useHeader()
+  const { logout, isLoggingOut } = useAuth()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
   useEffect(() => {
@@ -50,21 +52,8 @@ export default function MypageClient() {
     retry: 1, // Retry once on failure
   })
 
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      return await api.post('/api/v1/auth/logout')
-    },
-    onSuccess: () => {
-      router.push('/login')
-    },
-    onError: error => {
-      console.error('로그아웃 에러:', error)
-      alert('로그아웃 중 오류가 발생했습니다.')
-    },
-  })
-
   const handleLogout = () => {
-    logoutMutation.mutate()
+    logout()
     setShowLogoutModal(false)
   }
 
@@ -114,7 +103,7 @@ export default function MypageClient() {
           isOpen={showLogoutModal}
           onClose={() => setShowLogoutModal(false)}
           onConfirm={handleLogout}
-          isLoading={logoutMutation.isPending}
+          isLoading={isLoggingOut}
         />
       )}
     </div>

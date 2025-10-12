@@ -33,7 +33,7 @@ export class ApiError extends Error {
  * Fetch options with credentials included by default
  */
 interface FetchOptions extends RequestInit {
-  params?: Record<string, string | number | boolean>
+  params?: Record<string, string | number | boolean | undefined>
 }
 
 /**
@@ -41,13 +41,16 @@ interface FetchOptions extends RequestInit {
  */
 function buildUrl(
   path: string,
-  params?: Record<string, string | number | boolean>
+  params?: Record<string, string | number | boolean | undefined>
 ): string {
   const url = new URL(path, BASE_URL)
 
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      url.searchParams.append(key, String(value))
+      // Skip undefined values
+      if (value !== undefined) {
+        url.searchParams.append(key, String(value))
+      }
     })
   }
 
@@ -74,11 +77,13 @@ async function parseResponse<T>(response: Response): Promise<T> {
     )
   }
 
-  if (data.code !== 1000) {
+  // Accept both 1000 (number) and "1000"/"2000" (string) as success codes
+  const successCodes = [1000, '1000', '2000', 2000]
+  if (!successCodes.includes(data.code)) {
     throw new ApiError(
       data.message || 'Request failed',
       response.status,
-      data.code
+      typeof data.code === 'string' ? parseInt(data.code) : data.code
     )
   }
 
@@ -128,7 +133,7 @@ export const api = {
    */
   get: <T = unknown>(
     path: string,
-    params?: Record<string, string | number | boolean>
+    params?: Record<string, string | number | boolean | undefined>
   ) => apiClient<T>(path, { method: 'GET', params }),
 
   /**

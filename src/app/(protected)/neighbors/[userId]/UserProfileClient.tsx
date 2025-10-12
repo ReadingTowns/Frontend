@@ -125,16 +125,13 @@ export default function UserProfileClient({ userId }: UserProfileClientProps) {
 
       {/* 액션 버튼들 */}
       <div className="bg-white px-4 py-3 border-b border-gray-200">
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 gap-2">
           <FollowButton
             isFollowing={profile.following}
             isLoading={followMutation.isPending}
             onClick={() => followMutation.mutate(!profile.following)}
             size="md"
           />
-          <button className="px-4 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-            채팅하기
-          </button>
           <Link
             href={`/library/${userId}`}
             className="px-4 py-1.5 text-sm font-medium text-center text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"

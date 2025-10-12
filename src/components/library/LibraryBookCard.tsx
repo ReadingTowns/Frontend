@@ -12,18 +12,22 @@ interface LibraryBookCardProps {
   book: LibraryBook
   onDelete?: (bookId: string) => void
   onReviewClick?: (bookId: string, bookTitle: string) => void
+  onExchangeRequest?: (bookId: number, bookTitle: string) => void
   showActions?: boolean
   isOwner?: boolean
   compact?: boolean // 3열 모드
+  ownerId?: number // 책 주인의 memberId
 }
 
 export function LibraryBookCard({
   book,
   onDelete,
   onReviewClick,
+  onExchangeRequest,
   showActions = true,
   isOwner = true,
   compact = false,
+  ownerId,
 }: LibraryBookCardProps) {
   const router = useRouter()
   const [showMenu, setShowMenu] = useState(false)
@@ -125,10 +129,22 @@ export function LibraryBookCard({
 
       {/* Action Buttons for non-owner */}
       {!isOwner && (
-        <div className="mt-2 pt-2 border-t border-gray-100">
+        <div className="mt-2 pt-2 border-t border-gray-100 flex gap-2">
+          <button
+            onClick={e => {
+              e.stopPropagation()
+              if (onExchangeRequest && ownerId) {
+                onExchangeRequest(book.bookId, book.bookName)
+              }
+            }}
+            className="flex-1 text-xs bg-primary-400 text-white px-3 py-2 rounded-lg font-medium hover:bg-primary-500 transition-colors"
+          >
+            교환 신청
+          </button>
           <Link
             href={`/bookstore/${book.bookId}`}
-            className="text-xs text-primary-600 hover:text-primary-700 font-medium"
+            onClick={e => e.stopPropagation()}
+            className="flex-1 text-center text-xs border border-primary-400 text-primary-600 px-3 py-2 rounded-lg font-medium hover:bg-primary-50 transition-colors"
           >
             자세히 보기
           </Link>

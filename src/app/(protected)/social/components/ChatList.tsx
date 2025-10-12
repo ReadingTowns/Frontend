@@ -71,12 +71,12 @@ export default function ChatList({ selectedId }: ChatListProps) {
           </div>
         ) : (
           filteredConversations.map(room => {
-            const isSelected = selectedId === String(room.chatRoomId)
+            const isSelected = selectedId === String(room.chatroomId)
 
             return (
               <button
-                key={room.chatRoomId}
-                onClick={() => router.push(`/social/${room.chatRoomId}`)}
+                key={room.chatroomId}
+                onClick={() => router.push(`/chat/${room.chatroomId}`)}
                 className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left ${
                   isSelected ? 'bg-primary-50' : ''
                 }`}
