@@ -116,6 +116,26 @@ export interface CreateExchangeRequestResponse {
 }
 
 // ============================================================================
+// WebSocket Types
+// ============================================================================
+
+/**
+ * WebSocket 메시지 송신 페이로드
+ */
+export interface WebSocketSendPayload {
+  roomId: number
+  message: string
+}
+
+/**
+ * WebSocket 메시지 수신 페이로드
+ */
+export interface WebSocketReceivePayload {
+  senderId: number
+  message: string
+}
+
+// ============================================================================
 // UI State Types
 // ============================================================================
 

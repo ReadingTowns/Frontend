@@ -8,6 +8,7 @@ import {
   usePartnerProfile,
   useExchangeBooks,
 } from '@/hooks/useChatRoom'
+import { useWebSocket } from '@/hooks/useWebSocket'
 import type { Message } from '@/types/chatroom'
 import MessageBubble from '../components/MessageBubble'
 import MessageInput from '../components/MessageInput'
@@ -42,6 +43,24 @@ export default function ChatRoomClient({
   // Get current user ID from first page response
   const myMemberId = messagesData?.pages[0]?.myMemberId
 
+  // WebSocket 연결 및 실시간 메시지
+  const { sendMessage: sendWebSocketMessage, isConnected } = useWebSocket({
+    chatroomId,
+    onMessageReceived: message => {
+      console.log('📨 New message received:', message)
+      // 자동으로 TanStack Query 캐시 업데이트됨 (useWebSocket 훅 내부)
+    },
+    onError: error => {
+      console.error('WebSocket error:', error)
+    },
+    onConnect: () => {
+      console.log('✅ WebSocket connected')
+    },
+    onDisconnect: () => {
+      console.log('🔌 WebSocket disconnected')
+    },
+  })
+
   // Set header with partner info
   useEffect(() => {
     if (!partner) return
@@ -54,7 +73,7 @@ export default function ChatRoomClient({
         >
           <span className="text-xl">←</span>
         </button>
-        <div>
+        <div className="flex-1">
           <h1 className="text-xl font-bold">{partner.nickname}</h1>
           {exchangeBooks && exchangeBooks[0]?.myBook?.bookName && (
             <p className="text-xs text-primary-600 flex items-center gap-1">
@@ -63,13 +82,25 @@ export default function ChatRoomClient({
             </p>
           )}
         </div>
+        {/* WebSocket 연결 상태 표시 */}
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? 'bg-green-500' : 'bg-gray-300'
+            }`}
+            title={isConnected ? '연결됨' : '연결 끊김'}
+          />
+          <span className="text-xs text-gray-500">
+            {isConnected ? '실시간' : '오프라인'}
+          </span>
+        </div>
       </header>
     )
 
     return () => {
       setHeaderContent(null)
     }
-  }, [setHeaderContent, router, partner, exchangeBooks])
+  }, [setHeaderContent, router, partner, exchangeBooks, isConnected])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -87,8 +118,12 @@ export default function ChatRoomClient({
 
   const handleSendMessage = (content: string) => {
     if (content.trim()) {
-      // TODO: Implement message sending API
-      console.log('Sending message:', content)
+      try {
+        sendWebSocketMessage(content)
+      } catch (error) {
+        console.error('Failed to send message:', error)
+        alert('메시지 전송에 실패했습니다. 연결 상태를 확인해주세요.')
+      }
     }
   }
 
@@ -165,7 +200,10 @@ export default function ChatRoomClient({
       </div>
 
       {/* Message Input */}
-      <MessageInput onSendMessage={handleSendMessage} isLoading={false} />
+      <MessageInput
+        onSendMessage={handleSendMessage}
+        isLoading={!isConnected}
+      />
     </div>
   )
 }
