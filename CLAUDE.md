@@ -19,7 +19,7 @@ npm run dev      # Start development server with Turbopack
 ```
 
 개발 서버가 시작되면 다음 URL로 접속하세요:
-- **개발 환경**: https://dev.readingtown.site (권장)
+- **개발 환경**: https://dev.readingtown.site
 - ~~localhost:3000~~ (쿠키 인증 불가 - 사용 금지)
 
 **쿠키 인증 문제**:
