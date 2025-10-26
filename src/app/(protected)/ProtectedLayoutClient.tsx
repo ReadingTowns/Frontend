@@ -21,9 +21,9 @@ export default function ProtectedLayoutClient({
   const hideBottomNavigation = pathname === '/onboarding'
 
   return (
-    <div className="min-h-screen-safe flex flex-col">
+    <div className="h-screen-safe flex flex-col overflow-hidden">
       {headerContent}
-      <main className="flex flex-col flex-1 max-w-[430px] mx-auto overflow-y-auto w-full">
+      <main className="flex flex-col flex-1 max-w-[430px] mx-auto w-full overflow-hidden">
         {children}
       </main>
       {!hideBottomNavigation && <BottomNavigation />}

@@ -162,9 +162,9 @@ export default function ChatRoomClient({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-50">
+    <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0">
         {messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center h-full">
             <div className="text-center py-12">
