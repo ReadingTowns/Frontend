@@ -54,9 +54,10 @@ export const useWebSocket = ({
       }>(chatRoomKeys.messages(chatroomId), oldData => {
         if (!oldData) return oldData
 
-        // ✅ FIX: crypto.randomUUID()로 고유 ID 보장 (React Key 중복 방지)
+        // ✅ FIX: 음수 타임스탬프로 고유 ID 보장 (React Key 중복 방지)
+        // 음수를 사용하여 백엔드 ID(양수)와 구분, Date.now()로 고유성 보장
         const newMessage: Message = {
-          messageId: `temp-${crypto.randomUUID()}`,
+          messageId: -Date.now(),
           senderId: message.senderId,
           messageText: message.message,
           sentTime: new Date().toISOString(),
