@@ -38,12 +38,14 @@ export const chatRoomKeys = {
 
 /**
  * 채팅룸 리스트 조회
+ * 3초마다 자동 갱신 (폴링)
  */
 export const useChatRoomList = () => {
   return useQuery({
     queryKey: chatRoomKeys.list(),
     queryFn: getChatRoomList,
     staleTime: 0, // 캐시 없음 - 항상 최신 데이터
+    refetchInterval: 3000, // 3초마다 자동 refetch
   })
 }
 
@@ -67,7 +69,7 @@ export const useChatRoomMessages = (chatroomId: number, limit = 50) => {
       }
       return undefined
     },
-    staleTime: 1000 * 60, // 1분간 캐시 유지
+    staleTime: 0, // 캐시 없음 - 항상 최신 데이터 (채팅방 진입 시 새 메시지 즉시 표시)
   })
 }
 

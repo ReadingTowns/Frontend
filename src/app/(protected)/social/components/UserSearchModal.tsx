@@ -61,7 +61,7 @@ export default function UserSearchModal({
       queryClient.invalidateQueries({ queryKey: ['conversations'] })
 
       // Navigate to the new chat room
-      router.push(`/social/${result.chatroomId}`)
+      router.push(`/chat/${result.chatroomId}`)
       onClose()
     },
     onError: error => {

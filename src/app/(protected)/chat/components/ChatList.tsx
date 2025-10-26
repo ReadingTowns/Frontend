@@ -1,16 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useQuery } from '@tanstack/react-query'
 import {
   MagnifyingGlassIcon,
   ChatBubbleLeftIcon,
   UserCircleIcon,
   BookOpenIcon,
 } from '@heroicons/react/24/outline'
+import { useChatRoomList } from '@/hooks/useChatRoom'
+import { useGlobalWebSocket } from '@/hooks/useGlobalWebSocket'
 import UserSearchModal from './UserSearchModal'
-import type { Conversation } from '../ChatClient'
 
 interface ChatListProps {
   selectedId: string | null
@@ -22,67 +22,69 @@ export default function ChatList({ selectedId }: ChatListProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false)
 
-  // Mock data for development
-  const mockConversations: Conversation[] = [
-    {
-      id: '1',
-      participants: [
-        { id: '1', name: '김독서', profileImage: undefined },
-        { id: '2', name: '나' },
-      ],
-      bookTitle: '미움받을 용기',
-      bookId: 'book1',
-      lastMessage: '내일 오후 2시에 만날까요?',
-      lastMessageTime: '방금 전',
-      unreadCount: 2,
-      status: 'active',
-    },
-    {
-      id: '2',
-      participants: [
-        { id: '3', name: '이책방', profileImage: undefined },
-        { id: '2', name: '나' },
-      ],
-      bookTitle: '사피엔스',
-      bookId: 'book2',
-      lastMessage: '책 상태가 정말 좋네요!',
-      lastMessageTime: '10분 전',
-      unreadCount: 0,
-      status: 'active',
-    },
-    {
-      id: '3',
-      participants: [
-        { id: '4', name: '박문학', profileImage: undefined },
-        { id: '2', name: '나' },
-      ],
-      bookTitle: '1984',
-      bookId: 'book3',
-      lastMessage: '교환 완료했습니다. 감사합니다!',
-      lastMessageTime: '어제',
-      unreadCount: 0,
-      status: 'completed',
-    },
-  ]
+  // 글로벌 WebSocket 연결 및 이벤트 리스닝 (새 메시지 감지 → 자동 갱신)
+  useGlobalWebSocket()
 
-  const { data: conversations = mockConversations, isLoading } = useQuery({
-    queryKey: ['conversations'],
-    queryFn: async () => {
-      // TODO: Replace with actual API call
-      return mockConversations
-    },
-    refetchInterval: 5000, // Poll every 5 seconds
-  })
+  // 실제 API 호출
+  const { data: chatRooms = [], isLoading } = useChatRoomList()
 
-  const filteredConversations = conversations.filter(conv => {
-    if (!searchQuery) return true
-    const query = searchQuery.toLowerCase()
-    return (
-      conv.participants.some(p => p.name.toLowerCase().includes(query)) ||
-      conv.bookTitle?.toLowerCase().includes(query) ||
-      conv.lastMessage.toLowerCase().includes(query)
-    )
-  })
+  // 검색 필터링 + 최신순 정렬 (useMemo로 최적화)
+  const sortedAndFilteredChatRooms = useMemo(() => {
+    // 1. 검색 필터링
+    let filtered = chatRooms
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      filtered = chatRooms.filter(
+        room =>
+          room.partnerName.toLowerCase().includes(query) ||
+          room.lastMessage?.toLowerCase().includes(query)
+      )
+    }
+
+    // 2. 최신순 정렬 (lastMessageTime 기준)
+    const sorted = [...filtered].sort((a, b) => {
+      // lastMessageTime이 없는 경우 맨 뒤로
+      if (!a.lastMessageTime) return 1
+      if (!b.lastMessageTime) return -1
+
+      // 안전한 날짜 파싱 (NaN 방지)
+      const timeA = new Date(a.lastMessageTime).getTime()
+      const timeB = new Date(b.lastMessageTime).getTime()
+
+      // 파싱 실패 시 (NaN) 맨 뒤로
+      if (isNaN(timeA)) {
+        console.warn(
+          `[ChatList] Invalid date format for ${a.partnerName}:`,
+          a.lastMessageTime
+        )
+        return 1
+      }
+      if (isNaN(timeB)) {
+        console.warn(
+          `[ChatList] Invalid date format for ${b.partnerName}:`,
+          b.lastMessageTime
+        )
+        return -1
+      }
+
+      // 최신순 정렬 (큰 숫자가 더 최신)
+      return timeB - timeA
+    })
+
+    // 개발 환경에서만 정렬 결과 로깅
+    if (process.env.NODE_ENV === 'development' && sorted.length > 0) {
+      console.log(
+        '[ChatList] Sorted chat rooms:',
+        sorted.map(room => ({
+          name: room.partnerName,
+          time: room.lastMessageTime,
+          parsed: new Date(room.lastMessageTime || '').toLocaleString('ko-KR'),
+        }))
+      )
+    }
+
+    return sorted
+  }, [chatRooms, searchQuery])
 
   if (isLoading) {
     return (
@@ -114,7 +116,7 @@ export default function ChatList({ selectedId }: ChatListProps) {
 
       {/* Conversation List */}
       <div className="flex-1 overflow-y-auto">
-        {filteredConversations.length === 0 ? (
+        {sortedAndFilteredChatRooms.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-8">
             <div className="text-center">
               <ChatBubbleLeftIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -125,16 +127,13 @@ export default function ChatList({ selectedId }: ChatListProps) {
             </div>
           </div>
         ) : (
-          filteredConversations.map(conversation => {
-            const otherParticipant = conversation.participants.find(
-              p => p.name !== '나'
-            )
-            const isSelected = selectedId === conversation.id
+          sortedAndFilteredChatRooms.map(chatRoom => {
+            const isSelected = selectedId === String(chatRoom.chatroomId)
 
             return (
               <button
-                key={conversation.id}
-                onClick={() => router.push(`/chat/${conversation.id}`)}
+                key={chatRoom.chatroomId}
+                onClick={() => router.push(`/chat/${chatRoom.chatroomId}`)}
                 className={`w-full p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors text-left ${
                   isSelected ? 'bg-primary-50' : ''
                 }`}
@@ -142,15 +141,7 @@ export default function ChatList({ selectedId }: ChatListProps) {
                 <div className="flex items-start gap-3">
                   {/* Profile Image */}
                   <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    {otherParticipant?.profileImage ? (
-                      <img
-                        src={otherParticipant.profileImage}
-                        alt={otherParticipant.name}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <UserCircleIcon className="w-7 h-7 text-gray-400" />
-                    )}
+                    <UserCircleIcon className="w-7 h-7 text-gray-400" />
                   </div>
 
                   {/* Content */}
@@ -158,34 +149,34 @@ export default function ChatList({ selectedId }: ChatListProps) {
                     <div className="flex items-start justify-between mb-1">
                       <div className="flex-1">
                         <h3 className="font-medium text-gray-900">
-                          {otherParticipant?.name}
+                          {chatRoom.partnerName}
                         </h3>
-                        {conversation.bookTitle && (
-                          <p className="text-xs text-primary-600 mt-0.5 flex items-center gap-1">
-                            <BookOpenIcon className="w-3 h-3" />
-                            {conversation.bookTitle}
-                          </p>
+                        {(chatRoom.myBookImage ||
+                          chatRoom.partnerBookImage) && (
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <BookOpenIcon className="w-3 h-3 text-primary-600" />
+                            <span className="text-xs text-primary-600">
+                              책 교환 중
+                            </span>
+                          </div>
                         )}
                       </div>
                       <span className="text-xs text-gray-500">
-                        {conversation.lastMessageTime}
+                        {chatRoom.lastMessageTime
+                          ? new Date(
+                              chatRoom.lastMessageTime
+                            ).toLocaleDateString('ko-KR', {
+                              month: 'short',
+                              day: 'numeric',
+                            })
+                          : ''}
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-gray-600 truncate pr-2">
-                        {conversation.lastMessage}
+                        {chatRoom.lastMessage || '메시지가 없습니다'}
                       </p>
-                      {conversation.unreadCount > 0 && (
-                        <span className="bg-primary-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
-                          {conversation.unreadCount}
-                        </span>
-                      )}
                     </div>
-                    {conversation.status === 'completed' && (
-                      <span className="inline-block mt-1 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                        교환 완료
-                      </span>
-                    )}
                   </div>
                 </div>
               </button>
