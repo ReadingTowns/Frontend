@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/hooks/useChatRoom'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import type { Message } from '@/types/chatroom'
+import type { ChatMessage } from '@/services/websocketService'
 import MessageBubble from '../components/MessageBubble'
 import MessageInput from '../components/MessageInput'
 import {
@@ -43,22 +44,31 @@ export default function ChatRoomClient({
   // Get current user ID from first page response
   const myMemberId = messagesData?.pages[0]?.myMemberId
 
+  // ✅ FIX: useCallback으로 안정적인 콜백 참조 유지
+  const handleMessageReceived = useCallback((message: ChatMessage) => {
+    console.log('📨 New message received:', message)
+    // 자동으로 TanStack Query 캐시 업데이트됨 (useWebSocket 훅 내부)
+  }, [])
+
+  const handleError = useCallback((error: Event) => {
+    console.error('WebSocket error:', error)
+  }, [])
+
+  const handleConnect = useCallback(() => {
+    console.log('✅ WebSocket connected')
+  }, [])
+
+  const handleDisconnect = useCallback(() => {
+    console.log('🔌 WebSocket disconnected')
+  }, [])
+
   // WebSocket 연결 및 실시간 메시지
   const { sendMessage: sendWebSocketMessage, isConnected } = useWebSocket({
     chatroomId,
-    onMessageReceived: message => {
-      console.log('📨 New message received:', message)
-      // 자동으로 TanStack Query 캐시 업데이트됨 (useWebSocket 훅 내부)
-    },
-    onError: error => {
-      console.error('WebSocket error:', error)
-    },
-    onConnect: () => {
-      console.log('✅ WebSocket connected')
-    },
-    onDisconnect: () => {
-      console.log('🔌 WebSocket disconnected')
-    },
+    onMessageReceived: handleMessageReceived,
+    onError: handleError,
+    onConnect: handleConnect,
+    onDisconnect: handleDisconnect,
   })
 
   // Set header with partner info
@@ -107,8 +117,7 @@ export default function ChatRoomClient({
   }
 
   // Extract all messages from infinite query pages
-  const messages =
-    messagesData?.pages.flatMap(page => page.message).reverse() || []
+  const messages = messagesData?.pages.flatMap(page => page.message) || []
 
   useEffect(() => {
     if (messages.length > 0) {

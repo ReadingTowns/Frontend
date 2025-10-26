@@ -23,6 +23,20 @@ export const useWebSocket = ({
   const isConnecting = useRef(false)
   const [isConnected, setIsConnected] = useState(false)
 
+  // ✅ FIX: useRef로 안정적인 콜백 참조 유지 (의존성 체인 끊기)
+  const onMessageReceivedRef = useRef(onMessageReceived)
+  const onErrorRef = useRef(onError)
+  const onConnectRef = useRef(onConnect)
+  const onDisconnectRef = useRef(onDisconnect)
+
+  // 최신 콜백으로 ref 업데이트
+  useEffect(() => {
+    onMessageReceivedRef.current = onMessageReceived
+    onErrorRef.current = onError
+    onConnectRef.current = onConnect
+    onDisconnectRef.current = onDisconnect
+  }, [onMessageReceived, onError, onConnect, onDisconnect])
+
   /**
    * 수신된 메시지를 TanStack Query 캐시에 추가
    */
@@ -30,8 +44,8 @@ export const useWebSocket = ({
     (message: ChatMessage) => {
       console.log('📨 Handling received message:', message)
 
-      // 커스텀 핸들러 실행
-      onMessageReceived?.(message)
+      // 커스텀 핸들러 실행 (ref를 통해 최신 버전 호출)
+      onMessageReceivedRef.current?.(message)
 
       // TanStack Query 캐시 업데이트 (Optimistic UI)
       queryClient.setQueryData<{
@@ -40,8 +54,9 @@ export const useWebSocket = ({
       }>(chatRoomKeys.messages(chatroomId), oldData => {
         if (!oldData) return oldData
 
+        // ✅ FIX: crypto.randomUUID()로 고유 ID 보장 (React Key 중복 방지)
         const newMessage: Message = {
-          messageId: Date.now(), // 임시 ID
+          messageId: `temp-${crypto.randomUUID()}`,
           senderId: message.senderId,
           messageText: message.message,
           sentTime: new Date().toISOString(),
@@ -61,7 +76,7 @@ export const useWebSocket = ({
         }
       })
     },
-    [chatroomId, onMessageReceived, queryClient]
+    [chatroomId, queryClient] // ✅ FIX: 의존성 최소화 (onMessageReceived 제거)
   )
 
   /**
@@ -90,31 +105,25 @@ export const useWebSocket = ({
         // 메시지 수신 핸들러 등록
         cleanupMessage = websocketService.onMessage(handleMessageReceived)
 
-        // 에러 핸들러 등록
-        if (onError) {
-          cleanupError = websocketService.onError(error => {
-            console.error('WebSocket error:', error)
-            onError(error)
-          })
-        }
+        // 에러 핸들러 등록 (ref를 통해 최신 버전 호출)
+        cleanupError = websocketService.onError(error => {
+          console.error('WebSocket error:', error)
+          onErrorRef.current?.(error)
+        })
 
-        // 연결 핸들러 등록
-        if (onConnect) {
-          cleanupConnect = websocketService.onConnect(() => {
-            console.log('✅ Connected')
-            setIsConnected(true)
-            onConnect()
-          })
-        }
+        // 연결 핸들러 등록 (ref를 통해 최신 버전 호출)
+        cleanupConnect = websocketService.onConnect(() => {
+          console.log('✅ Connected')
+          setIsConnected(true)
+          onConnectRef.current?.()
+        })
 
-        // 연결 해제 핸들러 등록
-        if (onDisconnect) {
-          cleanupDisconnect = websocketService.onDisconnect(() => {
-            console.log('🔌 Disconnected')
-            setIsConnected(false)
-            onDisconnect()
-          })
-        }
+        // 연결 해제 핸들러 등록 (ref를 통해 최신 버전 호출)
+        cleanupDisconnect = websocketService.onDisconnect(() => {
+          console.log('🔌 Disconnected')
+          setIsConnected(false)
+          onDisconnectRef.current?.()
+        })
       } catch (error) {
         console.error('Failed to connect WebSocket:', error)
         setIsConnected(false)
@@ -133,7 +142,7 @@ export const useWebSocket = ({
       cleanupConnect?.()
       cleanupDisconnect?.()
     }
-  }, [chatroomId, handleMessageReceived, onError, onConnect, onDisconnect])
+  }, [chatroomId, handleMessageReceived]) // ✅ FIX: 의존성 최소화 (ref 사용으로 콜백 제거)
 
   /**
    * 메시지 전송
