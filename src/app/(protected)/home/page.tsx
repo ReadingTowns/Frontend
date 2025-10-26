@@ -4,6 +4,7 @@ import { useState } from 'react'
 import HomeTabs from '@/components/home/HomeTabs'
 import ExchangedBooksSection from '@/components/home/ExchangedBooksSection'
 import MyLibrarySection from '@/components/home/MyLibrarySection'
+import RecommendedBooksSection from '@/components/home/RecommendedBooksSection'
 import { HomeTab } from '@/types/home'
 import { useAuth } from '@/hooks/useAuth'
 import { useExchangedBooks } from '@/hooks/useExchangedBooks'
@@ -64,13 +65,11 @@ function MyTownTab({ nickname }: { nickname: string }) {
 
       {/* 2. 추천 도서 섹션 */}
       <section>
-        <div className="mb-4">
-          <h2 className="text-xl font-bold">{nickname}님에게 추천하는 도서</h2>
-        </div>
-        {/* TODO: RecommendedBooksPreview 컴포넌트 추가 */}
-        <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-          <p className="text-gray-500">추천 도서 섹션 (구현 예정)</p>
-        </div>
+        <RecommendedBooksSection
+          title={`${nickname}님에게 추천하는 도서`}
+          limit={6}
+          showMoreButton
+        />
       </section>
 
       {/* 3. 이웃과 교환한 도서 섹션 */}
@@ -97,11 +96,7 @@ function MyTownTab({ nickname }: { nickname: string }) {
 function RecommendationsTab({ nickname }: { nickname: string }) {
   return (
     <div className="px-4 py-6">
-      <h2 className="text-xl font-bold mb-4">{nickname}님에게 추천하는 도서</h2>
-      {/* TODO: 추천 도서 전체 목록 컴포넌트 추가 */}
-      <div className="h-96 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-        <p className="text-gray-500">추천 도서 전체 목록 (구현 예정)</p>
-      </div>
+      <RecommendedBooksSection title={`${nickname}님에게 추천하는 도서`} />
     </div>
   )
 }
