@@ -6,21 +6,29 @@ import { useHeader } from '@/contexts/HeaderContext'
 import {
   CameraIcon,
   PencilSquareIcon,
-  ChevronRightIcon,
+  MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 import ISBNScanner from './components/ISBNScanner'
 import BookForm from './components/BookForm'
-import type { BookInfo } from '@/types/book'
+import BookSearchTab from './components/BookSearchTab'
+import BookConfirmation from './components/BookConfirmation'
+import type { BookInfo, BookSearchResult } from '@/types/book'
 
-type RegistrationMethod = 'select' | 'scan' | 'manual'
+type RegistrationMethod = 'select' | 'scan' | 'search' | 'manual'
+type RegistrationStep = 'method' | 'search' | 'confirm'
 
 export default function AddBookClient() {
   const router = useRouter()
   const { setHeaderContent } = useHeader()
   const [registrationMethod, setRegistrationMethod] =
     useState<RegistrationMethod>('select')
+  const [registrationStep, setRegistrationStep] =
+    useState<RegistrationStep>('method')
   const [scannedISBN, setScannedISBN] = useState<string>('')
   const [bookInfo, setBookInfo] = useState<BookInfo | null>(null)
+  const [selectedBook, setSelectedBook] = useState<BookSearchResult | null>(
+    null
+  )
 
   // 헤더 설정
   useEffect(() => {
@@ -48,85 +56,74 @@ export default function AddBookClient() {
     setScannedISBN(isbn)
     setBookInfo(info)
     setRegistrationMethod('manual')
+    setRegistrationStep('method')
   }
 
   const handleBackToSelection = () => {
     setRegistrationMethod('select')
+    setRegistrationStep('method')
     setScannedISBN('')
     setBookInfo(null)
+    setSelectedBook(null)
   }
 
-  // 등록 방법 선택 화면
+  const handleBookSelect = (book: BookSearchResult) => {
+    setSelectedBook(book)
+    setRegistrationStep('confirm')
+  }
+
+  const handleBackToSearch = () => {
+    setRegistrationStep('search')
+    setSelectedBook(null)
+  }
+
+  // 등록 방법 선택 화면 (탭 구조)
   if (registrationMethod === 'select') {
     return (
       <div className="flex-1 flex flex-col bg-gray-50">
-        <div className="flex-1 p-4 space-y-4">
-          {/* ISBN 스캔 옵션 */}
-          <button
-            onClick={() => setRegistrationMethod('scan')}
-            className="w-full bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-200"
-          >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                <CameraIcon className="w-6 h-6 text-primary-600" />
-              </div>
-              <div className="ml-4 flex-1 text-left">
-                <h3 className="text-lg font-medium text-gray-900">
-                  ISBN 바코드 스캔
-                </h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  책 뒷면의 바코드를 카메라로 스캔하세요
-                </p>
-              </div>
-              <ChevronRightIcon className="w-5 h-5 text-gray-400" />
-            </div>
-          </button>
+        {/* 탭 네비게이션 */}
+        <div className="bg-white border-b border-gray-200">
+          <div className="flex">
+            <button
+              onClick={() => {
+                setRegistrationMethod('scan')
+                setRegistrationStep('method')
+              }}
+              className="flex-1 py-4 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <CameraIcon className="w-6 h-6 mx-auto mb-1" />
+              <span className="text-sm font-medium">ISBN 스캔</span>
+            </button>
+            <button
+              onClick={() => {
+                setRegistrationMethod('search')
+                setRegistrationStep('search')
+              }}
+              className="flex-1 py-4 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <MagnifyingGlassIcon className="w-6 h-6 mx-auto mb-1" />
+              <span className="text-sm font-medium">책 검색</span>
+            </button>
+            <button
+              onClick={() => {
+                setRegistrationMethod('manual')
+                setRegistrationStep('method')
+              }}
+              className="flex-1 py-4 text-center border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-colors"
+            >
+              <PencilSquareIcon className="w-6 h-6 mx-auto mb-1" />
+              <span className="text-sm font-medium">직접 입력</span>
+            </button>
+          </div>
+        </div>
 
-          {/* 직접 입력 옵션 */}
-          <button
-            onClick={() => setRegistrationMethod('manual')}
-            className="w-full bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-200"
-          >
-            <div className="flex items-center">
-              <div className="flex-shrink-0 w-12 h-12 bg-secondary-200 rounded-full flex items-center justify-center">
-                <PencilSquareIcon className="w-6 h-6 text-secondary-700" />
-              </div>
-              <div className="ml-4 flex-1 text-left">
-                <h3 className="text-lg font-medium text-gray-900">직접 입력</h3>
-                <p className="text-sm text-gray-500 mt-1">
-                  책 정보를 직접 입력하세요
-                </p>
-              </div>
-              <ChevronRightIcon className="w-5 h-5 text-gray-400" />
-            </div>
-          </button>
-
-          {/* 추가 안내 */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-6">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <svg
-                  className="h-5 w-5 text-blue-400"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-blue-800">Tip</h3>
-                <div className="mt-2 text-sm text-blue-700">
-                  <p>
-                    ISBN 스캔을 사용하면 책 정보를 자동으로 가져올 수 있어 더
-                    빠르게 등록할 수 있습니다.
-                  </p>
-                </div>
-              </div>
-            </div>
+        {/* 안내 */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center text-gray-500">
+            <p className="text-lg font-medium">등록 방법을 선택하세요</p>
+            <p className="text-sm mt-2">
+              ISBN 스캔, 책 검색 또는 직접 입력 중 선택할 수 있습니다
+            </p>
           </div>
         </div>
       </div>
@@ -138,6 +135,24 @@ export default function AddBookClient() {
     return (
       <ISBNScanner
         onISBNScanned={handleISBNScanned}
+        onBack={handleBackToSelection}
+      />
+    )
+  }
+
+  // 책 검색 플로우
+  if (registrationMethod === 'search') {
+    // 책 확인 화면
+    if (registrationStep === 'confirm' && selectedBook) {
+      return (
+        <BookConfirmation book={selectedBook} onBack={handleBackToSearch} />
+      )
+    }
+
+    // 검색 화면
+    return (
+      <BookSearchTab
+        onBookSelect={handleBookSelect}
         onBack={handleBackToSelection}
       />
     )

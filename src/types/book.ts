@@ -92,3 +92,23 @@ export interface AladinBookItem {
     itemPage?: number
   }
 }
+
+/**
+ * 책 검색 결과 (백엔드 API)
+ */
+export interface BookSearchResult {
+  bookId: number
+  bookImage: string
+  bookName: string
+  author: string
+}
+
+/**
+ * 책 검색 API 응답
+ */
+export interface BookSearchResponse {
+  timestamp: string
+  code: number
+  message: string
+  result: BookSearchResult[]
+}
