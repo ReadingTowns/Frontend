@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
@@ -11,6 +11,7 @@ import PhoneStep from '@/components/onboarding/PhoneStep'
 import ProfileStep from '@/components/onboarding/ProfileStep'
 import LocationStep from '@/components/onboarding/LocationStep'
 import PreferencesStep from '@/components/onboarding/PreferencesStep'
+import KeywordsStep from '@/components/onboarding/KeywordsStep'
 import CompleteStep from '@/components/onboarding/CompleteStep'
 import { OnboardingStep, OnboardingData } from '@/types/onboarding'
 import { api } from '@/lib/api'
@@ -22,6 +23,7 @@ const steps: OnboardingStep[] = [
   'profile',
   'location',
   'preferences',
+  'keywords',
   'complete',
 ]
 
@@ -34,6 +36,49 @@ export default function OnboardingPage() {
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isNicknameValid, setIsNicknameValid] = useState(false)
+
+  // 메모이제이션된 onChange 핸들러들
+  const handleGenreKeywordsChange = useCallback((ids: number[]) => {
+    setOnboardingData(prev => {
+      const genreKeywordIds = ids
+      const contentKeywordIds = prev.contentKeywordIds || []
+      const moodKeywordIds = prev.moodKeywordIds || []
+      const keywordIds = [
+        ...genreKeywordIds,
+        ...contentKeywordIds,
+        ...moodKeywordIds,
+      ]
+      return { ...prev, genreKeywordIds, keywordIds }
+    })
+  }, [])
+
+  const handleContentKeywordsChange = useCallback((ids: number[]) => {
+    setOnboardingData(prev => {
+      const genreKeywordIds = prev.genreKeywordIds || []
+      const contentKeywordIds = ids
+      const moodKeywordIds = prev.moodKeywordIds || []
+      const keywordIds = [
+        ...genreKeywordIds,
+        ...contentKeywordIds,
+        ...moodKeywordIds,
+      ]
+      return { ...prev, contentKeywordIds, keywordIds }
+    })
+  }, [])
+
+  const handleMoodKeywordsChange = useCallback((ids: number[]) => {
+    setOnboardingData(prev => {
+      const genreKeywordIds = prev.genreKeywordIds || []
+      const contentKeywordIds = prev.contentKeywordIds || []
+      const moodKeywordIds = ids
+      const keywordIds = [
+        ...genreKeywordIds,
+        ...contentKeywordIds,
+        ...moodKeywordIds,
+      ]
+      return { ...prev, moodKeywordIds, keywordIds }
+    })
+  }, [])
 
   // 온보딩 완료 여부 확인 및 리다이렉트
   useEffect(() => {
@@ -81,6 +126,9 @@ export default function OnboardingPage() {
       case 'preferences':
         setCurrentStep('location')
         break
+      case 'keywords':
+        setCurrentStep('preferences')
+        break
       default:
         break
     }
@@ -101,6 +149,9 @@ export default function OnboardingPage() {
         setCurrentStep('preferences')
         break
       case 'preferences':
+        setCurrentStep('keywords')
+        break
+      case 'keywords':
         setCurrentStep('complete')
         break
       case 'complete':
@@ -123,6 +174,7 @@ export default function OnboardingPage() {
           onboardingData.availableTime === '나중에 설정하기'
             ? null
             : onboardingData.availableTime,
+        keywordIdList: onboardingData.keywordIds || [],
       })
 
       router.push('/home')
@@ -147,6 +199,9 @@ export default function OnboardingPage() {
       case 'preferences':
         // 선택적 입력: 항상 다음 단계로 진행 가능
         return true
+      case 'keywords':
+        // 전체 키워드 최소 3개 이상 선택 필수
+        return (onboardingData.keywordIds?.length || 0) >= 3
       case 'complete':
         return true
       default:
@@ -216,6 +271,19 @@ export default function OnboardingPage() {
             onChange={availableTime =>
               setOnboardingData(prev => ({ ...prev, availableTime }))
             }
+            onBack={handleBackButton}
+          />
+        )
+
+      case 'keywords':
+        return (
+          <KeywordsStep
+            genreKeywordIds={onboardingData.genreKeywordIds || []}
+            contentKeywordIds={onboardingData.contentKeywordIds || []}
+            moodKeywordIds={onboardingData.moodKeywordIds || []}
+            onGenreChange={handleGenreKeywordsChange}
+            onContentChange={handleContentKeywordsChange}
+            onMoodChange={handleMoodKeywordsChange}
             onBack={handleBackButton}
           />
         )

@@ -17,6 +17,10 @@ interface RecommendedBooksSectionProps {
    * 더보기 버튼 표시 여부
    */
   showMoreButton?: boolean
+  /**
+   * 더보기 버튼 클릭 시 실행할 함수 (탭 전환 등)
+   */
+  onMoreClick?: () => void
 }
 
 /**
@@ -29,6 +33,7 @@ export default function RecommendedBooksSection({
   title = '추천 도서',
   limit,
   showMoreButton = false,
+  onMoreClick,
 }: RecommendedBooksSectionProps) {
   const {
     data: recommendations = [],
@@ -91,12 +96,12 @@ export default function RecommendedBooksSection({
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
           {showMoreButton && recommendations.length > (limit || 0) && (
-            <Link
-              href="/home?tab=recommendations"
+            <button
+              onClick={onMoreClick}
               className="text-sm text-primary-600 hover:underline"
             >
               더보기
-            </Link>
+            </button>
           )}
         </div>
       )}
@@ -125,11 +130,6 @@ export default function RecommendedBooksSection({
                     <p className="text-xs text-gray-600 font-medium line-clamp-3">
                       {book.bookTitle}
                     </p>
-                    {book.matchScore && (
-                      <p className="text-xs text-primary-600 mt-1">
-                        {book.matchScore.toFixed(1)}% 매칭
-                      </p>
-                    )}
                   </div>
                 </div>
               )}
@@ -141,11 +141,6 @@ export default function RecommendedBooksSection({
                 {book.bookTitle}
               </h4>
               <p className="text-xs text-gray-500 truncate">{book.author}</p>
-              {book.reason && (
-                <p className="text-xs text-primary-600 line-clamp-1">
-                  {book.reason}
-                </p>
-              )}
             </div>
           </Link>
         ))}

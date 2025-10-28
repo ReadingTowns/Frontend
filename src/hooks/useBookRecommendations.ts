@@ -40,7 +40,7 @@ export const bookRecommendationKeys = {
 const getBookRecommendations = async (): Promise<BookRecommendation[]> => {
   // api.get()은 이미 ApiResponse.result를 반환함
   const books = await api.get<BookRecommendationRaw[]>(
-    '/api/v1/members/recommendations/books'
+    '/api/v1/recommendations/books'
   )
 
   // 백엔드 응답을 프론트엔드 타입으로 변환
