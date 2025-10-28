@@ -1,8 +1,8 @@
 'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
 import { useBookRecommendations } from '@/hooks/useBookRecommendations'
+import { BookCard } from '@/components/books/BookCard'
+import { GridBook } from '@/types/bookCard'
 
 interface RecommendedBooksSectionProps {
   /**
@@ -109,40 +109,14 @@ export default function RecommendedBooksSection({
       {/* 책 그리드 */}
       <div className="grid grid-cols-3 gap-4">
         {displayBooks.map(book => (
-          <Link
+          <BookCard
             key={book.bookId}
-            href={`/books/${book.bookId}`}
-            className="group block"
-          >
-            {/* 책 커버 */}
-            <div className="relative aspect-[2/3] mb-2 overflow-hidden rounded-lg bg-gray-100">
-              {book.bookCoverImage ? (
-                <Image
-                  src={book.bookCoverImage}
-                  alt={book.bookTitle}
-                  fill
-                  className="object-cover transition-transform group-hover:scale-105"
-                  sizes="(max-width: 430px) 33vw, 143px"
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full bg-gradient-to-br from-primary-100 to-secondary-100">
-                  <div className="text-center px-2">
-                    <p className="text-xs text-gray-600 font-medium line-clamp-3">
-                      {book.bookTitle}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* 책 정보 */}
-            <div className="space-y-1">
-              <h4 className="text-sm font-medium line-clamp-2 group-hover:text-primary-600">
-                {book.bookTitle}
-              </h4>
-              <p className="text-xs text-gray-500 truncate">{book.author}</p>
-            </div>
-          </Link>
+            variant="grid"
+            book={book as GridBook}
+            columns={3}
+            compact={true}
+            aspectRatio="2/3"
+          />
         ))}
       </div>
     </div>

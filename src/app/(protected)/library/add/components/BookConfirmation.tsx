@@ -2,7 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import { BookCard } from '@/components/books/BookCard'
+import { Book } from '@/types/bookCard'
 import { useAddBookById } from '@/hooks/useLibrary'
 import type { BookSearchResult } from '@/types/book'
 
@@ -39,29 +40,20 @@ export default function BookConfirmation({
       {/* 책 정보 */}
       <div className="flex-1 overflow-y-auto p-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          {/* 표지 */}
-          <div className="relative w-40 h-56 mx-auto mb-6">
-            <Image
-              src={book.bookImage}
-              alt={book.bookName}
-              fill
-              className="object-cover rounded-lg"
-              sizes="160px"
-            />
-          </div>
-
-          {/* 책 정보 */}
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">
-                {book.bookName}
-              </h2>
-            </div>
-            <div className="flex items-center text-gray-600">
-              <span className="text-sm font-medium mr-2">저자</span>
-              <span className="text-sm">{book.author}</span>
-            </div>
-          </div>
+          {/* BookCard 컴포넌트 */}
+          <BookCard
+            variant="detail"
+            book={
+              {
+                bookId: book.bookId,
+                bookTitle: book.bookName,
+                bookCoverImage: book.bookImage,
+                author: book.author,
+              } as Book
+            }
+            size="medium"
+            showFullInfo={false}
+          />
 
           {/* 안내 메시지 */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">

@@ -1,6 +1,8 @@
 'use client'
 
 import { ExchangedBook } from '@/types/home'
+import { BookCard } from '@/components/books/BookCard'
+import { GridBook } from '@/types/bookCard'
 
 interface ExchangedBooksSectionProps {
   books: ExchangedBook[]
@@ -44,35 +46,23 @@ export default function ExchangedBooksSection({
   return (
     <div className="grid grid-cols-3 gap-4">
       {displayBooks.map(book => (
-        <div
+        <BookCard
           key={book.exchangeId}
-          className="cursor-pointer hover:opacity-80 transition-opacity"
-        >
-          {/* 책 표지 */}
-          <div className="aspect-[3/4] bg-gray-200 rounded-lg mb-2 overflow-hidden">
-            {book.bookCoverImage ? (
-              <img
-                src={book.bookCoverImage}
-                alt={book.bookTitle}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                표지 없음
-              </div>
-            )}
-          </div>
-
-          {/* 책 제목 */}
-          <h3 className="text-sm font-medium line-clamp-2 mb-1">
-            {book.bookTitle}
-          </h3>
-
-          {/* 교환 상대 정보 */}
-          <p className="text-xs text-gray-500">
-            {book.partnerNickname}님과 교환
-          </p>
-        </div>
+          variant="grid"
+          book={
+            {
+              bookId: book.exchangeId,
+              bookTitle: book.bookTitle,
+              bookCoverImage: book.bookCoverImage,
+              author: '',
+              partnerNickname: book.partnerNickname,
+            } as GridBook
+          }
+          columns={3}
+          compact={true}
+          aspectRatio="3/4"
+          showPartner={true}
+        />
       ))}
     </div>
   )

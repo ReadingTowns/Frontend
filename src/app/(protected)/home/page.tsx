@@ -1,7 +1,8 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import HomeTabs from '@/components/home/HomeTabs'
 import ExchangedBooksSection from '@/components/home/ExchangedBooksSection'
 import MyLibrarySection from '@/components/home/MyLibrarySection'
@@ -32,6 +33,7 @@ export default function HomePage() {
 function HomePageContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { user } = useAuth()
 
   // URL query parameter에서 탭 상태 읽기 (기본값: 'myTown')
@@ -44,6 +46,14 @@ function HomePageContent() {
   const handleTabChange = (tab: HomeTab) => {
     router.push(`/home?tab=${tab}`)
   }
+
+  // 홈 페이지 진입 시 관련 쿼리 무효화 (최신 데이터 로드)
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['recommend', 'books'] })
+    queryClient.invalidateQueries({ queryKey: ['recommend', 'users'] })
+    queryClient.invalidateQueries({ queryKey: ['exchanged-books'] })
+    queryClient.invalidateQueries({ queryKey: ['bookRecommendations'] })
+  }, [queryClient])
 
   return (
     <div className="min-h-screen bg-white">

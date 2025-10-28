@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Image from 'next/image'
+import { BookCard } from '@/components/books/BookCard'
+import { Book } from '@/types/bookCard'
 import { useBookDetailPage } from '@/hooks/useBookDetail'
 import { useUserProfile, useUserBookReview } from '@/hooks/useLibrary'
 import BookReviewSection from '@/components/books/BookReviewSection'
@@ -22,7 +22,6 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { book, myReview, isLoading } = useBookDetailPage(bookId)
-  const [imageError, setImageError] = useState(false)
 
   // 쿼리 파라미터 확인: 다른 유저의 서재에서 온 경우
   const fromLibrary = searchParams.get('from') === 'library'
@@ -100,73 +99,30 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
 
       {/* 메인 컨텐츠 */}
       <div className="mx-auto max-w-[430px] bg-white">
-        {/* 책 표지 */}
-        <div className="flex justify-center bg-gray-100 py-8">
-          {!imageError && bookImage ? (
-            <Image
-              src={bookImage}
-              alt={bookName}
-              width={200}
-              height={280}
-              className="rounded-lg shadow-md"
-              onError={() => setImageError(true)}
-              priority
-            />
-          ) : (
-            <div className="flex h-[280px] w-[200px] items-center justify-center rounded-lg bg-gray-200">
-              <svg
-                className="h-16 w-16 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
-          )}
-        </div>
-
-        {/* 책 정보 */}
-        <div className="space-y-6 p-6">
-          {/* 제목 */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">{bookName}</h2>
-          </div>
-
-          {/* 작가 및 출판 정보 */}
-          <div className="space-y-2 text-sm text-gray-600">
-            <p>
-              <span className="font-medium text-gray-700">저자:</span> {author}
-            </p>
-            <p>
-              <span className="font-medium text-gray-700">출판사:</span>{' '}
-              {publisher}
-            </p>
-            {publicationDate && (
-              <p>
-                <span className="font-medium text-gray-700">출간일:</span>{' '}
-                {publicationDate}
-              </p>
-            )}
-          </div>
-
-          {/* 책 소개 */}
-          {description && (
-            <div>
-              <h3 className="mb-2 font-semibold text-gray-900">책 소개</h3>
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
-                {description}
-              </p>
-            </div>
-          )}
+        {/* 책 정보 카드 */}
+        <div className="p-6">
+          <BookCard
+            variant="detail"
+            book={
+              {
+                bookId: Number(bookId),
+                bookTitle: bookName,
+                bookCoverImage: bookImage,
+                author,
+                publisher,
+                description,
+                publicationDate,
+              } as Book
+            }
+            size="large"
+            showFullInfo={true}
+            showOwnerInfo={fromLibrary}
+            fromLibrary={fromLibrary}
+            ownerId={ownerId || undefined}
+          />
 
           {/* 구분선 */}
-          <div className="border-t border-gray-200" />
+          <div className="border-t border-gray-200 mt-6" />
 
           {/* 책 주인 정보 (다른 유저의 서재에서 온 경우만 표시) */}
           {fromLibrary && ownerProfile && (
