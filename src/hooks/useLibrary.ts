@@ -47,6 +47,24 @@ export function useUserLibraryBooks(
   })
 }
 
+// 서재에 책 ID로 등록 (검색 결과에서 등록 시 사용)
+export function useAddBookById() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (bookId: number) => {
+      return await api.post(`/api/v1/bookhouse/books/${bookId}`)
+    },
+    onSuccess: () => {
+      // 서재 목록 캐시 무효화
+      queryClient.invalidateQueries({ queryKey: ['library', 'my-books'] })
+    },
+    onError: error => {
+      console.error('Failed to add book by ID:', error)
+    },
+  })
+}
+
 // 서재에 책 등록 (낙관적 업데이트 적용)
 export function useAddLibraryBook() {
   const queryClient = useQueryClient()
