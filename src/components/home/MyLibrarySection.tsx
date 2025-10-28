@@ -1,7 +1,8 @@
 'use client'
 
 import { useMyLibraryBooks } from '@/hooks/useLibrary'
-import { LibraryBookCard } from '@/components/library/LibraryBookCard'
+import { BookCard } from '@/components/books/BookCard'
+import { GridBook } from '@/types/bookCard'
 import Link from 'next/link'
 import { BookOpenIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 
@@ -54,12 +55,22 @@ export default function MyLibrarySection() {
       {/* 3열 그리드 - 서재 탭과 동일한 레이아웃 */}
       <div className="grid grid-cols-3 gap-3">
         {books.map(book => (
-          <LibraryBookCard
+          <BookCard
             key={book.bookId}
-            book={book}
-            showActions={false} // 홈에서는 액션 버튼 숨김
-            isOwner={true}
-            compact={true} // 3열 모드
+            variant="grid"
+            book={
+              {
+                ...book,
+                bookTitle: book.bookName,
+                bookCoverImage: book.bookImage,
+              } as GridBook
+            }
+            columns={3}
+            compact={true}
+            aspectRatio="2/3"
+            showActions={false}
+            showCategories={true}
+            showStatus={true}
           />
         ))}
       </div>

@@ -1,6 +1,11 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  useInfiniteQuery,
+} from '@tanstack/react-query'
 import {
   LibraryBooksResponse,
   AddLibraryBookRequest,
@@ -14,7 +19,27 @@ import {
 import { PaginationInfo } from '@/types/common'
 import { api } from '@/lib/api'
 
-// 내 서재 책 리스트 조회
+// 내 서재 책 리스트 조회 (무한 스크롤용)
+export function useMyLibraryBooksInfinite(size: number = 12) {
+  return useInfiniteQuery({
+    queryKey: ['library', 'my-books-infinite', size],
+    queryFn: async ({
+      pageParam = 0,
+    }): Promise<LibraryBooksResponse & PaginationInfo> => {
+      return await api.get<LibraryBooksResponse & PaginationInfo>(
+        '/api/v1/bookhouse/members/me',
+        { page: pageParam, size }
+      )
+    },
+    getNextPageParam: lastPage => {
+      // 마지막 페이지가 아니면 다음 페이지 번호 반환
+      return lastPage.last ? undefined : lastPage.curPage + 1
+    },
+    initialPageParam: 0,
+  })
+}
+
+// 내 서재 책 리스트 조회 (기존 페이지네이션용 - 하위 호환성)
 export function useMyLibraryBooks(params?: { page?: number; size?: number }) {
   return useQuery({
     queryKey: ['library', 'my-books', params],

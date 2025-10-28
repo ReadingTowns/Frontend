@@ -1,10 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useMyLibraryBooks, useBookReviewActions } from '@/hooks/useLibrary'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import {
+  useMyLibraryBooksInfinite,
+  useBookReviewActions,
+} from '@/hooks/useLibrary'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useSnackbar } from '@/hooks/useSnackbar'
-import { LibraryBookCard } from '@/components/library/LibraryBookCard'
+import { BookCard } from '@/components/books/BookCard'
+import { GridBook } from '@/types/bookCard'
 import { BookReviewModal } from '@/components/library/BookReviewModal'
 import Link from 'next/link'
 import { BookOpenIcon } from '@heroicons/react/24/outline'
@@ -13,25 +17,49 @@ import { api } from '@/lib/api'
 export default function LibraryPageClient() {
   const { setHeaderContent } = useHeader()
   const { showError } = useSnackbar()
-  const [page, setPage] = useState(0)
   const [selectedBook, setSelectedBook] = useState<{
     id: string
     title: string
   } | null>(null)
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false)
+  const observerTarget = useRef<HTMLDivElement>(null)
 
-  // TanStack Query로 서재 데이터 fetch
-  const { data, isLoading, refetch } = useMyLibraryBooks({ page, size: 12 })
-  const books = data?.content || []
-  const pagination = data
-    ? {
-        curPage: data.curPage,
-        totalPages: data.totalPages,
-        last: data.last,
-      }
-    : null
+  // 무한 스크롤 쿼리
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+    refetch,
+  } = useMyLibraryBooksInfinite(12)
+
+  // 모든 페이지의 책 데이터를 평탄화
+  const books = data?.pages.flatMap(page => page.content) || []
 
   const bookReviewActions = useBookReviewActions(selectedBook?.id || '')
+
+  // Intersection Observer로 스크롤 감지
+  const handleObserver = useCallback(
+    (entries: IntersectionObserverEntry[]) => {
+      const [target] = entries
+      if (target.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage()
+      }
+    },
+    [fetchNextPage, hasNextPage, isFetchingNextPage]
+  )
+
+  useEffect(() => {
+    const element = observerTarget.current
+    if (!element) return
+
+    const option = { threshold: 0.5 }
+    const observer = new IntersectionObserver(handleObserver, option)
+    observer.observe(element)
+
+    return () => observer.disconnect()
+  }, [handleObserver])
 
   // 페이지 마운트 시 서재 데이터 강제 재조회 (낙관적 업데이트 문제 해결)
   useEffect(() => {
@@ -131,33 +159,51 @@ export default function LibraryPageClient() {
             {/* 3열 그리드로 변경 */}
             <div className="grid grid-cols-3 gap-3">
               {books.map(book => (
-                <LibraryBookCard
+                <BookCard
                   key={book.bookId}
-                  book={book}
-                  onDelete={handleDeleteBook}
-                  onReviewClick={handleReviewClick}
-                  showActions={true}
-                  isOwner={true}
+                  variant="grid"
+                  book={
+                    {
+                      ...book,
+                      bookTitle: book.bookName,
+                      bookCoverImage: book.bookImage,
+                    } as GridBook
+                  }
+                  columns={3}
                   compact={true}
+                  aspectRatio="2/3"
+                  showActions={true}
+                  showCategories={true}
+                  showStatus={true}
+                  isOwner={true}
+                  onActionClick={(action, book) => {
+                    if (action === 'review') {
+                      handleReviewClick(String(book.bookId), book.bookTitle)
+                    }
+                    if (action === 'delete') {
+                      handleDeleteBook(String(book.bookId))
+                    }
+                  }}
                 />
               ))}
             </div>
 
-            {/* Pagination Controls */}
-            {pagination && !pagination.last && (
-              <div className="text-center mt-8">
-                <button
-                  className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={() => setPage(prev => prev + 1)}
-                  disabled={isLoading}
-                >
-                  {isLoading ? '로딩 중...' : '더 보기'}
-                </button>
-                <p className="text-sm text-gray-500 mt-2">
-                  {pagination.curPage + 1} / {pagination.totalPages} 페이지
+            {/* 무한 스크롤 트리거 및 로딩 인디케이터 */}
+            <div ref={observerTarget} className="text-center mt-8 pb-4">
+              {isFetchingNextPage && (
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-10 h-10 border-4 border-primary-400 border-t-transparent rounded-full animate-spin" />
+                  <p className="text-sm text-gray-600">
+                    더 많은 책 불러오는 중...
+                  </p>
+                </div>
+              )}
+              {!hasNextPage && books.length > 0 && (
+                <p className="text-sm text-gray-500">
+                  모든 책을 불러왔습니다 📚
                 </p>
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
       </section>
