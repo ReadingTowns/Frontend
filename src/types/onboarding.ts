@@ -5,6 +5,10 @@ export interface OnboardingData {
   latitude?: number
   longitude?: number
   availableTime?: string
+  genreKeywordIds?: number[]
+  contentKeywordIds?: number[]
+  moodKeywordIds?: number[]
+  keywordIds?: number[] // 전체 키워드 (API 전송용)
 }
 
 export type OnboardingStep =
@@ -13,6 +17,7 @@ export type OnboardingStep =
   | 'profile'
   | 'location'
   | 'preferences'
+  | 'keywords'
   | 'complete'
 
 export interface PhoneStepProps {
