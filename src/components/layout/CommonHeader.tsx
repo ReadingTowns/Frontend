@@ -4,6 +4,7 @@ import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { BookOpenIcon } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
+import Image from 'next/image'
 import {
   HEADER_HEIGHT,
   HEADER_STYLES,
@@ -131,15 +132,30 @@ export default function CommonHeader() {
         ) : (
           <>
             {/* 일반 헤더 콘텐츠 */}
-            <div className="flex-1 min-w-0">
-              {headerConfig.title && (
-                <h1 className={HEADER_STYLES.title}>{headerConfig.title}</h1>
-              )}
-              {headerConfig.subtitle && (
-                <p className={`${HEADER_STYLES.subtitle} mt-0.5`}>
-                  {headerConfig.subtitle}
-                </p>
-              )}
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+              {/* basic 헤더일 때만 로고 표시 - Next.js Image 컴포넌트로 최적화 */}
+              {headerConfig.variant === 'basic' &&
+                headerConfig.title === '리딩타운' && (
+                  <div className="relative w-7 h-7 flex-shrink-0">
+                    <Image
+                      src="/logo.png"
+                      alt="리딩타운 로고"
+                      fill
+                      sizes="28px"
+                      className="object-contain"
+                    />
+                  </div>
+                )}
+              <div>
+                {headerConfig.title && (
+                  <h1 className={HEADER_STYLES.title}>{headerConfig.title}</h1>
+                )}
+                {headerConfig.subtitle && (
+                  <p className={`${HEADER_STYLES.subtitle} mt-0.5`}>
+                    {headerConfig.subtitle}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* 액션 버튼들 */}

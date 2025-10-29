@@ -3,8 +3,6 @@
 import { useState, useRef, KeyboardEvent } from 'react'
 import {
   ChatBubbleLeftIcon,
-  CameraIcon,
-  MapPinIcon,
   PaperAirplaneIcon,
   ClockIcon,
 } from '@heroicons/react/24/outline'
@@ -72,43 +70,32 @@ export default function MessageInput({
 
       {/* Input Area */}
       <div className="p-4">
-        <div className="flex items-end gap-2">
+        <div className="flex items-center gap-2">
           {/* Action Buttons */}
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setShowQuickReplies(!showQuickReplies)}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors flex items-center justify-center"
               title="빠른 답장"
             >
               <ChatBubbleLeftIcon className="w-5 h-5 text-gray-600" />
             </button>
-            <button
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="사진 전송"
-            >
-              <CameraIcon className="w-5 h-5 text-gray-600" />
-            </button>
-            <button
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              title="위치 공유"
-            >
-              <MapPinIcon className="w-5 h-5 text-gray-600" />
-            </button>
           </div>
 
           {/* Text Input */}
-          <div className="flex-1 relative">
+          <div className="flex-1">
             <textarea
               ref={textareaRef}
               value={message}
               onChange={e => setMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="메시지를 입력하세요..."
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent"
+              className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent align-middle"
               rows={1}
               style={{
                 minHeight: '40px',
                 maxHeight: '120px',
+                lineHeight: '1.5',
               }}
             />
           </div>
@@ -117,7 +104,7 @@ export default function MessageInput({
           <button
             onClick={handleSend}
             disabled={!message.trim() || isLoading}
-            className={`p-2 rounded-lg transition-colors ${
+            className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
               message.trim() && !isLoading
                 ? 'bg-primary-400 hover:bg-primary-500 text-white'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'

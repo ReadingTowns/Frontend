@@ -144,7 +144,7 @@ export default function LibraryPageClient() {
         ) : (
           <>
             {/* 3열 그리드로 변경 */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-3 pt-4">
               {books.map(book => (
                 <BookCard
                   key={book.bookId}
