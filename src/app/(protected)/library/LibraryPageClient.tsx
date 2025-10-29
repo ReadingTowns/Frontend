@@ -5,7 +5,7 @@ import {
   useMyLibraryBooksInfinite,
   useBookReviewActions,
 } from '@/hooks/useLibrary'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useSnackbar } from '@/hooks/useSnackbar'
 import { BookCard } from '@/components/books/BookCard'
 import { GridBook } from '@/types/bookCard'
@@ -15,7 +15,6 @@ import { BookOpenIcon } from '@heroicons/react/24/outline'
 import { api } from '@/lib/api'
 
 export default function LibraryPageClient() {
-  const { setHeaderContent } = useHeader()
   const { showError } = useSnackbar()
   const [selectedBook, setSelectedBook] = useState<{
     id: string
@@ -66,24 +65,12 @@ export default function LibraryPageClient() {
     refetch()
   }, [refetch])
 
-  useEffect(() => {
-    // 새로운 헤더로 교체
-    setHeaderContent(
-      <header className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h1 className="text-2xl font-bold text-gray-900">나의 서재</h1>
-          <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
-            +옵션 없음
-          </button>
-        </div>
-        <p className="text-sm text-gray-600">내 서재에 보관하고 있는 책들</p>
-      </header>
-    )
-
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [setHeaderContent])
+  // 새로운 헤더 시스템 사용
+  useHeaderConfig({
+    variant: 'basic',
+    title: '나의 서재',
+    subtitle: '내 서재에 보관하고 있는 책들',
+  })
 
   const handleDeleteBook = async (bookId: string) => {
     if (confirm('정말로 이 책을 서재에서 삭제하시겠습니까?')) {

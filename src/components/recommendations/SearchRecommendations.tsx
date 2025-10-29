@@ -80,7 +80,7 @@ export default function SearchRecommendations() {
   }, [books.length])
 
   return (
-    <div className="p-4">
+    <div className="p-4 bg-white">
       <h2 className="text-xl font-bold mb-4">
         내 취향으로 책 검색하여 추천받기
       </h2>

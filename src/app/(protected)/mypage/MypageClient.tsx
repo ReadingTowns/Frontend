@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useAuth } from '@/hooks/useAuth'
 import { useMyRating } from '@/hooks/useUserRating'
 import ProfileSection from './components/ProfileSection'
@@ -22,21 +22,14 @@ interface UserProfile {
 }
 
 export default function MypageClient() {
-  const { setHeaderContent } = useHeader()
   const { logout, isLoggingOut } = useAuth()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
 
-  useEffect(() => {
-    setHeaderContent(
-      <header className="mb-4">
-        <h1 className="text-2xl font-bold text-gray-900">마이페이지</h1>
-      </header>
-    )
-
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [setHeaderContent])
+  // 새로운 헤더 시스템 사용
+  useHeaderConfig({
+    variant: 'basic',
+    title: '마이페이지',
+  })
 
   const {
     data: profile,

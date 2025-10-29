@@ -1,8 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useState } from 'react'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import {
   CameraIcon,
   PencilSquareIcon,
@@ -18,8 +17,6 @@ type RegistrationMethod = 'select' | 'scan' | 'search' | 'manual'
 type RegistrationStep = 'method' | 'search' | 'confirm'
 
 export default function AddBookClient() {
-  const router = useRouter()
-  const { setHeaderContent } = useHeader()
   const [registrationMethod, setRegistrationMethod] =
     useState<RegistrationMethod>('select')
   const [registrationStep, setRegistrationStep] =
@@ -30,27 +27,12 @@ export default function AddBookClient() {
     null
   )
 
-  // 헤더 설정
-  useEffect(() => {
-    setHeaderContent(
-      <header className="mb-6">
-        <button
-          onClick={() => router.back()}
-          className="text-gray-600 hover:text-gray-800 mb-4"
-        >
-          ← 뒤로
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">책 등록하기</h1>
-        <p className="text-sm text-gray-600 mt-2">
-          서재에 새로운 책을 추가해보세요
-        </p>
-      </header>
-    )
-
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [setHeaderContent, router])
+  // 새로운 헤더 시스템 사용
+  useHeaderConfig({
+    variant: 'navigation',
+    title: '책 등록하기',
+    subtitle: '서재에 새로운 책을 추가해보세요',
+  })
 
   const handleISBNScanned = (isbn: string, info: BookInfo | null) => {
     setScannedISBN(isbn)

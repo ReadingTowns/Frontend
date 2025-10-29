@@ -3,14 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useSnackbar } from '@/hooks/useSnackbar'
 import NicknameInput from '@/components/common/NicknameInput'
-import {
-  ArrowLeftIcon,
-  ClockIcon,
-  UserCircleIcon,
-} from '@heroicons/react/24/outline'
+import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { api } from '@/lib/api'
 
 interface UserProfile {
@@ -27,7 +23,6 @@ interface UserProfile {
 export default function ProfileEditClient() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { setHeaderContent } = useHeader()
   const { showWarning, showError, showInfo } = useSnackbar()
 
   const [nickname, setNickname] = useState('')
@@ -35,23 +30,11 @@ export default function ProfileEditClient() {
   const [profileImage, setProfileImage] = useState('')
   const [nicknameValid, setNicknameValid] = useState(false)
 
-  useEffect(() => {
-    setHeaderContent(
-      <header className="flex items-center gap-3">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg"
-        >
-          <ArrowLeftIcon className="w-6 h-6" />
-        </button>
-        <h1 className="text-xl font-bold">프로필 수정</h1>
-      </header>
-    )
-
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [setHeaderContent, router])
+  useHeaderConfig({
+    variant: 'navigation',
+    title: '프로필 수정',
+    onBack: () => router.back(),
+  })
 
   // 현재 프로필 정보 가져오기
   const { data: profile, isLoading } = useQuery<UserProfile>({

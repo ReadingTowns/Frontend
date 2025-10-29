@@ -1,14 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, ReactNode } from 'react'
-
-interface HeaderConfig {
-  type?: 'main' | 'search'
-  title?: string
-  showBack?: boolean
-  showSearch?: boolean
-  onSearch?: (query: string) => void
-}
+import { HeaderConfig } from '@/types/header'
 
 interface HeaderContextType {
   headerContent: ReactNode | null
