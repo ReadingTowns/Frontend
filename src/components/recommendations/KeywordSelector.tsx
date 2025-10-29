@@ -8,7 +8,7 @@ export default function KeywordSelector() {
   const { data: keywords, isLoading, error } = useRecommendKeywords()
 
   const handleRedoKeywordSelection = () => {
-    router.push('/onboarding?step=keywords')
+    router.push('/recommendations/keywords/edit')
   }
 
   if (isLoading) {

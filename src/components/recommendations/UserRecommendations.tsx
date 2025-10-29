@@ -41,7 +41,8 @@ export default function UserRecommendations() {
     )
   }
 
-  if (!data?.result || data.result.length === 0) {
+  // api.ts가 자동으로 result를 추출해서 반환하므로 data가 직접 배열
+  if (!data || data.length === 0) {
     return (
       <div className="p-4">
         <div className="flex items-center justify-between mb-4">
@@ -61,7 +62,7 @@ export default function UserRecommendations() {
       </div>
 
       <div className="flex gap-4 overflow-x-auto pb-4">
-        {data.result.map(user => (
+        {data.map(user => (
           <Link
             key={user.memberId}
             href={`/social/${user.memberId}`}

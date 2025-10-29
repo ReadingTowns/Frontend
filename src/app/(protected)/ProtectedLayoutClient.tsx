@@ -45,9 +45,11 @@ export default function ProtectedLayoutClient({
     router,
   ])
 
-  // 온보딩 페이지에서는 바텀 네비게이션 숨김
+  // 온보딩 및 키워드 편집 페이지에서는 바텀 네비게이션 숨김
   const hideBottomNavigation =
-    pathname === '/onboarding' || pathname.startsWith('/onboarding/')
+    pathname === '/onboarding' ||
+    pathname.startsWith('/onboarding/') ||
+    pathname.startsWith('/recommendations/keywords/edit')
 
   return (
     <div className="h-screen-safe flex flex-col overflow-hidden">

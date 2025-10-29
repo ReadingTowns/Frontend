@@ -34,18 +34,29 @@ npm run dev      # Start development server with Turbopack
 
 ### Build & Production
 
+⚠️ **IMPORTANT**: Only run build when explicitly needed for build error resolution or deployment.
+
 ```bash
-npm run build    # Build the application for production
+npm run build    # Build the application for production (USE SPARINGLY)
 npm run start    # Start the production server
 ```
+
+**Build Policy**:
+- ✅ Run build: Build error troubleshooting, production deployment
+- ❌ Do NOT run build: After code changes, during development, for general validation
 
 ### Code Quality
 
 ```bash
-npm run lint           # Run ESLint
+npm run lint           # Run ESLint (PRIMARY validation tool)
 npm run quality:check  # Run lint + build + test (full quality check)
 npm run quality:fix    # Run ESLint with auto-fix
 ```
+
+**Validation Workflow**:
+1. Use `npm run lint` for code validation (PRIMARY)
+2. Use `npm test` for testing
+3. Use `npm run build` ONLY when explicitly needed
 
 ### Testing
 
@@ -483,14 +494,30 @@ Git hooks를 통해 다음 상황에서 자동으로 빌드 실패를 감지:
 - ✅ 통일된 에러 처리
 - ✅ TypeScript 타입 안전성
 - ✅ Query parameter 지원
+- ✅ **자동 result 추출**: API 응답의 `result` 필드를 자동으로 추출하여 반환
+
+**⚠️ 중요: 자동 result 추출 동작**
+
+API 응답 형식:
+```json
+{
+  "timestamp": "2025-10-30 00:48:15",
+  "code": 1000,
+  "message": "Success",
+  "result": [...]  // 또는 {...}
+}
+```
+
+`api.get`이 반환하는 값: **`result` 내용만 반환** (래퍼 객체 제거됨)
 
 **사용 예시**:
 
 ```typescript
 import { api } from '@/lib/api'
 
-// GET 요청
-const users = await api.get('/api/v1/members/search', { nickname: 'john' })
+// GET 요청 - result 내용이 직접 반환됨
+const users = await api.get<User[]>('/api/v1/members/search', { nickname: 'john' })
+// users는 User[] 타입 (Response 래퍼 없음)
 
 // POST 요청
 await api.post('/api/v1/members/11/follow')
@@ -512,7 +539,20 @@ await api.delete('/api/v1/members/11/follow')
 
 ```typescript
 import { api } from '@/lib/api'
-import { useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
+
+// ✅ 올바른 사용법 - result 내용의 타입 직접 사용
+const { data } = useQuery({
+  queryKey: ['users'],
+  queryFn: () => api.get<User[]>('/api/v1/users')  // User[] 타입
+})
+// data는 User[] 타입
+
+// ❌ 잘못된 사용법 - Response 타입 사용
+const { data } = useQuery({
+  queryFn: () => api.get<ApiResponse<User[]>>('/api/v1/users')
+})
+// data.result 접근 시도 시 에러!
 
 const followMutation = useMutation({
   mutationFn: async (follow: boolean) => {

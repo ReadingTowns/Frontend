@@ -49,10 +49,10 @@ export default function KeywordStep({
   const { data, isLoading, error } = useRecommendKeywordCandidates(type)
   const config = STEP_CONFIG[type]
 
-  // type이 변경되면 selected 상태를 selectedIds로 초기화
+  // type이나 selectedIds가 변경되면 selected 상태 초기화
   useEffect(() => {
     setSelected(new Set(selectedIds || []))
-  }, [type])
+  }, [type, selectedIds])
 
   const toggleKeyword = (id: number) => {
     const newSelected = new Set(selected)
