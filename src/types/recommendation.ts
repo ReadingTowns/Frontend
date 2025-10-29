@@ -74,21 +74,19 @@ export interface VideoRecommendationsResponse {
   result: VideoRecommendation[]
 }
 
-// 책 검색 추천 타입 (백엔드 미구현)
+// 책 검색 추천 타입
 export interface BookSearchResult {
-  book_id: number
-  book_name: string
-  keywords: string
-  similarity_score: number
-  method: string
-  review_preview: string
+  bookId: number
+  bookImage: string | null
+  bookName: string
+  author: string
+  publisher: string
+  similarity: number
+  relatedUserKeywords: string[] | null
+  reviewPreview: string
 }
 
 export interface BookSearchResponse {
-  code: string
-  message: string
-  result: {
-    results: BookSearchResult[]
-    method: string
-  }
+  query: string
+  results: BookSearchResult[]
 }

@@ -21,6 +21,7 @@ export interface BookRecommendation {
 interface BookRecommendationRaw {
   bookId: number
   bookName: string
+  bookImage?: string | null // 백엔드에서 이미지 URL 제공 (nullable)
   author: string
   publisher: string
   similarity: number
@@ -47,10 +48,11 @@ const getBookRecommendations = async (): Promise<BookRecommendation[]> => {
   return books.map(book => ({
     bookId: book.bookId,
     bookTitle: book.bookName,
+    bookCoverImage: book.bookImage || null, // 이미지 URL 매핑
     author: book.author,
     publisher: book.publisher,
     matchScore: book.similarity,
-    // bookCoverImage와 isbn은 별도 API로 가져오거나 추후 추가
+    // isbn은 별도 API로 가져오거나 추후 추가
   }))
 }
 

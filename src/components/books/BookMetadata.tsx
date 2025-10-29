@@ -56,7 +56,7 @@ export function BookMetadata({
       {/* 유사도 (추천 탭) */}
       {showSimilarity && similarity !== undefined && (
         <p className="text-xs text-primary-600 font-medium">
-          유사도: {(similarity * 10).toFixed(1)}%
+          유사도: {(similarity * 100).toFixed(1)}%
         </p>
       )}
 
