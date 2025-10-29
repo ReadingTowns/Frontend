@@ -1,8 +1,10 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import { useHeader } from '@/contexts/HeaderContext'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function ProtectedLayoutClient({
   children,
@@ -10,12 +12,38 @@ export default function ProtectedLayoutClient({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
+  const router = useRouter()
   const { headerContent } = useHeader()
+  const {
+    isAuthenticated,
+    isOnboardingCompleted,
+    isLoading,
+    isOnboardingLoading,
+  } = useAuth()
 
-  // 쿠키 체크 로직 제거
-  // - HttpOnly 쿠키는 document.cookie로 읽을 수 없음
-  // - Middleware에서 서버사이드로 access_token 체크 수행
-  // - 토큰 재발급은 useAuth Hook에서 처리
+  // 온보딩 완료 체크 및 리다이렉트
+  useEffect(() => {
+    // 로딩 중이거나 온보딩 페이지면 체크 안함
+    if (
+      isLoading ||
+      isOnboardingLoading ||
+      pathname.startsWith('/onboarding')
+    ) {
+      return
+    }
+
+    // 인증은 되었지만 온보딩 미완료 시 → 온보딩으로
+    if (isAuthenticated && !isOnboardingCompleted) {
+      router.push('/onboarding')
+    }
+  }, [
+    isAuthenticated,
+    isOnboardingCompleted,
+    isLoading,
+    isOnboardingLoading,
+    pathname,
+    router,
+  ])
 
   // 온보딩 페이지에서는 바텀 네비게이션 숨김
   const hideBottomNavigation =

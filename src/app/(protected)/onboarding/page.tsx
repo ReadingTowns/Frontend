@@ -11,7 +11,7 @@ import PhoneStep from '@/components/onboarding/PhoneStep'
 import ProfileStep from '@/components/onboarding/ProfileStep'
 import LocationStep from '@/components/onboarding/LocationStep'
 import PreferencesStep from '@/components/onboarding/PreferencesStep'
-import KeywordsStep from '@/components/onboarding/KeywordsStep'
+import KeywordStep from '@/components/onboarding/KeywordStep'
 import CompleteStep from '@/components/onboarding/CompleteStep'
 import { OnboardingStep, OnboardingData } from '@/types/onboarding'
 import { api } from '@/lib/api'
@@ -23,7 +23,9 @@ const steps: OnboardingStep[] = [
   'profile',
   'location',
   'preferences',
-  'keywords',
+  'keywords1',
+  'keywords2',
+  'keywords3',
   'complete',
 ]
 
@@ -80,15 +82,9 @@ export default function OnboardingPage() {
     })
   }, [])
 
-  // 온보딩 완료 여부 확인 및 리다이렉트
+  // 온보딩 완료 여부 확인 - ProtectedLayoutClient에서 처리하므로 완료된 경우만 체크
   useEffect(() => {
     if (isLoading) return
-
-    // 인증되지 않은 경우 로그인 페이지로
-    if (!isAuthenticated) {
-      router.push('/login')
-      return
-    }
 
     // 이미 온보딩 완료한 경우 홈으로
     if (isAuthenticated && isOnboardingCompleted) {
@@ -126,8 +122,14 @@ export default function OnboardingPage() {
       case 'preferences':
         setCurrentStep('location')
         break
-      case 'keywords':
+      case 'keywords1':
         setCurrentStep('preferences')
+        break
+      case 'keywords2':
+        setCurrentStep('keywords1')
+        break
+      case 'keywords3':
+        setCurrentStep('keywords2')
         break
       default:
         break
@@ -149,9 +151,15 @@ export default function OnboardingPage() {
         setCurrentStep('preferences')
         break
       case 'preferences':
-        setCurrentStep('keywords')
+        setCurrentStep('keywords1')
         break
-      case 'keywords':
+      case 'keywords1':
+        setCurrentStep('keywords2')
+        break
+      case 'keywords2':
+        setCurrentStep('keywords3')
+        break
+      case 'keywords3':
         setCurrentStep('complete')
         break
       case 'complete':
@@ -199,9 +207,15 @@ export default function OnboardingPage() {
       case 'preferences':
         // 선택적 입력: 항상 다음 단계로 진행 가능
         return true
-      case 'keywords':
-        // 전체 키워드 최소 3개 이상 선택 필수
-        return (onboardingData.keywordIds?.length || 0) >= 3
+      case 'keywords1':
+        // 장르 키워드 최소 1개 이상 선택 필수
+        return (onboardingData.genreKeywordIds?.length || 0) >= 1
+      case 'keywords2':
+        // 주제 키워드 최소 1개 이상 선택 필수
+        return (onboardingData.contentKeywordIds?.length || 0) >= 1
+      case 'keywords3':
+        // 분위기 키워드 최소 1개 이상 선택 필수
+        return (onboardingData.moodKeywordIds?.length || 0) >= 1
       case 'complete':
         return true
       default:
@@ -275,15 +289,32 @@ export default function OnboardingPage() {
           />
         )
 
-      case 'keywords':
+      case 'keywords1':
         return (
-          <KeywordsStep
-            genreKeywordIds={onboardingData.genreKeywordIds || []}
-            contentKeywordIds={onboardingData.contentKeywordIds || []}
-            moodKeywordIds={onboardingData.moodKeywordIds || []}
-            onGenreChange={handleGenreKeywordsChange}
-            onContentChange={handleContentKeywordsChange}
-            onMoodChange={handleMoodKeywordsChange}
+          <KeywordStep
+            type="GENRE"
+            selectedIds={onboardingData.genreKeywordIds || []}
+            onChange={handleGenreKeywordsChange}
+            onBack={handleBackButton}
+          />
+        )
+
+      case 'keywords2':
+        return (
+          <KeywordStep
+            type="CONTENT"
+            selectedIds={onboardingData.contentKeywordIds || []}
+            onChange={handleContentKeywordsChange}
+            onBack={handleBackButton}
+          />
+        )
+
+      case 'keywords3':
+        return (
+          <KeywordStep
+            type="MOOD"
+            selectedIds={onboardingData.moodKeywordIds || []}
+            onChange={handleMoodKeywordsChange}
             onBack={handleBackButton}
           />
         )

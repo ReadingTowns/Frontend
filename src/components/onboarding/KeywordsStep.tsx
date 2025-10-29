@@ -19,11 +19,16 @@ interface KeywordsStepProps {
   onMoodChange: (ids: number[]) => void
   /** 뒤로가기 핸들러 */
   onBack: () => void
+  /** 현재 SubStep 변경 핸들러 */
+  onSubStepChange?: (step: 1 | 2 | 3) => void
 }
 
 /**
- * 온보딩 키워드 선택 단계 (통합 버전)
- * - GENRE, CONTENT, MOOD 세 섹션을 하나의 페이지에 스크롤로 표시
+ * 온보딩 키워드 선택 단계 (3단계 분리 버전)
+ * - Step 1: 🎭 장르 (GENRE)
+ * - Step 2: 💭 주제 (CONTENT)
+ * - Step 3: 📖 분위기 (MOOD)
+ * - 각 단계마다 최소 1개 이상 선택 필요
  */
 export default function KeywordsStep({
   genreKeywordIds,
@@ -33,7 +38,14 @@ export default function KeywordsStep({
   onContentChange,
   onMoodChange,
   onBack,
+  onSubStepChange,
 }: KeywordsStepProps) {
+  const [currentSubStep, setCurrentSubStep] = useState<1 | 2 | 3>(1)
+
+  // SubStep 변경 시 부모에게 알림
+  useEffect(() => {
+    onSubStepChange?.(currentSubStep)
+  }, [currentSubStep, onSubStepChange])
   const [genreSelected, setGenreSelected] = useState<Set<number>>(
     new Set(genreKeywordIds || [])
   )
@@ -103,6 +115,34 @@ export default function KeywordsStep({
     setMoodSelected(newSelected)
   }
 
+  // 현재 단계의 선택된 ID 가져오기
+  const getCurrentSelectedIds = () => {
+    if (currentSubStep === 1) return genreSelected
+    if (currentSubStep === 2) return contentSelected
+    return moodSelected
+  }
+
+  // 현재 단계에서 다음으로 넘어갈 수 있는지
+  const canProceedToNext = getCurrentSelectedIds().size >= 1
+
+  // 다음 단계로
+  const handleNext = () => {
+    if (!canProceedToNext) return
+    if (currentSubStep < 3) {
+      setCurrentSubStep(prev => (prev + 1) as 1 | 2 | 3)
+    }
+  }
+
+  // 이전 단계로
+  const handleSubBack = () => {
+    if (currentSubStep > 1) {
+      setCurrentSubStep(prev => (prev - 1) as 1 | 2 | 3)
+    } else {
+      // Step 1에서 이전 버튼 누르면 온보딩 이전 단계로
+      onBack()
+    }
+  }
+
   // 로딩 상태
   if (genreLoading || contentLoading || moodLoading) {
     return (
@@ -145,8 +185,36 @@ export default function KeywordsStep({
     )
   }
 
-  const totalSelected =
-    genreSelected.size + contentSelected.size + moodSelected.size
+  // 현재 단계 데이터 가져오기
+  const getStepData = () => {
+    if (currentSubStep === 1) {
+      return {
+        title: '🎭 좋아하는 장르',
+        description: '관심있는 장르를 선택해주세요 (최소 1개)',
+        keywords: genreData.keywordList,
+        selectedIds: genreSelected,
+        toggleKeyword: toggleGenreKeyword,
+      }
+    } else if (currentSubStep === 2) {
+      return {
+        title: '💭 관심있는 주제',
+        description: '읽고 싶은 주제를 선택해주세요 (최소 1개)',
+        keywords: contentData.keywordList,
+        selectedIds: contentSelected,
+        toggleKeyword: toggleContentKeyword,
+      }
+    } else {
+      return {
+        title: '📖 선호하는 분위기',
+        description: '원하는 분위기를 선택해주세요 (최소 1개)',
+        keywords: moodData.keywordList,
+        selectedIds: moodSelected,
+        toggleKeyword: toggleMoodKeyword,
+      }
+    }
+  }
+
+  const stepData = getStepData()
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
@@ -154,7 +222,7 @@ export default function KeywordsStep({
       <div className="bg-white px-4 pt-6 pb-4 border-b border-gray-200">
         {/* 뒤로가기 버튼 */}
         <button
-          onClick={onBack}
+          onClick={handleSubBack}
           className="flex items-center text-gray-600 hover:text-gray-900 transition-colors mb-6"
         >
           <svg
@@ -173,103 +241,86 @@ export default function KeywordsStep({
           <span className="ml-1">이전</span>
         </button>
 
+        {/* Step 인디케이터 */}
+        <div className="flex items-center justify-center gap-2 mb-6">
+          {[1, 2, 3].map(step => (
+            <div
+              key={step}
+              className={`flex items-center ${step < 3 ? 'flex-1' : ''}`}
+            >
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
+                  currentSubStep === step
+                    ? 'bg-primary-400 text-white'
+                    : currentSubStep > step
+                      ? 'bg-primary-200 text-primary-700'
+                      : 'bg-gray-200 text-gray-500'
+                }`}
+              >
+                {step}
+              </div>
+              {step < 3 && (
+                <div
+                  className={`flex-1 h-1 mx-2 rounded transition-colors ${
+                    currentSubStep > step ? 'bg-primary-400' : 'bg-gray-200'
+                  }`}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+
         {/* 제목 */}
         <h1 className="text-2xl font-bold text-gray-900 mb-2">
-          선호하는 키워드를 선택해주세요
+          {stepData.title}
         </h1>
-        <p className="text-gray-600">
-          장르, 주제, 분위기 중 최소 3개 이상 선택해주세요
-        </p>
+        <p className="text-gray-600">{stepData.description}</p>
         <div className="mt-4">
           <span className="text-sm font-medium text-primary-600">
-            선택한 키워드: {totalSelected}개
+            선택한 키워드: {stepData.selectedIds.size}개
           </span>
         </div>
       </div>
 
       {/* 키워드 선택 영역 - 스크롤 */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-8">
-        {/* GENRE 섹션 */}
-        <div>
-          <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-            <span className="mr-2">🎭</span>
-            좋아하는 장르
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {genreData.keywordList.map((keyword: KeywordItem) => {
-              const isSelected = genreSelected.has(keyword.id)
-              return (
-                <button
-                  key={keyword.id}
-                  onClick={() => toggleGenreKeyword(keyword.id)}
-                  className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-primary-400 text-white shadow-sm'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                  }`}
-                  aria-pressed={isSelected}
-                >
-                  {keyword.content}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* CONTENT 섹션 */}
-        <div>
-          <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-            <span className="mr-2">💭</span>
-            관심있는 주제
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {contentData.keywordList.map((keyword: KeywordItem) => {
-              const isSelected = contentSelected.has(keyword.id)
-              return (
-                <button
-                  key={keyword.id}
-                  onClick={() => toggleContentKeyword(keyword.id)}
-                  className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-primary-400 text-white shadow-sm'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                  }`}
-                  aria-pressed={isSelected}
-                >
-                  {keyword.content}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* MOOD 섹션 */}
-        <div>
-          <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-            <span className="mr-2">📖</span>
-            선호하는 분위기
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            {moodData.keywordList.map((keyword: KeywordItem) => {
-              const isSelected = moodSelected.has(keyword.id)
-              return (
-                <button
-                  key={keyword.id}
-                  onClick={() => toggleMoodKeyword(keyword.id)}
-                  className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
-                    isSelected
-                      ? 'bg-primary-400 text-white shadow-sm'
-                      : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
-                  }`}
-                  aria-pressed={isSelected}
-                >
-                  {keyword.content}
-                </button>
-              )
-            })}
-          </div>
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="flex flex-wrap gap-2">
+          {stepData.keywords.map((keyword: KeywordItem) => {
+            const isSelected = stepData.selectedIds.has(keyword.id)
+            return (
+              <button
+                key={keyword.id}
+                onClick={() => stepData.toggleKeyword(keyword.id)}
+                className={`px-4 py-2.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-primary-400 text-white shadow-sm'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                }`}
+                aria-pressed={isSelected}
+              >
+                {keyword.content}
+              </button>
+            )
+          })}
         </div>
       </div>
+
+      {/* 하단 버튼 (Step 1, 2에만 표시) */}
+      {currentSubStep < 3 && (
+        <div className="bg-white border-t border-gray-200 p-4">
+          <button
+            onClick={handleNext}
+            disabled={!canProceedToNext}
+            className={`w-full py-3 px-4 rounded-xl font-medium transition-colors ${
+              canProceedToNext
+                ? 'bg-primary-400 hover:bg-primary-500 text-white'
+                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+            }`}
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
   )
 }
