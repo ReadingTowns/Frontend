@@ -33,7 +33,8 @@ export interface KeywordCandidatesResponse {
  */
 export const useRecommendKeywordCandidates = (type: KeywordType) => {
   return useQuery({
-    queryKey: ['recommend', 'keywords', 'candidates', type],
+    // type을 queryKey에서 제거 → 모든 type이 같은 캐시 공유 (API 1번만 호출)
+    queryKey: ['recommend', 'keywords', 'candidates'],
     queryFn: async () => {
       const response = await api.get<KeywordCandidatesResponse>(
         '/api/v1/recommendations/members/keywords'
@@ -44,17 +45,21 @@ export const useRecommendKeywordCandidates = (type: KeywordType) => {
         throw new Error('키워드 데이터를 불러올 수 없습니다')
       }
 
-      // type에 맞는 키워드 배열 선택
+      // 전체 응답 반환 (type별 필터링은 select로 처리)
+      return response
+    },
+    // type에 맞는 데이터만 선택
+    select: data => {
       let keywordList: KeywordItem[]
       switch (type) {
         case 'GENRE':
-          keywordList = response.genreKeyword
+          keywordList = data.genreKeyword
           break
         case 'CONTENT':
-          keywordList = response.contentKeyword
+          keywordList = data.contentKeyword
           break
         case 'MOOD':
-          keywordList = response.moodKeyword
+          keywordList = data.moodKeyword
           break
         default:
           throw new Error('유효하지 않은 키워드 타입입니다')

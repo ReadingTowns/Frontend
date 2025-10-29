@@ -17,7 +17,9 @@ export type OnboardingStep =
   | 'profile'
   | 'location'
   | 'preferences'
-  | 'keywords'
+  | 'keywords1'
+  | 'keywords2'
+  | 'keywords3'
   | 'complete'
 
 export interface PhoneStepProps {
