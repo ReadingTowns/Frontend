@@ -7,13 +7,10 @@ import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
 import { useUserRating } from '@/hooks/useUserRating'
 import { useSnackbar } from '@/hooks/useSnackbar'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useState } from 'react'
 import RatingModal from '@/components/user/RatingModal'
-import {
-  BookCardSkeleton,
-  ProfileSkeleton,
-  HeaderSkeleton,
-} from '@/components/ui/Skeleton'
+import { BookCardSkeleton, ProfileSkeleton } from '@/components/ui/Skeleton'
 import { LibraryBook } from '@/types/library'
 import {
   UserCircleIcon,
@@ -41,6 +38,18 @@ export default function UserLibraryPage() {
   const displayRating = userRating?.userRating ?? profile?.userRating
   const displayRatingCount =
     userRating?.userRatingCount ?? profile?.userRatingCount
+
+  // 헤더 설정
+  useHeaderConfig(
+    {
+      variant: 'navigation',
+      title: profile ? `${profile.nickname}님의 서재` : '서재',
+      subtitle: isOwnLibrary
+        ? '나만의 책 컬렉션을 관리해보세요'
+        : '이웃의 책 컬렉션을 둘러보세요',
+    },
+    [profile, isOwnLibrary]
+  )
 
   // 교환 신청 상태 관리
   const [showExchangeModal, setShowExchangeModal] = useState(false)
@@ -100,7 +109,6 @@ export default function UserLibraryPage() {
   if (profileLoading || booksLoading) {
     return (
       <>
-        <HeaderSkeleton />
         <ProfileSkeleton />
         <div className="grid grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
@@ -127,24 +135,6 @@ export default function UserLibraryPage() {
 
   return (
     <>
-      {/* Header */}
-      <header className="mb-6">
-        <button
-          onClick={() => window.history.back()}
-          className="text-gray-600 hover:text-gray-800 mb-4"
-        >
-          ← 뒤로
-        </button>
-        <h1 className="text-2xl font-bold text-gray-900">
-          {profile.nickname}님의 서재
-        </h1>
-        <p className="text-sm text-gray-600">
-          {isOwnLibrary
-            ? '나만의 책 컬렉션을 관리해보세요'
-            : '이웃의 책 컬렉션을 둘러보세요'}
-        </p>
-      </header>
-
       {/* User Profile */}
       <div className="bg-white rounded-lg p-4 border border-gray-200 mb-6">
         <div className="flex items-center gap-4 mb-4">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { BookCard } from '@/components/books/BookCard'
 import { Book } from '@/types/bookCard'
 import { useBookDetailPage } from '@/hooks/useBookDetail'
@@ -33,6 +34,12 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
   // 책 주인의 감상평 조회 (다른 유저의 서재에서 온 경우만)
   const { data: ownerReview, isLoading: ownerReviewLoading } =
     useUserBookReview(bookId, ownerId || '')
+
+  useHeaderConfig({
+    variant: 'navigation',
+    title: '책 정보',
+    onBack: () => router.back(),
+  })
 
   if (isLoading) {
     return (
@@ -71,32 +78,6 @@ export default function BookDetailClient({ bookId }: BookDetailClientProps) {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <header className="sticky top-0 z-10 bg-white shadow-sm">
-        <div className="mx-auto flex max-w-[430px] items-center gap-4 px-4 py-3">
-          <button
-            onClick={() => router.back()}
-            className="text-gray-600 hover:text-gray-900"
-            aria-label="뒤로가기"
-          >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </button>
-          <h1 className="flex-1 truncate text-lg font-semibold">책 정보</h1>
-        </div>
-      </header>
-
       {/* 메인 컨텐츠 */}
       <div className="mx-auto max-w-[430px] bg-white">
         {/* 책 정보 카드 */}

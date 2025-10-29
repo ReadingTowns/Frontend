@@ -1,12 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import TownEditModal from '@/components/profile/TownEditModal'
 import {
-  ArrowLeftIcon,
   ClockIcon,
   MapPinIcon,
   LightBulbIcon,
@@ -29,26 +28,13 @@ interface UserProfile {
 
 export default function TownEditClient() {
   const router = useRouter()
-  const { setHeaderContent } = useHeader()
   const [showTownModal, setShowTownModal] = useState(false)
 
-  useEffect(() => {
-    setHeaderContent(
-      <header className="flex items-center gap-3">
-        <button
-          onClick={() => router.back()}
-          className="p-2 hover:bg-gray-100 rounded-lg"
-        >
-          <ArrowLeftIcon className="w-6 h-6" />
-        </button>
-        <h1 className="text-xl font-bold">동네 설정</h1>
-      </header>
-    )
-
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [setHeaderContent, router])
+  useHeaderConfig({
+    variant: 'navigation',
+    title: '동네 설정',
+    onBack: () => router.back(),
+  })
 
   // 현재 프로필 정보 가져오기
   const { data: profile, isLoading } = useQuery<UserProfile>({

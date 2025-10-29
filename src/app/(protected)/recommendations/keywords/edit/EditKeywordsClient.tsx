@@ -4,13 +4,10 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useRecommendKeywords } from '@/hooks/useRecommendKeywords'
-import {
-  KeywordCandidatesResponse,
-  useRecommendKeywordCandidates,
-} from '@/hooks/useRecommendKeywordCandidates'
+import { KeywordCandidatesResponse } from '@/hooks/useRecommendKeywordCandidates'
 import { useSnackbar } from '@/hooks/useSnackbar'
 import { api } from '@/lib/api'
-import ProgressHeader from '@/components/layout/ProgressHeader'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import KeywordStep from '@/components/onboarding/KeywordStep'
 
 export default function EditKeywordsClient() {
@@ -128,6 +125,17 @@ export default function EditKeywordsClient() {
     }
   }
 
+  // Progress 헤더 설정
+  useHeaderConfig(
+    {
+      variant: 'progress',
+      title: '키워드 편집',
+      currentStep: currentStep,
+      totalSteps: 3,
+    },
+    [currentStep]
+  )
+
   // 로딩 중
   if (isLoading) {
     return (
@@ -144,11 +152,6 @@ export default function EditKeywordsClient() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Progress Header */}
-      <div className="flex-shrink-0">
-        <ProgressHeader currentStep={currentStep} totalSteps={3} />
-      </div>
-
       {/* Keyword Step */}
       <div className="flex-1 overflow-y-auto">
         {currentStep === 1 && (

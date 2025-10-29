@@ -18,11 +18,19 @@ export default function HomeTabs({
   activeTab,
   onTabChange,
 }: HomeTabsProps) {
+  // 탭 데이터 정의
   const tabs = [
-    { id: 'myTown' as const, label: `${nickname}님의 리딩타운` },
+    {
+      id: 'myTown' as const,
+      nickname: nickname,
+      suffix: '님의 리딩타운',
+      fullLabel: `${nickname}님의 리딩타운`,
+    },
     {
       id: 'recommendations' as const,
-      label: `${nickname}님에게 추천하는 도서`,
+      nickname: nickname,
+      suffix: '님에게 추천하는 도서',
+      fullLabel: `${nickname}님에게 추천하는 도서`,
     },
   ]
 
@@ -34,7 +42,7 @@ export default function HomeTabs({
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              flex-1 px-4 py-3 text-sm font-medium transition-all
+              flex-1 min-w-0 px-3 py-3 text-sm font-medium transition-all
               ${
                 activeTab === tab.id
                   ? 'text-primary-600 border-b-2 border-primary-600'
@@ -43,8 +51,16 @@ export default function HomeTabs({
             `}
             aria-selected={activeTab === tab.id}
             role="tab"
+            title={tab.fullLabel} // 툴팁으로 전체 텍스트 표시
           >
-            {tab.label}
+            <span className="flex items-center justify-center">
+              {/* 닉네임 부분만 말줄임 처리 */}
+              <span className="truncate max-w-[60px] sm:max-w-[80px] md:max-w-[100px]">
+                {tab.nickname}
+              </span>
+              {/* 뒤쪽 텍스트는 고정 */}
+              <span className="flex-shrink-0">{tab.suffix}</span>
+            </span>
           </button>
         ))}
       </div>

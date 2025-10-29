@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import SocialTabs from './components/SocialTabs'
 import MessagesTab from './components/MessagesTab'
 import FollowingTab from './components/FollowingTab'
@@ -13,21 +13,13 @@ import type { SocialTab } from '@/types/social'
 
 export default function SocialClient() {
   const [activeTab, setActiveTab] = useState<SocialTab>('messages')
-  const { setHeaderContent } = useHeader()
   const queryClient = useQueryClient()
 
-  useEffect(() => {
-    setHeaderContent(
-      <header>
-        <h1 className="text-2xl font-bold">소셜</h1>
-        <p className="text-sm text-gray-600 mt-1">이웃과 소통하세요</p>
-      </header>
-    )
-
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [setHeaderContent])
+  useHeaderConfig({
+    variant: 'basic',
+    title: '소셜',
+    subtitle: '이웃과 소통하세요',
+  })
 
   const handleTabChange = (tab: SocialTab) => {
     setActiveTab(tab)

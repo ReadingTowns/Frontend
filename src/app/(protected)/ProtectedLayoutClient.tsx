@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
+import CommonHeader from '@/components/layout/CommonHeader'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -13,7 +14,7 @@ export default function ProtectedLayoutClient({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const { headerContent } = useHeader()
+  const { headerContent, headerConfig } = useHeader()
   const {
     isAuthenticated,
     isOnboardingCompleted,
@@ -53,7 +54,10 @@ export default function ProtectedLayoutClient({
 
   return (
     <div className="h-screen-safe flex flex-col overflow-hidden">
-      {headerContent}
+      {/* 새로운 CommonHeader 사용 (headerConfig 기반) */}
+      {headerConfig && <CommonHeader />}
+      {/* 레거시 지원: headerContent가 있고 headerConfig가 없는 경우 */}
+      {!headerConfig && headerContent}
       <main className="flex flex-col flex-1 max-w-[430px] mx-auto w-full overflow-y-auto">
         {children}
       </main>

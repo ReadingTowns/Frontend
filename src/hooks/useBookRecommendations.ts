@@ -48,7 +48,7 @@ const getBookRecommendations = async (): Promise<BookRecommendation[]> => {
   return books.map(book => ({
     bookId: book.bookId,
     bookTitle: book.bookName,
-    bookCoverImage: book.bookImage || null, // 이미지 URL 매핑
+    bookCoverImage: book.bookImage || undefined, // 이미지 URL 매핑
     author: book.author,
     publisher: book.publisher,
     matchScore: book.similarity,

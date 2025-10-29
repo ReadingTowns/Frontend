@@ -1,11 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useAuth } from '@/hooks/useAuth'
 import { useSnackbar } from '@/hooks/useSnackbar'
-import ProgressHeader from '@/components/layout/ProgressHeader'
 import StartStep from '@/components/onboarding/StartStep'
 import PhoneStep from '@/components/onboarding/PhoneStep'
 import ProfileStep from '@/components/onboarding/ProfileStep'
@@ -31,7 +30,6 @@ const steps: OnboardingStep[] = [
 
 export default function OnboardingPage() {
   const router = useRouter()
-  const { setHeaderContent } = useHeader()
   const { isAuthenticated, isOnboardingCompleted, isLoading } = useAuth()
   const { showError } = useSnackbar()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('start')
@@ -93,20 +91,21 @@ export default function OnboardingPage() {
     }
   }, [isAuthenticated, isOnboardingCompleted, isLoading, router])
 
-  // Update header when step changes
-  useEffect(() => {
-    const currentStepIndex = steps.indexOf(currentStep) + 1
-    setHeaderContent(
-      <ProgressHeader
-        currentStep={currentStepIndex}
-        totalSteps={steps.length}
-      />
-    )
+  // 진행률 계산
+  const currentStepIndex = useMemo(() => {
+    return steps.indexOf(currentStep) + 1
+  }, [currentStep])
 
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [currentStep, setHeaderContent])
+  // Progress 헤더 설정
+  useHeaderConfig(
+    {
+      variant: 'progress',
+      title: '온보딩',
+      currentStep: currentStepIndex,
+      totalSteps: steps.length,
+    },
+    [currentStepIndex]
+  )
 
   const handleBackButton = () => {
     switch (currentStep) {

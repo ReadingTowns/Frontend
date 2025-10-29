@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { useHeader } from '@/contexts/HeaderContext'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import {
   useChatRoomMessages,
   usePartnerProfile,
@@ -13,11 +13,7 @@ import type { Message } from '@/types/chatroom'
 import type { ChatMessage } from '@/services/websocketService'
 import MessageBubble from '../components/MessageBubble'
 import MessageInput from '../components/MessageInput'
-import {
-  ChatBubbleLeftIcon,
-  BookOpenIcon,
-  ArrowPathIcon,
-} from '@heroicons/react/24/outline'
+import { ChatBubbleLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
 interface ChatRoomClientProps {
   conversationId: string
@@ -27,7 +23,6 @@ export default function ChatRoomClient({
   conversationId,
 }: ChatRoomClientProps) {
   const router = useRouter()
-  const { setHeaderContent } = useHeader()
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const chatroomId = parseInt(conversationId)
@@ -71,46 +66,29 @@ export default function ChatRoomClient({
     onDisconnect: handleDisconnect,
   })
 
-  // Set header with partner info
-  useEffect(() => {
-    if (!partner) return
-
-    setHeaderContent(
-      <header className="flex items-center gap-3">
-        <button
-          onClick={() => router.push('/social')}
-          className="p-2 hover:bg-gray-100 rounded-lg"
-        >
-          <span className="text-xl">←</span>
-        </button>
-        <div className="flex-1">
-          <h1 className="text-xl font-bold">{partner.nickname}</h1>
-          {exchangeBooks && exchangeBooks[0]?.myBook?.bookName && (
-            <p className="text-xs text-primary-600 flex items-center gap-1">
-              <BookOpenIcon className="w-3 h-3" />
-              {exchangeBooks[0].myBook.bookName}
-            </p>
-          )}
-        </div>
-        {/* WebSocket 연결 상태 표시 */}
-        <div className="flex items-center gap-2">
-          <div
-            className={`w-2 h-2 rounded-full ${
-              isConnected ? 'bg-green-500' : 'bg-gray-300'
-            }`}
-            title={isConnected ? '연결됨' : '연결 끊김'}
-          />
-          <span className="text-xs text-gray-500">
-            {isConnected ? '실시간' : '오프라인'}
-          </span>
-        </div>
-      </header>
-    )
-
-    return () => {
-      setHeaderContent(null)
-    }
-  }, [setHeaderContent, router, partner, exchangeBooks, isConnected])
+  // Chat 헤더 설정
+  useHeaderConfig(
+    {
+      variant: 'chat',
+      partner: partner
+        ? {
+            id: partner.memberId,
+            nickname: partner.nickname,
+            profileImage: partner.profileImage,
+          }
+        : { id: 0, nickname: '채팅' },
+      isConnected,
+      bookInfo:
+        exchangeBooks && exchangeBooks[0]?.myBook?.bookName
+          ? {
+              bookName: exchangeBooks[0].myBook.bookName,
+              bookImage: exchangeBooks[0].myBook.bookImage || undefined,
+            }
+          : undefined,
+      onBack: () => router.push('/social'),
+    },
+    [partner, isConnected, exchangeBooks]
+  )
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

@@ -14,6 +14,7 @@ import SearchRecommendations from '@/components/recommendations/SearchRecommenda
 import { HomeTab } from '@/types/home'
 import { useAuth } from '@/hooks/useAuth'
 import { useExchangedBooks } from '@/hooks/useExchangedBooks'
+import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 
 /**
  * 홈 화면 페이지
@@ -41,6 +42,15 @@ function HomePageContent() {
 
   // 닉네임: API에서 가져온 닉네임 사용, 없으면 '사용자' 기본값
   const nickname = user?.nickname || '사용자'
+
+  // 헤더 설정
+  useHeaderConfig(
+    {
+      variant: 'basic',
+      title: '리딩타운',
+    },
+    []
+  )
 
   // 탭 변경 시 URL query parameter 업데이트
   const handleTabChange = (tab: HomeTab) => {
