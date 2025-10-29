@@ -18,7 +18,6 @@ export default function SocialClient() {
   useHeaderConfig({
     variant: 'basic',
     title: '소셜',
-    subtitle: '이웃과 소통하세요',
   })
 
   const handleTabChange = (tab: SocialTab) => {

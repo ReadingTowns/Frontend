@@ -9,6 +9,7 @@ import { DevLoginButton } from '@/components/auth/DevLoginButton'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import Image from 'next/image'
 
 function LoginContent() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -142,6 +143,17 @@ function LoginContent() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center space-y-8 px-4">
       <div className="text-center space-y-4">
+        {/* 로고 이미지 추가 - Next.js Image 컴포넌트로 최적화 */}
+        <div className="relative w-24 h-24 mx-auto mb-4">
+          <Image
+            src="/logo.png"
+            alt="리딩타운 로고"
+            fill
+            sizes="96px"
+            priority
+            className="object-contain"
+          />
+        </div>
         <h1 className="text-3xl font-bold text-gray-900">리딩타운</h1>
         <p className="text-gray-600">책으로 이웃과 연결되는 공간</p>
       </div>
