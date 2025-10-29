@@ -46,9 +46,10 @@ export interface UserRecommendation {
   nickname: string
   profileImage: string
   currentTown: string
-  userRating: number
+  userRating: number | null // null 가능
   similarity?: number
   distance?: string
+  distanceKm?: number // 추가: 거리(킬로미터)
   matchedKeywords?: string[]
   matchedBooks?: string[]
   availableTime: string
