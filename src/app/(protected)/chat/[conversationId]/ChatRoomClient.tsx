@@ -30,14 +30,14 @@ export default function ChatRoomClient({
   // Fetch partner profile
   const { data: partner } = usePartnerProfile(chatroomId)
 
-  // Fetch exchange books info
+  // Fetch exchange books info (legacy)
   const { data: exchangeBooks } = useExchangeBooks(chatroomId)
 
   // Fetch messages
   const { data: messagesData, isLoading } = useChatRoomMessages(chatroomId)
 
   // Get current user ID from first page response
-  const myMemberId = messagesData?.pages[0]?.myMemberId
+  const myMemberId = messagesData?.pages[0]?.myMemberId || 0
 
   // ✅ FIX: useCallback으로 안정적인 콜백 참조 유지
   const handleMessageReceived = useCallback((message: ChatMessage) => {
@@ -78,13 +78,12 @@ export default function ChatRoomClient({
           }
         : { id: 0, nickname: '채팅' },
       isConnected,
-      bookInfo:
-        exchangeBooks && exchangeBooks[0]?.myBook?.bookName
-          ? {
-              bookName: exchangeBooks[0].myBook.bookName,
-              bookImage: exchangeBooks[0].myBook.bookImage || undefined,
-            }
-          : undefined,
+      bookInfo: exchangeBooks?.myBook?.bookName
+        ? {
+            bookName: exchangeBooks.myBook.bookName,
+            bookImage: exchangeBooks.myBook.bookImage || undefined,
+          }
+        : undefined,
       onBack: () => router.push('/social'),
     },
     [partner, isConnected, exchangeBooks]
@@ -176,6 +175,12 @@ export default function ChatRoomClient({
                     dateMessages[index - 1]?.senderId !== message.senderId
                   }
                   partnerName={partner?.nickname}
+                  exchangeBooks={exchangeBooks}
+                  chatroomId={chatroomId}
+                  onNewRequest={() => {
+                    // TODO: Navigate to new exchange request dialog
+                    console.log('New exchange request clicked')
+                  }}
                 />
               ))}
             </div>

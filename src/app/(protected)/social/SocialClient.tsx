@@ -8,6 +8,7 @@ import MessagesTab from './components/MessagesTab'
 import FollowingTab from './components/FollowingTab'
 import FollowersTab from './components/FollowersTab'
 import ExploreTab from './components/ExploreTab'
+import ExchangeTab from './components/ExchangeTab'
 import { socialKeys } from '@/types/social'
 import type { SocialTab } from '@/types/social'
 
@@ -50,6 +51,7 @@ export default function SocialClient() {
       {activeTab === 'following' && <FollowingTab />}
       {activeTab === 'followers' && <FollowersTab />}
       {activeTab === 'explore' && <ExploreTab />}
+      {activeTab === 'exchange' && <ExchangeTab />}
     </div>
   )
 }

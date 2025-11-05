@@ -18,6 +18,7 @@ export default function SocialTabs({
     { id: 'following' as const, label: '팔로잉' },
     { id: 'followers' as const, label: '팔로워' },
     { id: 'explore' as const, label: '둘러보기' },
+    { id: 'exchange' as const, label: '책 교환' },
   ]
 
   return (

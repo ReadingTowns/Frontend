@@ -1,3 +1,16 @@
+/**
+ * useChatRoom Hook
+ * 채팅룸 관련 기본 기능 (리스트, 메시지, 프로필)
+ *
+ * 교환 기능 마이그레이션 안내:
+ * - Legacy 교환 API: useExchangeBooks, useCompleteExchange, useReturnExchange (deprecated)
+ * - 새로운 교환 API: useExchange hook 사용 권장 (@/hooks/useExchange)
+ *
+ * 백엔드 마이그레이션:
+ * - 새로운 교환 시스템은 메시지 타입 기반 (EXCHANGE_REQUEST, EXCHANGE_ACCEPTED, etc.)
+ * - 기존 교환 API는 backward compatibility를 위해 유지
+ */
+
 import {
   useQuery,
   useMutation,
@@ -85,7 +98,8 @@ export const usePartnerProfile = (chatroomId: number) => {
 }
 
 /**
- * 채팅룸 교환 책 정보 조회
+ * 채팅룸 교환 책 정보 조회 (Legacy)
+ * @deprecated Use useExchange hook from '@/hooks/useExchange' for new exchange system
  */
 export const useExchangeBooks = (chatroomId: number) => {
   return useQuery({
@@ -155,7 +169,8 @@ export const useDeleteChatRoom = () => {
 }
 
 /**
- * 대면 교환 완료
+ * 대면 교환 완료 (Legacy)
+ * @deprecated Use useCompleteExchange hook from '@/hooks/useExchange' for new exchange system
  */
 export const useCompleteExchange = () => {
   const queryClient = useQueryClient()
@@ -174,7 +189,8 @@ export const useCompleteExchange = () => {
 }
 
 /**
- * 대면 반납 완료
+ * 대면 반납 완료 (Legacy)
+ * @deprecated Use useReturnExchange hook from '@/hooks/useExchange' for new exchange system
  */
 export const useReturnExchange = () => {
   const queryClient = useQueryClient()
