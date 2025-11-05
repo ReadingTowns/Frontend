@@ -2,22 +2,45 @@
  * WebSocket 실시간 채팅 서비스
  * 백엔드 WebSocket 엔드포인트: NEXT_PUBLIC_WS_URL
  *
+ * Breaking Changes (백엔드 마이그레이션):
+ * - messageType 필드 추가 (TEXT, EXCHANGE_REQUEST, etc.)
+ * - relatedBookhouseId, relatedExchangeStatusId 필드 추가
+ *
  * 사용 예시:
  * ```typescript
  * const ws = new WebSocketService()
  * await ws.connect()
  * ws.sendMessage(123, 'Hello!')
+ * ws.sendMessage(123, 'Exchange request', {
+ *   messageType: MessageType.EXCHANGE_REQUEST,
+ *   relatedBookhouseId: 456,
+ *   relatedExchangeStatusId: 789
+ * })
  * ```
  */
+
+import { MessageType } from '@/types/exchange'
 
 export interface ChatMessage {
   senderId: number
   message: string
+  messageType?: MessageType
+  relatedBookhouseId?: number
+  relatedExchangeStatusId?: number
 }
 
 export interface SendMessagePayload {
   roomId: number
   message: string
+  messageType?: MessageType
+  relatedBookhouseId?: number
+  relatedExchangeStatusId?: number
+}
+
+export interface SendMessageOptions {
+  messageType?: MessageType
+  relatedBookhouseId?: number
+  relatedExchangeStatusId?: number
 }
 
 type MessageHandler = (message: ChatMessage) => void
@@ -102,8 +125,27 @@ export class WebSocketService {
 
   /**
    * 메시지 전송
+   *
+   * @param roomId 채팅방 ID
+   * @param message 메시지 내용
+   * @param options 추가 옵션 (messageType, relatedBookhouseId, relatedExchangeStatusId)
+   *
+   * @example
+   * // 일반 텍스트 메시지
+   * ws.sendMessage(123, 'Hello!')
+   *
+   * // 교환 요청 메시지
+   * ws.sendMessage(123, 'Exchange request message', {
+   *   messageType: MessageType.EXCHANGE_REQUEST,
+   *   relatedBookhouseId: 456,
+   *   relatedExchangeStatusId: 789
+   * })
    */
-  sendMessage(roomId: number, message: string): void {
+  sendMessage(
+    roomId: number,
+    message: string,
+    options?: SendMessageOptions
+  ): void {
     if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
       throw new Error('WebSocket is not connected')
     }
@@ -111,6 +153,13 @@ export class WebSocketService {
     const payload: SendMessagePayload = {
       roomId,
       message,
+      ...(options?.messageType && { messageType: options.messageType }),
+      ...(options?.relatedBookhouseId && {
+        relatedBookhouseId: options.relatedBookhouseId,
+      }),
+      ...(options?.relatedExchangeStatusId && {
+        relatedExchangeStatusId: options.relatedExchangeStatusId,
+      }),
     }
 
     console.log('📤 Sending message:', payload)

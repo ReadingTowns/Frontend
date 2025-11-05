@@ -3,12 +3,12 @@ import type {
   ChatRoomListItem,
   MessagesResponse,
   PartnerProfile,
-  ExchangeBooksInfo,
+  ExchangeBooksResponse,
   CreateChatRoomRequest,
   CreateChatRoomResponse,
   CreateExchangeRequestRequest,
-  CreateExchangeRequestResponse,
 } from '@/types/chatroom'
+import type { ExchangeRequestResponse } from '@/types/exchange'
 
 // ============================================================================
 // API Service Functions
@@ -69,8 +69,8 @@ export const getPartnerProfile = async (
  */
 export const getExchangeBooks = async (
   chatroomId: number
-): Promise<ExchangeBooksInfo[]> => {
-  const response = await api.get<ExchangeBooksInfo[]>(
+): Promise<ExchangeBooksResponse> => {
+  const response = await api.get<ExchangeBooksResponse>(
     `/api/v1/chatrooms/${chatroomId}/books`
   )
   return response
@@ -96,8 +96,8 @@ export const createChatRoom = async (
  */
 export const createExchangeRequest = async (
   data: CreateExchangeRequestRequest
-): Promise<CreateExchangeRequestResponse> => {
-  const response = await api.post<CreateExchangeRequestResponse>(
+): Promise<ExchangeRequestResponse> => {
+  const response = await api.post<ExchangeRequestResponse>(
     '/api/v1/exchange-requests',
     data
   )
