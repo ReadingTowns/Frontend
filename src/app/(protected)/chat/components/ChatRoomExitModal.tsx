@@ -2,31 +2,31 @@
 
 import { Modal } from '@/components/common/Modal'
 
-interface LogoutModalProps {
+interface ChatRoomExitModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
   isLoading?: boolean
 }
 
-export default function LogoutModal({
+export default function ChatRoomExitModal({
   isOpen,
   onClose,
   onConfirm,
   isLoading = false,
-}: LogoutModalProps) {
+}: ChatRoomExitModalProps) {
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title="로그아웃 하시겠습니까?"
+      title="채팅방 나가기"
       closeOnBackdropClick={false}
       closeOnEsc={!isLoading}
       size="sm"
       showCloseButton={false}
     >
       <div className="p-6 text-center">
-        {/* 아이콘 */}
+        {/* 경고 아이콘 */}
         <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
           <svg
             className="w-6 h-6 text-red-600"
@@ -38,14 +38,14 @@ export default function LogoutModal({
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeWidth={2}
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
             />
           </svg>
         </div>
 
         {/* 설명 */}
         <p className="text-sm text-gray-600 mb-6">
-          로그아웃 시 다시 로그인이 필요합니다
+          채팅방을 나가면 모든 대화 내용이 삭제됩니다. 정말 나가시겠습니까?
         </p>
 
         {/* 버튼 */}
@@ -83,10 +83,10 @@ export default function LogoutModal({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   />
                 </svg>
-                처리중...
+                나가는 중...
               </span>
             ) : (
-              '로그아웃'
+              '나가기'
             )}
           </button>
         </div>
@@ -94,3 +94,5 @@ export default function LogoutModal({
     </Modal>
   )
 }
+
+ChatRoomExitModal.displayName = 'ChatRoomExitModal'

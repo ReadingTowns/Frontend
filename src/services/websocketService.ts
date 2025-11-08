@@ -22,16 +22,19 @@
 import { MessageType } from '@/types/exchange'
 
 export interface ChatMessage {
+  messageId?: number
+  chatroomId?: number
   senderId: number
-  message: string
+  content: string
   messageType?: MessageType
-  relatedBookhouseId?: number
-  relatedExchangeStatusId?: number
+  relatedBookhouseId?: number | null
+  relatedExchangeStatusId?: number | null
+  sentTime?: string
 }
 
 export interface SendMessagePayload {
-  roomId: number
-  message: string
+  chatroomId: number
+  content: string
   messageType?: MessageType
   relatedBookhouseId?: number
   relatedExchangeStatusId?: number
@@ -126,7 +129,7 @@ export class WebSocketService {
   /**
    * 메시지 전송
    *
-   * @param roomId 채팅방 ID
+   * @param chatroomId 채팅방 ID
    * @param message 메시지 내용
    * @param options 추가 옵션 (messageType, relatedBookhouseId, relatedExchangeStatusId)
    *
@@ -142,7 +145,7 @@ export class WebSocketService {
    * })
    */
   sendMessage(
-    roomId: number,
+    chatroomId: number,
     message: string,
     options?: SendMessageOptions
   ): void {
@@ -151,8 +154,8 @@ export class WebSocketService {
     }
 
     const payload: SendMessagePayload = {
-      roomId,
-      message,
+      chatroomId,
+      content: message,
       ...(options?.messageType && { messageType: options.messageType }),
       ...(options?.relatedBookhouseId && {
         relatedBookhouseId: options.relatedBookhouseId,

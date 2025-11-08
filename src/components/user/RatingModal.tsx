@@ -5,6 +5,7 @@ import { StarIcon } from '@heroicons/react/24/solid'
 import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 import { useSubmitRating } from '@/hooks/useUserRating'
 import { useSnackbar } from '@/hooks/useSnackbar'
+import { Modal } from '@/components/common/Modal'
 
 interface RatingModalProps {
   isOpen: boolean
@@ -23,8 +24,6 @@ export default function RatingModal({
   const [selectedRating, setSelectedRating] = useState<number>(0)
   const [hoverRating, setHoverRating] = useState<number>(0)
   const submitRatingMutation = useSubmitRating(userId)
-
-  if (!isOpen) return null
 
   const handleSubmit = async () => {
     if (selectedRating === 0) {
@@ -60,15 +59,20 @@ export default function RatingModal({
   const displayRating = hoverRating || selectedRating
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
-        {/* 헤더 */}
-        <div className="mb-6 text-center">
-          <h2 className="text-xl font-bold text-gray-900">
-            {userName} 님에게 별점 남기기
-          </h2>
-          <p className="mt-2 text-sm text-gray-600">교환 경험은 어떠셨나요?</p>
-        </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`${userName} 님에게 별점 남기기`}
+      closeOnBackdropClick={false}
+      closeOnEsc={!submitRatingMutation.isPending}
+      size="md"
+      showCloseButton={!submitRatingMutation.isPending}
+    >
+      <div className="p-6">
+        {/* 헤더 설명 */}
+        <p className="mb-6 text-center text-sm text-gray-600">
+          교환 경험은 어떠셨나요?
+        </p>
 
         {/* 별점 선택 */}
         <div className="mb-6 flex justify-center gap-2">
@@ -115,7 +119,7 @@ export default function RatingModal({
           </button>
         </div>
       </div>
-    </div>
+    </Modal>
   )
 }
 

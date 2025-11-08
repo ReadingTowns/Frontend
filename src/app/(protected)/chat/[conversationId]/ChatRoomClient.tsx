@@ -1,18 +1,20 @@
 'use client'
 
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import {
   useChatRoomMessages,
   usePartnerProfile,
   useExchangeBooks,
+  useDeleteChatRoom,
 } from '@/hooks/useChatRoom'
 import { useWebSocket } from '@/hooks/useWebSocket'
 import type { Message } from '@/types/chatroom'
 import type { ChatMessage } from '@/services/websocketService'
 import MessageBubble from '../components/MessageBubble'
 import MessageInput from '../components/MessageInput'
+import ChatRoomExitModal from '../components/ChatRoomExitModal'
 import { ChatBubbleLeftIcon, ArrowPathIcon } from '@heroicons/react/24/outline'
 
 interface ChatRoomClientProps {
@@ -24,8 +26,12 @@ export default function ChatRoomClient({
 }: ChatRoomClientProps) {
   const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [showExitDialog, setShowExitDialog] = useState(false)
 
   const chatroomId = parseInt(conversationId)
+
+  // Delete chatroom mutation
+  const deleteChatRoomMutation = useDeleteChatRoom()
 
   // Fetch partner profile
   const { data: partner } = usePartnerProfile(chatroomId)
@@ -66,6 +72,17 @@ export default function ChatRoomClient({
     onDisconnect: handleDisconnect,
   })
 
+  // Exit chatroom handler
+  const handleExitChatRoom = useCallback(async () => {
+    try {
+      await deleteChatRoomMutation.mutateAsync(chatroomId)
+      router.push('/social')
+    } catch (error) {
+      console.error('Failed to exit chat room:', error)
+      alert('채팅방 나가기에 실패했습니다.')
+    }
+  }, [chatroomId, deleteChatRoomMutation, router])
+
   // Chat 헤더 설정
   useHeaderConfig(
     {
@@ -85,6 +102,14 @@ export default function ChatRoomClient({
           }
         : undefined,
       onBack: () => router.push('/social'),
+      actions: (
+        <button
+          onClick={() => setShowExitDialog(true)}
+          className="text-sm text-gray-600 hover:text-gray-900"
+        >
+          나가기
+        </button>
+      ),
     },
     [partner, isConnected, exchangeBooks]
   )
@@ -195,6 +220,14 @@ export default function ChatRoomClient({
       <MessageInput
         onSendMessage={handleSendMessage}
         isLoading={!isConnected}
+      />
+
+      {/* Exit Confirmation Modal */}
+      <ChatRoomExitModal
+        isOpen={showExitDialog}
+        onClose={() => setShowExitDialog(false)}
+        onConfirm={handleExitChatRoom}
+        isLoading={deleteChatRoomMutation.isPending}
       />
     </div>
   )

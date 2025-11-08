@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useSnackbar } from '@/hooks/useSnackbar'
+import { Modal } from '@/components/common/Modal'
 import type { MyBookReview } from '@/types/book'
 import {
   useCreateBookReview,
@@ -162,36 +163,39 @@ export default function BookReviewSection({
       )}
 
       {/* 삭제 확인 모달 */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="mx-4 w-full max-w-sm rounded-lg bg-white p-6 shadow-xl">
-            <h4 className="mb-2 text-lg font-semibold text-gray-900">
-              감상평 삭제
-            </h4>
-            <p className="mb-6 text-sm text-gray-600">
-              정말로 감상평을 삭제하시겠습니까?
-              <br />
-              삭제된 감상평은 복구할 수 없습니다.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                disabled={deleteReview.isPending}
-                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-              >
-                취소
-              </button>
-              <button
-                onClick={handleDelete}
-                disabled={deleteReview.isPending}
-                className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
-              >
-                {deleteReview.isPending ? '삭제 중...' : '삭제'}
-              </button>
-            </div>
+      <Modal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title="감상평 삭제"
+        closeOnBackdropClick={false}
+        closeOnEsc={!deleteReview.isPending}
+        size="sm"
+        showCloseButton={false}
+      >
+        <div className="p-6 text-center">
+          <p className="mb-6 text-sm text-gray-600">
+            정말로 감상평을 삭제하시겠습니까?
+            <br />
+            삭제된 감상평은 복구할 수 없습니다.
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={deleteReview.isPending}
+              className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              취소
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={deleteReview.isPending}
+              className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
+            >
+              {deleteReview.isPending ? '삭제 중...' : '삭제'}
+            </button>
           </div>
         </div>
-      )}
+      </Modal>
     </div>
   )
 }

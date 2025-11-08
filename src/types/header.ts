@@ -58,6 +58,7 @@ export interface ChatHeaderConfig extends BaseHeaderConfig {
     bookImage?: string
   }
   onBack?: () => void
+  actions?: ReactNode // 우측 액션 버튼들 (나가기 등)
 }
 
 // 통합 헤더 설정 타입
