@@ -60,6 +60,10 @@ export class WebSocketService {
   private connectHandlers: Set<ConnectionHandler> = new Set()
   private disconnectHandlers: Set<ConnectionHandler> = new Set()
 
+  // Heartbeat mechanism to keep connection alive
+  private heartbeatInterval: NodeJS.Timeout | null = null
+  private heartbeatIntervalMs = 25000 // 25초마다 ping (서버 30초 timeout보다 짧게 설정)
+
   /**
    * WebSocket 연결
    */
@@ -78,6 +82,7 @@ export class WebSocketService {
         this.socket.onopen = () => {
           console.log('✅ WebSocket connected')
           this.reconnectAttempts = 0
+          this.startHeartbeat() // Start heartbeat to keep connection alive
           this.connectHandlers.forEach(handler => handler())
           resolve()
         }
@@ -116,6 +121,7 @@ export class WebSocketService {
             )
           }
 
+          this.stopHeartbeat() // Stop heartbeat when connection closes
           this.disconnectHandlers.forEach(handler => handler())
           this.handleReconnect()
         }
@@ -222,9 +228,42 @@ export class WebSocketService {
   }
 
   /**
+   * 하트비트 시작 (연결 유지용 ping)
+   * 25초마다 서버에 PING 메시지를 보내 idle timeout 방지
+   */
+  private startHeartbeat(): void {
+    this.stopHeartbeat() // 기존 타이머 제거
+
+    this.heartbeatInterval = setInterval(() => {
+      if (this.socket?.readyState === WebSocket.OPEN) {
+        try {
+          // 서버가 처리할 수 있는 heartbeat ping 메시지 전송
+          const pingMessage = JSON.stringify({ type: 'PING' })
+          this.socket.send(pingMessage)
+          console.log('💓 Heartbeat ping sent')
+        } catch (error) {
+          console.error('Failed to send heartbeat ping:', error)
+        }
+      }
+    }, this.heartbeatIntervalMs)
+  }
+
+  /**
+   * 하트비트 중지
+   */
+  private stopHeartbeat(): void {
+    if (this.heartbeatInterval) {
+      clearInterval(this.heartbeatInterval)
+      this.heartbeatInterval = null
+      console.log('💔 Heartbeat stopped')
+    }
+  }
+
+  /**
    * 연결 종료
    */
   disconnect(): void {
+    this.stopHeartbeat() // Stop heartbeat before closing connection
     if (this.socket) {
       this.socket.close()
       this.socket = null

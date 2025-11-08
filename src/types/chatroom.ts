@@ -33,13 +33,13 @@ export interface ChatRoomListItem {
  */
 export interface Message {
   messageId: number
-  senderId: number
+  senderId: number // 시스템 메시지의 경우 0
   messageText: string
   sentTime: string
   // 새로운 필드들 (optional for backward compatibility)
   messageType?: MessageType
-  relatedBookhouseId?: number
-  relatedExchangeStatusId?: number
+  relatedBookhouseId?: number | null // 교환 메시지가 아닌 경우 null
+  relatedExchangeStatusId?: number | null // 교환 메시지가 아닌 경우 null
 }
 
 /**
