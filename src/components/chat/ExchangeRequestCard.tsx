@@ -60,8 +60,10 @@ export function ExchangeRequestCard({
     myBook.isAccepted === 'EXCHANGED' && partnerBook.isAccepted === 'EXCHANGED'
 
   // 내가 요청자인지 판단
-  const isMyRequest = isMyBookPending && !isPartnerBookPending
-  const isPartnerRequest = isPartnerBookPending && !isMyBookPending
+  // 내가 상대 책을 요청 → partnerBook.isAccepted = PENDING
+  // 상대가 내 책을 요청 → myBook.isAccepted = PENDING
+  const isMyRequest = isPartnerBookPending && !isMyBookPending
+  const isPartnerRequest = isMyBookPending && !isPartnerBookPending
 
   // 헤더 텍스트
   const getHeaderText = () => {
