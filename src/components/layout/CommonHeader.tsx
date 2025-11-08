@@ -109,22 +109,32 @@ export default function CommonHeader() {
                       </p>
                     )}
                   </div>
-                  {/* WebSocket 연결 상태 */}
-                  {chatConfig.isConnected !== undefined && (
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          chatConfig.isConnected
-                            ? 'bg-green-500'
-                            : 'bg-gray-300'
-                        }`}
-                        title={chatConfig.isConnected ? '연결됨' : '연결 끊김'}
-                      />
-                      <span className="text-xs text-gray-500">
-                        {chatConfig.isConnected ? '실시간' : '오프라인'}
-                      </span>
-                    </div>
-                  )}
+                  <div className="flex items-center gap-3">
+                    {/* WebSocket 연결 상태 */}
+                    {chatConfig.isConnected !== undefined && (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            chatConfig.isConnected
+                              ? 'bg-green-500'
+                              : 'bg-gray-300'
+                          }`}
+                          title={
+                            chatConfig.isConnected ? '연결됨' : '연결 끊김'
+                          }
+                        />
+                        <span className="text-xs text-gray-500">
+                          {chatConfig.isConnected ? '실시간' : '오프라인'}
+                        </span>
+                      </div>
+                    )}
+                    {/* 액션 버튼들 */}
+                    {chatConfig.actions && (
+                      <div className="flex items-center">
+                        {chatConfig.actions}
+                      </div>
+                    )}
+                  </div>
                 </>
               )
             })()}

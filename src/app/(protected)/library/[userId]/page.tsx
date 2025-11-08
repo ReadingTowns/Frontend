@@ -10,6 +10,7 @@ import { useSnackbar } from '@/hooks/useSnackbar'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useState } from 'react'
 import RatingModal from '@/components/user/RatingModal'
+import { Modal } from '@/components/common/Modal'
 import { BookCardSkeleton, ProfileSkeleton } from '@/components/ui/Skeleton'
 import { LibraryBook } from '@/types/library'
 import {
@@ -253,12 +254,17 @@ export default function UserLibraryPage() {
       )}
 
       {/* 교환 신청 확인 모달 */}
-      {showExchangeModal && selectedBook && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4">
-          <div className="bg-white rounded-lg p-6 max-w-sm w-full">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              교환 신청 확인
-            </h3>
+      {selectedBook && (
+        <Modal
+          isOpen={showExchangeModal}
+          onClose={handleCloseModal}
+          title="교환 신청 확인"
+          closeOnBackdropClick={false}
+          closeOnEsc={!createChatRoomMutation.isPending}
+          size="sm"
+          showCloseButton={false}
+        >
+          <div className="p-6 text-center">
             <p className="text-gray-600 mb-4">
               <span className="font-medium">{profile?.nickname}</span>님에게{' '}
               <span className="font-medium text-primary-600">
@@ -288,7 +294,7 @@ export default function UserLibraryPage() {
               </button>
             </div>
           </div>
-        </div>
+        </Modal>
       )}
     </>
   )
