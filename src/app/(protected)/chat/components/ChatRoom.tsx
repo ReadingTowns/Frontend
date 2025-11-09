@@ -156,8 +156,8 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
             <div>
               <h2 className="font-medium text-gray-900">김독서</h2>
               <p className="text-xs text-primary-600 flex items-center gap-1">
-                <BookOpenIcon className="w-3 h-3" />
-                미움받을 용기
+                <BookOpenIcon className="w-3 h-3 flex-shrink-0" />
+                <span className="truncate">미움받을 용기</span>
               </p>
             </div>
           </div>

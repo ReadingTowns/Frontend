@@ -104,8 +104,10 @@ export default function CommonHeader() {
                     </h1>
                     {chatConfig.bookInfo && (
                       <p className="text-xs text-primary-600 flex items-center gap-1 mt-0.5">
-                        <BookOpenIcon className="w-3 h-3" />
-                        {chatConfig.bookInfo.bookName}
+                        <BookOpenIcon className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">
+                          {chatConfig.bookInfo.bookName}
+                        </span>
                       </p>
                     )}
                   </div>
