@@ -71,9 +71,15 @@ function LoginContent() {
   // 로그아웃 직후인지 먼저 확인 (쿼리 파라미터 또는 sessionStorage)
   useEffect(() => {
     const logoutParam = searchParams.get('logout')
+    const sessionExpired = searchParams.get('session')
     const sessionLogout = sessionStorage.getItem('justLoggedOut')
 
-    if (logoutParam === 'true' || sessionLogout === 'true') {
+    // 세션 만료로 인한 접근인 경우에도 로그아웃 상태로 간주
+    if (
+      logoutParam === 'true' ||
+      sessionLogout === 'true' ||
+      sessionExpired === 'expired'
+    ) {
       setJustLoggedOut(true)
       // 로그아웃 플래그 제거
       sessionStorage.removeItem('justLoggedOut')
@@ -86,8 +92,8 @@ function LoginContent() {
       queryClient.invalidateQueries({ queryKey: ['auth'] })
       queryClient.removeQueries() // 모든 쿼리 제거
 
-      // URL에서 logout 파라미터 제거
-      if (logoutParam) {
+      // URL에서 파라미터 제거
+      if (logoutParam || sessionExpired) {
         router.replace('/login', { scroll: false })
       }
 
