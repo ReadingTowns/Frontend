@@ -24,8 +24,8 @@ const EXCHANGE_API = {
     `/api/v1/exchange-requests/${exchangeId}/reject`,
   CANCEL_REQUEST: (exchangeId: number) =>
     `/api/v1/exchange-requests/${exchangeId}/cancel`,
-  COMPLETE_EXCHANGE: (exchangeId: number) =>
-    `/api/v1/exchange-requests/${exchangeId}/complete`,
+  COMPLETE_EXCHANGE: (chatroomId: number) =>
+    `/api/v1/chatrooms/${chatroomId}/exchange/complete`,
   RETURN_EXCHANGE: (exchangeId: number) =>
     `/api/v1/exchange-requests/${exchangeId}/return`,
   GET_AVAILABLE_BOOKS: (chatroomId: number) =>
@@ -79,25 +79,25 @@ export class ExchangeService {
 
   /**
    * Cancel an exchange request (requester only)
-   * PATCH /api/v1/exchange-requests/{exchangeId}/cancel
+   * DELETE /api/v1/exchange-requests/{exchangeId}/cancel
    */
   static async cancelRequest(
     exchangeId: number
   ): Promise<ExchangeStatusResponse> {
-    return api.patch<ExchangeStatusResponse>(
+    return api.delete<ExchangeStatusResponse>(
       EXCHANGE_API.CANCEL_REQUEST(exchangeId)
     )
   }
 
   /**
    * Complete an exchange (mark as completed)
-   * PATCH /api/v1/exchange-requests/{exchangeId}/complete
+   * PATCH /api/v1/chatrooms/{chatroomId}/exchange/complete
    */
   static async completeExchange(
-    exchangeId: number
+    chatroomId: number
   ): Promise<ExchangeStatusResponse> {
     return api.patch<ExchangeStatusResponse>(
-      EXCHANGE_API.COMPLETE_EXCHANGE(exchangeId)
+      EXCHANGE_API.COMPLETE_EXCHANGE(chatroomId)
     )
   }
 

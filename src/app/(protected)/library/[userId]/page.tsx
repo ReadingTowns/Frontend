@@ -1,8 +1,8 @@
 'use client'
 
 import { useParams } from 'next/navigation'
-import { useUserLibraryBooks, useUserProfile } from '@/hooks/useLibrary'
-import { LibraryBookCard } from '@/components/library/LibraryBookCard'
+import { useUserProfile } from '@/hooks/useLibrary'
+import { LibraryBooksGrid } from '@/components/library/LibraryBooksGrid'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
 import { useUserRating } from '@/hooks/useUserRating'
@@ -11,11 +11,9 @@ import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useState } from 'react'
 import RatingModal from '@/components/user/RatingModal'
 import { Modal } from '@/components/common/Modal'
-import { BookCardSkeleton, ProfileSkeleton } from '@/components/ui/Skeleton'
-import { LibraryBook } from '@/types/library'
+import { ProfileSkeleton } from '@/components/ui/Skeleton'
 import {
   UserCircleIcon,
-  BookOpenIcon,
   FaceFrownIcon,
   MapPinIcon,
   StarIcon,
@@ -28,11 +26,8 @@ export default function UserLibraryPage() {
   const { showError } = useSnackbar()
 
   const { data: profile, isLoading: profileLoading } = useUserProfile(userId)
-  const { data: libraryData, isLoading: booksLoading } =
-    useUserLibraryBooks(userId)
   const { data: userRating } = useUserRating(userId)
 
-  const books = libraryData?.content || []
   const isOwnLibrary = currentUser?.memberId?.toString() === userId
 
   // 별점 데이터 우선순위: useUserRating hook > profile 데이터
@@ -107,17 +102,8 @@ export default function UserLibraryPage() {
     setSelectedBook(null)
   }
 
-  if (profileLoading || booksLoading) {
-    return (
-      <>
-        <ProfileSkeleton />
-        <div className="grid grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <BookCardSkeleton key={i} />
-          ))}
-        </div>
-      </>
-    )
+  if (profileLoading) {
+    return <ProfileSkeleton />
   }
 
   if (!profile) {
@@ -198,49 +184,12 @@ export default function UserLibraryPage() {
 
       {/* Books Section */}
       <section>
-        {books.length === 0 ? (
-          <div className="text-center py-12">
-            <BookOpenIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              {isOwnLibrary ? '서재가 비어있어요' : '등록된 책이 없어요'}
-            </h3>
-            <p className="text-gray-600">
-              {isOwnLibrary
-                ? '첫 번째 책을 등록하고 나만의 서재를 만들어보세요!'
-                : '아직 등록된 책이 없습니다.'}
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">
-                {isOwnLibrary ? '내 책' : '등록한 책'} ({books.length}권)
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              {books.map((book: LibraryBook) => (
-                <LibraryBookCard
-                  key={book.bookId}
-                  book={book}
-                  showActions={false}
-                  isOwner={isOwnLibrary}
-                  ownerId={profile?.memberId}
-                  onExchangeRequest={handleExchangeRequest}
-                />
-              ))}
-            </div>
-
-            {/* Load More Button */}
-            {libraryData && !libraryData.last && (
-              <div className="text-center mt-8">
-                <button className="bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors">
-                  더 보기
-                </button>
-              </div>
-            )}
-          </>
-        )}
+        <LibraryBooksGrid
+          userId={userId}
+          isOwner={isOwnLibrary}
+          onExchangeRequest={handleExchangeRequest}
+          pageSize={12}
+        />
       </section>
 
       {/* 별점 모달 */}

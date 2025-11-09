@@ -19,24 +19,36 @@ import {
 import { PaginationInfo } from '@/types/common'
 import { api } from '@/lib/api'
 
-// 내 서재 책 리스트 조회 (무한 스크롤용)
-export function useMyLibraryBooksInfinite(size: number = 12) {
+// 서재 책 리스트 조회 (무한 스크롤용)
+// userId가 없으면 내 서재, 있으면 해당 유저 서재 조회
+export function useLibraryBooksInfinite(userId?: string, size: number = 12) {
   return useInfiniteQuery({
-    queryKey: ['library', 'my-books-infinite', size],
+    queryKey: userId
+      ? ['library', 'user-books-infinite', userId, size]
+      : ['library', 'my-books-infinite', size],
     queryFn: async ({
       pageParam = 0,
     }): Promise<LibraryBooksResponse & PaginationInfo> => {
-      return await api.get<LibraryBooksResponse & PaginationInfo>(
-        '/api/v1/bookhouse/members/me',
-        { page: pageParam, size }
-      )
+      const endpoint = userId
+        ? `/api/v1/bookhouse/members/${userId}`
+        : '/api/v1/bookhouse/members/me'
+      return await api.get<LibraryBooksResponse & PaginationInfo>(endpoint, {
+        page: pageParam,
+        size,
+      })
     },
     getNextPageParam: lastPage => {
       // 마지막 페이지가 아니면 다음 페이지 번호 반환
       return lastPage.last ? undefined : lastPage.curPage + 1
     },
     initialPageParam: 0,
+    enabled: userId ? !!userId : true,
   })
+}
+
+// 하위 호환성을 위한 별칭
+export function useMyLibraryBooksInfinite(size: number = 12) {
+  return useLibraryBooksInfinite(undefined, size)
 }
 
 // 내 서재 책 리스트 조회 (기존 페이지네이션용 - 하위 호환성)
@@ -49,26 +61,6 @@ export function useMyLibraryBooks(params?: { page?: number; size?: number }) {
         params
       )
     },
-  })
-}
-
-// 특정 사용자의 서재 책 리스트 조회
-export function useUserLibraryBooks(
-  userId: string,
-  params?: {
-    page?: number
-    size?: number
-  }
-) {
-  return useQuery({
-    queryKey: ['library', 'user-books', userId, params],
-    queryFn: async (): Promise<LibraryBooksResponse & PaginationInfo> => {
-      return await api.get<LibraryBooksResponse & PaginationInfo>(
-        `/api/v1/bookhouse/members/${userId}`,
-        params
-      )
-    },
-    enabled: !!userId,
   })
 }
 

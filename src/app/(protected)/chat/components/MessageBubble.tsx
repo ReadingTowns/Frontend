@@ -15,15 +15,19 @@ import { UserCircleIcon } from '@heroicons/react/24/outline'
 import { SystemMessage } from '@/components/chat/SystemMessage'
 import { ExchangeRequestCard } from '@/components/chat/ExchangeRequestCard'
 import { ExchangeStatusMessage } from '@/components/chat/ExchangeStatusMessage'
+import { isExchangeExpired } from '@/utils/exchangeUtils'
+import { shouldIntegrateIntoCard } from '@/utils/exchangeMessageUtils'
 
 interface MessageBubbleProps {
   message: Message
   isOwn: boolean
   showAvatar: boolean
   partnerName?: string
+  partnerId?: string
   exchangeBooks?: ExchangeBooksResponse
   chatroomId?: number
-  onNewRequest?: () => void
+  myMemberId?: number
+  messages?: Message[] // 상태 히스토리 추출용
 }
 
 export default function MessageBubble({
@@ -31,9 +35,11 @@ export default function MessageBubble({
   isOwn,
   showAvatar,
   partnerName,
+  partnerId,
   exchangeBooks,
   chatroomId,
-  onNewRequest,
+  myMemberId,
+  messages = [],
 }: MessageBubbleProps) {
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('ko-KR', {
@@ -42,8 +48,50 @@ export default function MessageBubble({
     })
   }
 
+  /**
+   * 원래 교환 요청을 보낸 사람의 ID를 찾는 헬퍼 함수
+   * EXCHANGE_REJECTED, EXCHANGE_ACCEPTED 등의 메시지에서
+   * 원래 EXCHANGE_REQUEST를 보낸 사람을 찾기 위해 사용
+   */
+  const getOriginalRequestSender = (
+    currentMessage: Message,
+    allMessages: Message[]
+  ): number => {
+    // relatedExchangeStatusId가 없으면 현재 senderId 사용
+    if (!currentMessage.relatedExchangeStatusId) {
+      return currentMessage.senderId
+    }
+
+    // 같은 exchangeStatusId를 가진 EXCHANGE_REQUEST 메시지 찾기
+    const requestMessage = allMessages.find(
+      msg =>
+        msg.messageType === MessageType.EXCHANGE_REQUEST &&
+        msg.relatedExchangeStatusId === currentMessage.relatedExchangeStatusId
+    )
+
+    const originalSenderId = requestMessage?.senderId ?? currentMessage.senderId
+
+    // 디버깅 로그
+    console.log('🔍 [MessageBubble] getOriginalRequestSender:', {
+      currentMessageType: currentMessage.messageType,
+      currentMessageSenderId: currentMessage.senderId,
+      relatedExchangeStatusId: currentMessage.relatedExchangeStatusId,
+      foundRequestMessage: !!requestMessage,
+      requestMessageSenderId: requestMessage?.senderId,
+      originalSenderId,
+    })
+
+    return originalSenderId
+  }
+
   // Determine message type (default to TEXT for backward compatibility)
   const messageType = message.messageType || MessageType.TEXT
+
+  // 카드 내부로 통합될 메시지는 렌더링하지 않음
+  // (EXCHANGE_ACCEPTED, EXCHANGE_REJECTED, EXCHANGE_CANCELED)
+  if (shouldIntegrateIntoCard(messageType)) {
+    return null
+  }
 
   // Render different components based on message type
   switch (messageType) {
@@ -56,7 +104,7 @@ export default function MessageBubble({
         />
       )
 
-    case MessageType.EXCHANGE_REQUEST:
+    case MessageType.EXCHANGE_REQUEST: {
       if (!exchangeBooks || !chatroomId) {
         return (
           <div className="my-3 px-4">
@@ -66,14 +114,38 @@ export default function MessageBubble({
           </div>
         )
       }
+
+      // 만료된 교환 요청 확인
+      if (isExchangeExpired(message.relatedExchangeStatusId, exchangeBooks)) {
+        return (
+          <ExchangeStatusMessage
+            messageType={MessageType.EXCHANGE_CANCELED}
+            messageText="만료된 교환 요청"
+            sentTime={message.sentTime}
+            isOwn={isOwn}
+            showAvatar={showAvatar}
+            partnerName={partnerName}
+            chatroomId={chatroomId}
+            messages={messages}
+          />
+        )
+      }
+
       return (
         <ExchangeRequestCard
           myBook={exchangeBooks.myBook}
           partnerBook={exchangeBooks.partnerBook}
           chatroomId={chatroomId}
-          onNewRequest={onNewRequest}
+          requestSenderId={getOriginalRequestSender(message, messages)}
+          currentUserId={myMemberId}
+          partnerId={partnerId}
+          partnerName={partnerName}
+          relatedExchangeStatusId={message.relatedExchangeStatusId}
+          showAvatar={showAvatar}
+          messages={messages}
         />
       )
+    }
 
     case MessageType.EXCHANGE_ACCEPTED:
     case MessageType.EXCHANGE_REJECTED:
@@ -85,6 +157,11 @@ export default function MessageBubble({
           messageType={messageType}
           messageText={message.messageText}
           sentTime={message.sentTime}
+          isOwn={isOwn}
+          showAvatar={showAvatar}
+          partnerName={partnerName}
+          chatroomId={chatroomId}
+          messages={messages}
         />
       )
 
