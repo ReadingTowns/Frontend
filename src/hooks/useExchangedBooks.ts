@@ -15,8 +15,6 @@ const exchangedBooksKeys = {
 function transformExchangeResponse(
   apiResponse: ExchangeApiResponse[]
 ): ExchangedBook[] {
-  console.log('🔍 [useExchangedBooks] 원본 API 응답:', apiResponse)
-
   const books: ExchangedBook[] = []
 
   apiResponse.forEach(item => {
@@ -41,7 +39,6 @@ function transformExchangeResponse(
     }
   })
 
-  console.log('🔍 [useExchangedBooks] 변환된 책 목록:', books)
   return books
 }
 
@@ -52,11 +49,9 @@ export function useExchangedBooks() {
   return useQuery({
     queryKey: exchangedBooksKeys.list(),
     queryFn: async (): Promise<ExchangedBook[]> => {
-      console.log('🔍 [useExchangedBooks] API 호출 시작')
       const apiResponse = await api.get<ExchangeApiResponse[]>(
         '/api/v1/members/me/exchanges'
       )
-      console.log('🔍 [useExchangedBooks] API 응답 받음:', apiResponse)
       return transformExchangeResponse(apiResponse)
     },
     staleTime: 1000 * 60 * 5, // 5분

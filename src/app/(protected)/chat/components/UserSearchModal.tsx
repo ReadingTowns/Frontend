@@ -64,8 +64,7 @@ export default function UserSearchModal({
       router.push(`/chat/${result.chatroomId}`)
       onClose()
     },
-    onError: error => {
-      console.error('Failed to create chat:', error)
+    onError: () => {
       showError('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
     },
   })

@@ -51,7 +51,6 @@ export default function ChatRoomClient({
   // ✅ FIX: useCallback으로 안정적인 콜백 참조 유지
   const handleMessageReceived = useCallback((message: ChatMessage) => {
     console.log('📨 New message received:', message)
-    // 자동으로 TanStack Query 캐시 업데이트됨 (useWebSocket 훅 내부)
   }, [])
 
   const handleError = useCallback((error: Event) => {

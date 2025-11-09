@@ -5,7 +5,7 @@
 
 import { useEffect } from 'react'
 import { useHeader } from '@/contexts/HeaderContext'
-import { HeaderConfig } from '@/types/header'
+import { HeaderConfig, ChatHeaderConfig } from '@/types/header'
 
 /**
  * 헤더 설정을 관리하는 훅

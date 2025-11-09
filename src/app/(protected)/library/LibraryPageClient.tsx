@@ -77,8 +77,7 @@ export default function LibraryPageClient() {
       try {
         await api.delete(`/api/v1/bookhouse/books/${bookId}`)
         refetch() // 삭제 후 목록 새로고침
-      } catch (error) {
-        console.error('Failed to delete book:', error)
+      } catch {
         showError('책 삭제에 실패했습니다.')
       }
     }
