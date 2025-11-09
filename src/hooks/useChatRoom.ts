@@ -54,9 +54,25 @@ export const chatRoomKeys = {
  * 3초마다 자동 갱신 (폴링)
  */
 export const useChatRoomList = () => {
+  console.log(
+    '🔍 [useChatRoomList] Hook called, queryKey:',
+    chatRoomKeys.list()
+  )
+
   return useQuery({
     queryKey: chatRoomKeys.list(),
-    queryFn: getChatRoomList,
+    queryFn: async () => {
+      console.log('🔍 [useChatRoomList] queryFn executing - API fetch starting')
+      const result = await getChatRoomList()
+      console.log(
+        '🔍 [useChatRoomList] queryFn completed - API fetch result:',
+        {
+          count: result.length,
+          timestamp: new Date().toISOString(),
+        }
+      )
+      return result
+    },
     staleTime: 0, // 캐시 없음 - 항상 최신 데이터
     refetchInterval: 3000, // 3초마다 자동 refetch
   })

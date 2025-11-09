@@ -6,6 +6,7 @@ export function middleware(request: NextRequest) {
 
   // 쿠키에서 인증 토큰 확인
   const accessToken = request.cookies.get('access_token')?.value
+  const refreshToken = request.cookies.get('refresh_token')?.value
 
   // Mock 모드 확인
   const isMockMode = process.env.NEXT_PUBLIC_USE_MOCK === 'true'
@@ -14,17 +15,12 @@ export function middleware(request: NextRequest) {
   console.log('[Middleware]', {
     pathname,
     hasAccessToken: !!accessToken,
+    hasRefreshToken: !!refreshToken,
     accessTokenValue: accessToken
       ? `${accessToken.substring(0, 10)}...`
       : 'none',
     isMockMode,
   })
-
-  // 인증 상태 확인
-  // access_token이 반드시 필요함 (refresh_token만으로는 인증 불가)
-  const isAuthenticated = isMockMode
-    ? !!accessToken?.startsWith('mock_')
-    : !!accessToken
 
   // Public routes (인증 없이 접근 가능)
   const publicRoutes = ['/login', '/auth']
@@ -35,6 +31,15 @@ export function middleware(request: NextRequest) {
 
   // Root page handling
   if (pathname === '/') {
+    const isAuthenticated = isMockMode
+      ? !!accessToken?.startsWith('mock_')
+      : !!accessToken || !!refreshToken // ✅ Refresh Token도 인증으로 간주
+
+    console.log('[Middleware] Root page redirect:', {
+      isAuthenticated,
+      targetUrl: isAuthenticated ? '/home' : '/login',
+    })
+
     if (isAuthenticated) {
       return NextResponse.redirect(new URL('/home', request.url))
     } else {
@@ -44,9 +49,19 @@ export function middleware(request: NextRequest) {
 
   // Protected routes
   if (!isPublicRoute && !isOAuthCallback) {
-    if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/login', request.url))
+    // ✅ Access Token 또는 Refresh Token이 있으면 통과
+    // 클라이언트에서 api.ts가 자동으로 토큰 갱신 처리
+    if (accessToken || refreshToken) {
+      console.log('[Middleware] Protected route - 토큰 있음, 통과:', pathname)
+      return NextResponse.next()
     }
+
+    // ❌ 둘 다 없으면 로그인 리다이렉트
+    console.log(
+      '[Middleware] No tokens found, redirecting to /login from:',
+      pathname
+    )
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   // 로그인된 사용자가 /login 접근 시 /home으로 리다이렉트하는 로직은

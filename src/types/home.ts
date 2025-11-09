@@ -31,16 +31,34 @@ export interface RecommendedBook {
 }
 
 /**
- * 교환한 도서 정보
+ * 백엔드 API 응답 구조 (실제 API 응답)
+ */
+export interface ExchangeApiResponse {
+  chatRoomId: number | null
+  myBook: {
+    bookhouseId: number
+    bookName: string
+    bookImage: string
+  } | null
+  yourBook: {
+    bookhouseId: number
+    bookName: string
+    bookImage: string
+  } | null
+}
+
+/**
+ * 교환한 도서 정보 (프론트엔드 사용)
  */
 export interface ExchangedBook {
   exchangeId: number
   bookTitle: string
   bookCoverImage: string
-  partnerMemberId: number
-  partnerNickname: string
-  exchangeDate: string
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
+  partnerMemberId?: number
+  partnerNickname?: string
+  exchangeDate?: string
+  status?: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED'
+  isMyBook: boolean // true: 내가 빌려준 책, false: 내가 빌린 책
 }
 
 /**

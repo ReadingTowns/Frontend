@@ -19,8 +19,16 @@ export default function ChatList({ selectedId }: ChatListProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
 
+  console.log('🔍 [ChatList] Component mounted/rendered')
+
   // 3초마다 자동 갱신 (폴링)
   const { data: chatRooms = [], isLoading } = useChatRoomList()
+
+  console.log('🔍 [ChatList] useChatRoomList result:', {
+    isLoading,
+    chatRoomsCount: chatRooms.length,
+    timestamp: new Date().toISOString(),
+  })
 
   // 검색 필터링 + 최신순 정렬 (useMemo로 최적화)
   const sortedAndFilteredChatRooms = useMemo(() => {
