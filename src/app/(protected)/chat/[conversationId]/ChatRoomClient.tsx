@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import {
@@ -26,6 +26,7 @@ export default function ChatRoomClient({
 }: ChatRoomClientProps) {
   const router = useRouter()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const [showExitDialog, setShowExitDialog] = useState(false)
 
   const chatroomId = parseInt(conversationId)
@@ -36,11 +37,13 @@ export default function ChatRoomClient({
   // Fetch partner profile
   const { data: partner } = usePartnerProfile(chatroomId)
 
-  // Fetch exchange books info (legacy)
-  const { data: exchangeBooks } = useExchangeBooks(chatroomId)
+  // Fetch exchange books info with fetching state
+  const { data: exchangeBooks, isFetching: isExchangeBooksFetching } =
+    useExchangeBooks(chatroomId)
 
-  // Fetch messages
-  const { data: messagesData, isLoading } = useChatRoomMessages(chatroomId)
+  // Fetch messages with loading state
+  const { data: messagesData, isLoading: isMessagesLoading } =
+    useChatRoomMessages(chatroomId)
 
   // Get current user ID from first page response
   const myMemberId = messagesData?.pages[0]?.myMemberId || 0
@@ -119,8 +122,52 @@ export default function ChatRoomClient({
   }
 
   // Extract all messages from infinite query pages
-  const messages = messagesData?.pages.flatMap(page => page.message) || []
+  const messages = useMemo(
+    () => messagesData?.pages.flatMap(page => page.message) || [],
+    [messagesData?.pages]
+  )
 
+  // ✨ ResizeObserver: layout shift 자동 감지 및 스크롤 유지
+  useEffect(() => {
+    const container = scrollContainerRef.current
+    if (!container) return
+
+    const resizeObserver = new ResizeObserver(() => {
+      // 스크롤이 맨 밑 근처에 있었는지 확인 (100px 이내)
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop - container.clientHeight <
+        100
+
+      if (isNearBottom) {
+        // requestAnimationFrame으로 브라우저 렌더링 사이클과 동기화
+        requestAnimationFrame(() => {
+          container.scrollTop = container.scrollHeight
+        })
+      }
+    })
+
+    resizeObserver.observe(container)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
+
+  // ✨ TanStack Query: exchangeBooks 로딩 완료 시 스크롤
+  useEffect(() => {
+    if (!isExchangeBooksFetching && exchangeBooks) {
+      scrollToBottom()
+    }
+  }, [isExchangeBooksFetching, exchangeBooks])
+
+  // ✨ TanStack Query: 메시지 로딩 완료 시 스크롤
+  useEffect(() => {
+    if (!isMessagesLoading && messagesData) {
+      scrollToBottom()
+    }
+  }, [isMessagesLoading, messagesData])
+
+  // 메시지 개수 변화 시 스크롤 (기존 로직 유지)
   useEffect(() => {
     if (messages.length > 0) {
       scrollToBottom()
@@ -131,6 +178,8 @@ export default function ChatRoomClient({
     if (content.trim()) {
       try {
         sendWebSocketMessage(content)
+        // 메시지 전송 즉시 스크롤 (낙관적 업데이트)
+        scrollToBottom()
       } catch (error) {
         console.error('Failed to send message:', error)
         alert('메시지 전송에 실패했습니다. 연결 상태를 확인해주세요.')
@@ -155,7 +204,7 @@ export default function ChatRoomClient({
     {} as Record<string, Message[]>
   )
 
-  if (isLoading) {
+  if (isMessagesLoading) {
     return (
       <div className="flex-1 flex items-center justify-center bg-gray-50">
         <ArrowPathIcon className="w-12 h-12 text-gray-400 animate-spin" />
@@ -166,7 +215,10 @@ export default function ChatRoomClient({
   return (
     <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 min-h-0">
+      <div
+        ref={scrollContainerRef}
+        className="flex-1 overflow-y-auto px-4 py-4 min-h-0"
+      >
         {messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center h-full">
             <div className="text-center py-12">
@@ -200,12 +252,11 @@ export default function ChatRoomClient({
                     dateMessages[index - 1]?.senderId !== message.senderId
                   }
                   partnerName={partner?.nickname}
+                  partnerId={partner?.memberId.toString()}
                   exchangeBooks={exchangeBooks}
                   chatroomId={chatroomId}
-                  onNewRequest={() => {
-                    // TODO: Navigate to new exchange request dialog
-                    console.log('New exchange request clicked')
-                  }}
+                  myMemberId={myMemberId}
+                  messages={messages}
                 />
               ))}
             </div>

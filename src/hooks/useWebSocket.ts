@@ -61,6 +61,9 @@ export const useWebSocket = ({
           senderId: message.senderId,
           messageText: message.content,
           sentTime: message.sentTime || new Date().toISOString(),
+          messageType: message.messageType,
+          relatedBookhouseId: message.relatedBookhouseId,
+          relatedExchangeStatusId: message.relatedExchangeStatusId,
         }
 
         // 마지막 페이지에 메시지 추가
@@ -76,6 +79,30 @@ export const useWebSocket = ({
           pages: updatedPages,
         }
       })
+
+      // ✨ NEW: 교환 상태 변경 메시지면 /books 캐시 무효화
+      const exchangeStatusTypes = [
+        'EXCHANGE_REQUEST',
+        'EXCHANGE_ACCEPTED',
+        'EXCHANGE_REJECTED',
+        'EXCHANGE_CANCELED',
+        'EXCHANGE_RESERVED',
+        'EXCHANGE_COMPLETED',
+        'EXCHANGE_RETURNED',
+      ]
+
+      if (
+        message.messageType &&
+        exchangeStatusTypes.includes(message.messageType)
+      ) {
+        console.log(
+          '🔄 Invalidating exchange books cache due to status change:',
+          message.messageType
+        )
+        queryClient.invalidateQueries({
+          queryKey: chatRoomKeys.books(chatroomId),
+        })
+      }
     },
     [chatroomId, queryClient] // ✅ FIX: 의존성 최소화 (onMessageReceived 제거)
   )

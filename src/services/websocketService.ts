@@ -238,7 +238,7 @@ export class WebSocketService {
       if (this.socket?.readyState === WebSocket.OPEN) {
         try {
           // 서버가 처리할 수 있는 heartbeat ping 메시지 전송
-          const pingMessage = JSON.stringify({ type: 'PING' })
+          const pingMessage = JSON.stringify({ messageType: 'PING' })
           this.socket.send(pingMessage)
           console.log('💓 Heartbeat ping sent')
         } catch (error) {

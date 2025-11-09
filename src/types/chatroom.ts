@@ -70,17 +70,21 @@ export interface PartnerProfile {
  */
 export type ExchangeBookStatus =
   | 'PENDING'
+  | 'REQUEST'
   | 'ACCEPTED'
   | 'REJECTED'
+  | 'RESERVED'
   | 'EXCHANGED'
 
 /**
  * 교환 책 정보
  * GET /api/v1/chatrooms/{id}/books 응답의 myBook/partnerBook
+ *
+ * Note: partnerBook의 경우 초기 요청 단계에서는 bookhouseId와 exchangeStatusId가 null일 수 있음
  */
 export interface ExchangeBookInfo {
-  exchangeStatusId: number
-  bookhouseId: number
+  exchangeStatusId: number | null
+  bookhouseId: number | null
   bookName: string
   bookImage: string
   isAccepted: ExchangeBookStatus

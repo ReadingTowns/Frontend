@@ -9,7 +9,6 @@ import {
   BookOpenIcon,
 } from '@heroicons/react/24/outline'
 import { useChatRoomList } from '@/hooks/useChatRoom'
-import UserSearchModal from './UserSearchModal'
 
 interface ChatListProps {
   selectedId: string | null
@@ -19,7 +18,6 @@ interface ChatListProps {
 export default function ChatList({ selectedId }: ChatListProps) {
   const router = useRouter()
   const [searchQuery, setSearchQuery] = useState('')
-  const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false)
 
   // 3초마다 자동 갱신 (폴링)
   const { data: chatRooms = [], isLoading } = useChatRoomList()
@@ -180,20 +178,6 @@ export default function ChatList({ selectedId }: ChatListProps) {
           })
         )}
       </div>
-
-      {/* New Chat Button */}
-      <button
-        onClick={() => setIsUserSearchModalOpen(true)}
-        className="m-4 py-3 bg-primary-400 text-white rounded-lg hover:bg-primary-500 transition-colors font-medium"
-      >
-        새 대화 시작하기
-      </button>
-
-      {/* User Search Modal */}
-      <UserSearchModal
-        isOpen={isUserSearchModalOpen}
-        onClose={() => setIsUserSearchModalOpen(false)}
-      />
     </div>
   )
 }

@@ -11,9 +11,9 @@ import {
   rejectRequest,
   cancelRequest,
   completeExchange,
-  returnExchange,
   getAvailableBooks,
 } from '@/services/exchangeService'
+import { returnExchange } from '@/services/chatRoomService'
 import type { CreateExchangeRequestRequest } from '@/types/chatroom'
 import { chatRoomKeys } from './useChatRoom'
 
@@ -134,24 +134,22 @@ export function useCancelExchange(chatroomId?: number) {
  * useCompleteExchange Hook
  * 교환 완료 처리
  */
-export function useCompleteExchange(chatroomId?: number) {
+export function useCompleteExchange(chatroomId: number) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (exchangeId: number) => completeExchange(exchangeId),
+    mutationFn: () => completeExchange(chatroomId),
     onSuccess: () => {
-      if (chatroomId) {
-        queryClient.invalidateQueries({
-          queryKey: chatRoomKeys.books(chatroomId),
-        })
-        queryClient.invalidateQueries({
-          queryKey: chatRoomKeys.messages(chatroomId),
-        })
-        // 채팅방 리스트도 갱신 (교환 완료 상태 반영)
-        queryClient.invalidateQueries({
-          queryKey: chatRoomKeys.list(),
-        })
-      }
+      queryClient.invalidateQueries({
+        queryKey: chatRoomKeys.books(chatroomId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: chatRoomKeys.messages(chatroomId),
+      })
+      // 채팅방 리스트도 갱신 (교환 완료 상태 반영)
+      queryClient.invalidateQueries({
+        queryKey: chatRoomKeys.list(),
+      })
     },
   })
 }
@@ -160,20 +158,22 @@ export function useCompleteExchange(chatroomId?: number) {
  * useReturnExchange Hook
  * 교환 책 반납
  */
-export function useReturnExchange(chatroomId?: number) {
+export function useReturnExchange(chatroomId: number) {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (exchangeId: number) => returnExchange(exchangeId),
+    mutationFn: () => returnExchange(chatroomId),
     onSuccess: () => {
-      if (chatroomId) {
-        queryClient.invalidateQueries({
-          queryKey: chatRoomKeys.books(chatroomId),
-        })
-        queryClient.invalidateQueries({
-          queryKey: chatRoomKeys.messages(chatroomId),
-        })
-      }
+      queryClient.invalidateQueries({
+        queryKey: chatRoomKeys.books(chatroomId),
+      })
+      queryClient.invalidateQueries({
+        queryKey: chatRoomKeys.messages(chatroomId),
+      })
+      // 채팅방 리스트도 갱신 (반납 완료 상태 반영)
+      queryClient.invalidateQueries({
+        queryKey: chatRoomKeys.list(),
+      })
     },
   })
 }
