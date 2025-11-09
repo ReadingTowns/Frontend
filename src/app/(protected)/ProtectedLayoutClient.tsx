@@ -24,31 +24,17 @@ export default function ProtectedLayoutClient({
 
   // 온보딩 완료 체크 및 리다이렉트
   useEffect(() => {
-    console.log('🔍 [ProtectedLayoutClient] useEffect 실행:', {
-      pathname,
-      isLoading,
-      isOnboardingLoading,
-      isAuthenticated,
-      isOnboardingCompleted,
-    })
-
     // 로딩 중이거나 온보딩 페이지면 체크 안함
     if (
       isLoading ||
       isOnboardingLoading ||
       pathname.startsWith('/onboarding')
     ) {
-      console.log(
-        '🔍 [ProtectedLayoutClient] 체크 스킵 (로딩 중 또는 온보딩 페이지)'
-      )
       return
     }
 
     // 인증은 되었지만 온보딩 미완료 시 → 온보딩으로
     if (isAuthenticated && !isOnboardingCompleted) {
-      console.log(
-        '🔍 [ProtectedLayoutClient] 온보딩 미완료 - /onboarding으로 리다이렉트'
-      )
       router.push('/onboarding')
     }
   }, [

@@ -208,20 +208,28 @@ export class WebSocketService {
   }
 
   /**
-   * 재연결 로직
+   * 재연결 로직 (Exponential Backoff)
+   * 1st retry: 1s, 2nd: 2s, 3rd: 4s, 4th: 8s, 5th: 10s (capped)
    */
   private handleReconnect(): void {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++
+
+      // Exponential backoff: 1s, 2s, 4s, 8s, 10s (max 10s)
+      const delay = Math.min(
+        1000 * Math.pow(2, this.reconnectAttempts - 1),
+        10000
+      )
+
       console.log(
-        `🔄 Reconnecting... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`
+        `🔄 Reconnecting in ${delay / 1000}s... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`
       )
 
       setTimeout(() => {
         this.connect().catch(error => {
           console.error('Reconnection failed:', error)
         })
-      }, this.reconnectDelay * this.reconnectAttempts)
+      }, delay)
     } else {
       console.error('❌ Max reconnection attempts reached')
     }

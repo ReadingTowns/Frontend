@@ -72,14 +72,6 @@ export default function MessageBubble({
     const originalSenderId = requestMessage?.senderId ?? currentMessage.senderId
 
     // 디버깅 로그
-    console.log('🔍 [MessageBubble] getOriginalRequestSender:', {
-      currentMessageType: currentMessage.messageType,
-      currentMessageSenderId: currentMessage.senderId,
-      relatedExchangeStatusId: currentMessage.relatedExchangeStatusId,
-      foundRequestMessage: !!requestMessage,
-      requestMessageSenderId: requestMessage?.senderId,
-      originalSenderId,
-    })
 
     return originalSenderId
   }

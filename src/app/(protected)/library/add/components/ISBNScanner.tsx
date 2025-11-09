@@ -93,17 +93,10 @@ export default function ISBNScanner({
 
   // 카메라 시작 및 바코드 스캔
   const handleCameraCapture = async () => {
-    console.log('[ISBNScanner] 카메라 시작 버튼 클릭됨')
-    console.log('[ISBNScanner] videoRef.current:', videoRef.current)
-    console.log('[ISBNScanner] isScanning:', isScanning)
-    console.log('[ISBNScanner] isLookingUp:', isLookingUp)
-
     setIsScanning(true)
     setError(null)
 
     try {
-      console.log('[ISBNScanner] getUserMedia 호출 시작')
-
       // 카메라 스트림 가져오기 (고해상도 + 자동 초점)
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
@@ -115,8 +108,6 @@ export default function ISBNScanner({
           focusMode: { ideal: 'continuous' }, // 자동 초점
         },
       })
-
-      console.log('[ISBNScanner] 카메라 스트림 획득 성공:', stream)
 
       streamRef.current = stream
 

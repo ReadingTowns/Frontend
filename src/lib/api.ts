@@ -97,9 +97,6 @@ async function refreshAccessToken(): Promise<boolean> {
       // If no content or empty response, but status is OK, consider it success
       // (Some backends return 200 with Set-Cookie header but no body)
       if (!contentType || contentLength === '0' || contentLength === null) {
-        console.log(
-          '🔍 [api.ts] 토큰 재발급 성공 (응답 본문 없음, Set-Cookie 헤더만 존재)'
-        )
         return true
       }
 
@@ -174,48 +171,22 @@ async function apiClient<T = unknown>(
     },
   }
 
-  console.log('🔍 [api.ts] API 요청 시작:', { url, path })
-
   try {
     const response = await fetch(url, config)
-    console.log('🔍 [api.ts] API 응답 받음:', {
-      url,
-      status: response.status,
-      ok: response.ok,
-    })
     return await parseResponse<T>(response)
   } catch (error) {
-    console.log('🔍 [api.ts] API 에러 발생:', {
-      url,
-      error,
-      errorType: error instanceof ApiError ? 'ApiError' : 'Unknown',
-      status: error instanceof ApiError ? error.status : 'N/A',
-    })
-
     if (error instanceof ApiError) {
       // 401 Unauthorized: Access token 만료
       if (error.status === 401 && !path.includes('/auth/reissue')) {
-        console.log('🔍 [api.ts] 401 에러 감지 - 토큰 재발급 시작:', {
-          url,
-          isRefreshing,
-          currentPath:
-            typeof window !== 'undefined' ? window.location.pathname : 'N/A',
-        })
-
         // 이미 refresh 중이면 대기
         if (isRefreshing) {
-          console.log('🔍 [api.ts] 이미 재발급 중 - 대기열에 추가:', url)
           return new Promise<T>((resolve, reject) => {
             subscribeTokenRefresh(async () => {
               try {
-                console.log('🔍 [api.ts] 대기열에서 재시도:', url)
-                // 토큰 갱신 후 원래 요청 재시도
                 const retryResponse = await fetch(url, config)
                 const result = await parseResponse<T>(retryResponse)
-                console.log('🔍 [api.ts] 대기열 재시도 성공:', url)
                 resolve(result)
               } catch (retryError) {
-                console.log('🔍 [api.ts] 대기열 재시도 실패:', url, retryError)
                 reject(retryError)
               }
             })
@@ -224,52 +195,33 @@ async function apiClient<T = unknown>(
 
         // Refresh token으로 access token 갱신 시도
         isRefreshing = true
-        console.log('🔍 [api.ts] 토큰 재발급 시작')
 
         try {
           const refreshSuccess = await refreshAccessToken()
-          console.log('🔍 [api.ts] 토큰 재발급 결과:', refreshSuccess)
 
           if (refreshSuccess) {
             // 갱신 성공: 대기 중인 요청들에게 알림
-            console.log('🔍 [api.ts] 토큰 재발급 성공 - 원래 요청 재시도')
             onTokenRefreshed('refreshed')
 
             // 원래 요청 재시도
             const retryResponse = await fetch(url, config)
-            console.log('🔍 [api.ts] 재시도 응답:', {
-              url,
-              status: retryResponse.status,
-              ok: retryResponse.ok,
-            })
             const result = await parseResponse<T>(retryResponse)
-            console.log('🔍 [api.ts] 재시도 성공 - 결과 반환:', url)
             return result
           } else {
             // Refresh 실패: 로그아웃 처리
-            console.log(
-              '🔍 [api.ts] 토큰 재발급 실패 - 로그인 페이지로 리다이렉트'
-            )
             onTokenRefreshed('failed')
             if (typeof window !== 'undefined') {
               sessionStorage.setItem('sessionExpired', 'true')
-              console.log(
-                '🔍 [api.ts] window.location.replace 호출 - /login?session=expired'
-              )
               window.location.replace('/login?session=expired')
             }
             throw new ApiError('Session expired', 401)
           }
         } finally {
           isRefreshing = false
-          console.log('🔍 [api.ts] 토큰 재발급 프로세스 종료')
         }
       }
-
-      console.log('🔍 [api.ts] ApiError throw:', error)
       throw error
     }
-    console.log('🔍 [api.ts] 일반 에러 throw:', error)
     throw new ApiError(
       error instanceof Error ? error.message : 'Network error',
       0

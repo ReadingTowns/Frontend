@@ -117,20 +117,26 @@ export const useWebSocket = ({
     let cleanupDisconnect: (() => void) | undefined
 
     const connectWebSocket = async () => {
-      if (isConnecting.current) {
-        console.log('⏳ Already connecting...')
-        return
-      }
+      if (isConnecting.current) return
       isConnecting.current = true
 
       try {
+        // 연결 시도 (실패해도 핸들러는 등록해야 함)
         if (!websocketService.isConnected()) {
-          await websocketService.connect()
+          try {
+            await websocketService.connect()
+          } catch (connectError) {
+            // 연결 실패해도 계속 진행 (자동 재연결이 처리함)
+            console.warn(
+              'Initial WebSocket connect failed, will retry automatically'
+            )
+          }
         }
 
-        setIsConnected(true)
+        // 실제 WebSocket 연결 상태 기반으로 설정
+        setIsConnected(websocketService.isConnected())
 
-        // 메시지 수신 핸들러 등록
+        // 메시지 수신 핸들러 등록 (연결 실패해도 등록하여 재연결 시 동작하도록)
         cleanupMessage = websocketService.onMessage(handleMessageReceived)
 
         // 에러 핸들러 등록 (ref를 통해 최신 버전 호출)
@@ -141,14 +147,12 @@ export const useWebSocket = ({
 
         // 연결 핸들러 등록 (ref를 통해 최신 버전 호출)
         cleanupConnect = websocketService.onConnect(() => {
-          console.log('✅ Connected')
           setIsConnected(true)
           onConnectRef.current?.()
         })
 
         // 연결 해제 핸들러 등록 (ref를 통해 최신 버전 호출)
         cleanupDisconnect = websocketService.onDisconnect(() => {
-          console.log('🔌 Disconnected')
           setIsConnected(false)
           onDisconnectRef.current?.()
         })
@@ -164,13 +168,13 @@ export const useWebSocket = ({
 
     // Cleanup
     return () => {
-      console.log('🧹 Cleaning up WebSocket hook')
       cleanupMessage?.()
       cleanupError?.()
       cleanupConnect?.()
       cleanupDisconnect?.()
     }
-  }, [chatroomId, handleMessageReceived]) // ✅ FIX: 의존성 최소화 (ref 사용으로 콜백 제거)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatroomId]) // ✅ FIX: handleMessageReceived 제거하여 불필요한 재연결 방지
 
   /**
    * 메시지 전송
