@@ -17,6 +17,7 @@ import {
   getChatRoomList,
 } from '@/services/chatRoomService'
 import { useMyBookhouse } from '@/hooks/useBookhouse'
+import { useSnackbar } from '@/hooks/useSnackbar'
 import type { BookSearchResult, BookhouseOwner } from '@/types/exchange'
 import type { CreateChatRoomRequest } from '@/types/chatroom'
 
@@ -33,6 +34,7 @@ export function ConfirmCreateStep({
 }: ConfirmCreateStepProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
+  const { showError, showWarning } = useSnackbar()
   const [selectedMyBook, setSelectedMyBook] = useState<BookSearchResult | null>(
     null
   )
@@ -86,13 +88,13 @@ export function ConfirmCreateStep({
     },
     onError: error => {
       console.error('Failed to create chatroom:', error)
-      alert('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
+      showError('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
     },
   })
 
   const handleCreate = () => {
     if (!selectedMyBook) {
-      alert('교환할 내 책을 선택해주세요')
+      showWarning('교환할 내 책을 선택해주세요')
       return
     }
 

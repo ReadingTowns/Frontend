@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 import { useLibraryBooksInfinite } from '@/hooks/useLibrary'
 import { LibraryBookCard } from './LibraryBookCard'
 import { SelectableBookCard } from '../chat/SelectableBookCard'
@@ -43,6 +44,7 @@ export function LibraryBooksGrid({
   onReviewClick,
   onExchangeRequest,
 }: LibraryBooksGridProps) {
+  const router = useRouter()
   const observerTarget = useRef<HTMLDivElement>(null)
 
   const {
@@ -112,7 +114,7 @@ export function LibraryBooksGrid({
           <p className="text-gray-500 mb-4">등록된 책이 없습니다</p>
           {isOwner && (
             <button
-              onClick={() => (window.location.href = '/library/register')}
+              onClick={() => router.push('/library/register')}
               className="px-4 py-2 bg-primary-400 text-white rounded-lg hover:bg-primary-500 transition-colors"
             >
               첫 번째 책 등록하기

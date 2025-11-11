@@ -54,7 +54,6 @@ export class WebSocketService {
   private socket: WebSocket | null = null
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
-  private reconnectDelay = 3000
   private messageHandlers: Set<MessageHandler> = new Set()
   private errorHandlers: Set<ErrorHandler> = new Set()
   private connectHandlers: Set<ConnectionHandler> = new Set()
