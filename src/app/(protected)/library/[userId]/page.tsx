@@ -1,6 +1,6 @@
 'use client'
 
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import { useUserProfile } from '@/hooks/useLibrary'
 import { LibraryBooksGrid } from '@/components/library/LibraryBooksGrid'
 import { useAuth } from '@/hooks/useAuth'
@@ -21,6 +21,7 @@ import {
 
 export default function UserLibraryPage() {
   const params = useParams()
+  const router = useRouter()
   const userId = params.userId as string
   const { user: currentUser } = useAuth()
   const { showError } = useSnackbar()
@@ -84,8 +85,8 @@ export default function UserLibraryPage() {
       {
         onSuccess: data => {
           setShowExchangeModal(false)
-          // 채팅방으로 이동 - 개발 환경 URL 사용
-          window.location.href = `https://dev.readingtown.site/chat/${data.chatroomId}`
+          // Next.js Router로 채팅방 이동 (SPA 방식)
+          router.push(`/chat/${data.chatroomId}`)
         },
         onError: error => {
           console.error('Failed to create chatroom:', error)
