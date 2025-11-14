@@ -1,8 +1,10 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { ExchangedBook } from '@/types/home'
 import { BookCard } from '@/components/books/BookCard'
 import { GridBook } from '@/types/bookCard'
+import { useSnackbar } from '@/contexts/SnackbarContext'
 
 interface ExchangedBooksSectionProps {
   books: ExchangedBook[]
@@ -13,11 +15,23 @@ interface ExchangedBooksSectionProps {
  * 교환한 도서 섹션 컴포넌트
  * - 최근 교환한 도서 3권 표시
  * - 책 표지, 제목, 교환 상대 닉네임, 교환 날짜 표시
+ * - chatRoomId가 있으면 채팅방으로 이동, 없으면 안내 메시지 표시
  */
 export default function ExchangedBooksSection({
   books,
   isLoading,
 }: ExchangedBooksSectionProps) {
+  const router = useRouter()
+  const { showInfo } = useSnackbar()
+
+  const handleBookClick = (book: ExchangedBook) => {
+    if (book.chatRoomId) {
+      router.push(`/chat/${book.chatRoomId}`)
+    } else {
+      showInfo('채팅방이 생성되면 이동할 수 있습니다')
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-3 gap-4">
@@ -58,6 +72,7 @@ export default function ExchangedBooksSection({
               partnerNickname: book.partnerNickname,
             } as GridBook
           }
+          onClick={() => handleBookClick(book)}
           columns={3}
           compact={true}
           aspectRatio="3/4"

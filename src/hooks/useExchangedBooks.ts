@@ -18,12 +18,15 @@ function transformExchangeResponse(
   const books: ExchangedBook[] = []
 
   apiResponse.forEach(item => {
+    const chatRoomId = item.chatRoomId
+
     // myBook: 내가 빌려준 책
     if (item.myBook) {
       books.push({
         exchangeId: item.myBook.bookhouseId,
         bookTitle: item.myBook.bookName,
         bookCoverImage: item.myBook.bookImage,
+        chatRoomId,
         isMyBook: true,
       })
     }
@@ -34,6 +37,7 @@ function transformExchangeResponse(
         exchangeId: item.yourBook.bookhouseId,
         bookTitle: item.yourBook.bookName,
         bookCoverImage: item.yourBook.bookImage,
+        chatRoomId,
         isMyBook: false,
       })
     }

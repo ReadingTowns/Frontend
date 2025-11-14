@@ -54,6 +54,7 @@ export interface ExchangedBook {
   exchangeId: number
   bookTitle: string
   bookCoverImage: string
+  chatRoomId?: number | null
   partnerMemberId?: number
   partnerNickname?: string
   exchangeDate?: string
