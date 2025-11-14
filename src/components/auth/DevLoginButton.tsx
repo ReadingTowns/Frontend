@@ -42,9 +42,7 @@ export function DevLoginButton({ onClick }: DevLoginButtonProps) {
         <span className="text-xs opacity-75 ml-1">🚀</span>
       </button>
       <div className="mt-2 text-center">
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          ⚡ 개발 환경 전용 - 즉시 로그인
-        </p>
+        <p className="text-xs text-gray-500">⚡ 개발 환경 전용 - 즉시 로그인</p>
       </div>
     </div>
   )

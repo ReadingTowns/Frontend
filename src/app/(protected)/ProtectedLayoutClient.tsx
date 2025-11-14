@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import CommonHeader from '@/components/layout/CommonHeader'
+import { ChatbotFloatingButton } from '@/components/chatbot/ChatbotFloatingButton'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -52,6 +53,9 @@ export default function ProtectedLayoutClient({
     pathname.startsWith('/onboarding/') ||
     pathname.startsWith('/recommendations/keywords/edit')
 
+  // 챗봇 페이지에서는 플로팅 버튼 숨김 (중복 방지)
+  const hideChatbotButton = pathname === '/chatbot'
+
   return (
     <div className="h-screen-safe flex flex-col overflow-hidden">
       {/* 새로운 CommonHeader 사용 (headerConfig 기반) */}
@@ -62,6 +66,7 @@ export default function ProtectedLayoutClient({
         {children}
       </main>
       {!hideBottomNavigation && <BottomNavigation />}
+      {!hideChatbotButton && <ChatbotFloatingButton />}
     </div>
   )
 }
