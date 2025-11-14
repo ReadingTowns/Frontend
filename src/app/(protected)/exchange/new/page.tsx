@@ -43,7 +43,7 @@ export default function NewExchangePage() {
   }
 
   return (
-    <div className="h-screen bg-white dark:bg-gray-900">
+    <div className="h-screen bg-white">
       {currentStep === 'search' && (
         <BookSearchStep onBookSelect={handleBookSelect} />
       )}
