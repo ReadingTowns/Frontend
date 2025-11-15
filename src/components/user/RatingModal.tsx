@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 import { useSubmitRating } from '@/hooks/useUserRating'
-import { useSnackbar } from '@/hooks/useSnackbar'
 import { Modal } from '@/components/common/Modal'
 
 interface RatingModalProps {
@@ -20,26 +20,25 @@ export default function RatingModal({
   userId,
   userName,
 }: RatingModalProps) {
-  const { showWarning, showSuccess, showError } = useSnackbar()
   const [selectedRating, setSelectedRating] = useState<number>(0)
   const [hoverRating, setHoverRating] = useState<number>(0)
   const submitRatingMutation = useSubmitRating(userId)
 
   const handleSubmit = async () => {
     if (selectedRating === 0) {
-      showWarning('별점을 선택해주세요.')
+      toast('별점을 선택해주세요.', { icon: '⚠️' })
       return
     }
 
     try {
       await submitRatingMutation.mutateAsync(selectedRating)
-      showSuccess('별점이 제출되었습니다.')
+      toast.success('별점이 제출되었습니다.')
       onClose()
     } catch (error) {
       if (error instanceof Error && error.message.includes('본인')) {
-        showWarning('본인에게는 별점을 남길 수 없습니다.')
+        toast('본인에게는 별점을 남길 수 없습니다.', { icon: '⚠️' })
       } else {
-        showError('별점 제출에 실패했습니다. 다시 시도해주세요.')
+        // API 에러는 api.ts에서 자동으로 토스트 표시
       }
     }
   }

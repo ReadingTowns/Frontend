@@ -1,10 +1,11 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import CommonHeader from '@/components/layout/CommonHeader'
-import { ChatbotFloatingButton } from '@/components/chatbot/ChatbotFloatingButton'
+import { FloatingButton } from '@/components/layout/FloatingButton'
+import { SparklesIcon } from '@heroicons/react/24/solid'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -53,8 +54,44 @@ export default function ProtectedLayoutClient({
     pathname.startsWith('/onboarding/') ||
     pathname.startsWith('/recommendations/keywords/edit')
 
-  // 챗봇 페이지에서는 플로팅 버튼 숨김 (중복 방지)
-  const hideChatbotButton = pathname === '/chatbot'
+  // 플로팅 버튼 설정 - 페이지별 조건부 렌더링
+  const floatingButtons = useMemo(() => {
+    const buttons: Array<{
+      id: string
+      variant: 'primary' | 'secondary' | 'neutral'
+      icon?: typeof SparklesIcon
+      text?: string
+      href?: string
+      ariaLabel: string
+    }> = []
+
+    // 라이브러리 페이지 - 책 추가 버튼
+    if (pathname === '/library') {
+      buttons.push({
+        id: 'library-add',
+        variant: 'secondary',
+        text: '+',
+        href: '/library/add',
+        ariaLabel: '책 추가',
+      })
+    }
+
+    // 소셜 페이지 - 챗봇 버튼
+    if (
+      (pathname === '/social' || pathname.startsWith('/social/')) &&
+      pathname !== '/chatbot'
+    ) {
+      buttons.push({
+        id: 'chatbot',
+        variant: 'primary',
+        icon: SparklesIcon,
+        href: '/chatbot',
+        ariaLabel: 'AI 챗봇 열기',
+      })
+    }
+
+    return buttons
+  }, [pathname])
 
   return (
     <div className="h-screen-safe flex flex-col overflow-hidden">
@@ -66,7 +103,19 @@ export default function ProtectedLayoutClient({
         {children}
       </main>
       {!hideBottomNavigation && <BottomNavigation />}
-      {!hideChatbotButton && <ChatbotFloatingButton />}
+
+      {/* 플로팅 버튼 컨테이너 - max-width 제약 적용 */}
+      {floatingButtons.length > 0 && (
+        <div className="fixed bottom-0 right-0 left-0 z-50 pointer-events-none">
+          <div className="max-w-[430px] mx-auto relative h-0 pointer-events-none">
+            <div className="absolute bottom-20 right-4 flex flex-col-reverse space-y-3 space-y-reverse pointer-events-auto">
+              {floatingButtons.map(button => (
+                <FloatingButton key={button.id} {...button} />
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

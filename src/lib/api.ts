@@ -2,6 +2,8 @@
  * API Client - Centralized fetch wrapper with authentication
  */
 
+import toast from 'react-hot-toast'
+
 const BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
 
@@ -131,18 +133,20 @@ async function parseResponse<T>(response: Response): Promise<T> {
   const data = (await response.json()) as ApiResponse<T>
 
   if (!response.ok) {
-    throw new ApiError(
-      data.message || 'Request failed',
-      response.status,
-      data.code
-    )
+    const errorMessage = data.message || 'Request failed'
+    // ✅ 자동 에러 토스트 표시
+    toast.error(errorMessage)
+    throw new ApiError(errorMessage, response.status, data.code)
   }
 
   // Accept both 1000 (number) and "1000"/"2000" (string) as success codes
   const successCodes = [1000, '1000', '2000', 2000]
   if (!successCodes.includes(data.code)) {
+    const errorMessage = data.message || 'Request failed'
+    // ✅ 자동 에러 토스트 표시
+    toast.error(errorMessage)
     throw new ApiError(
-      data.message || 'Request failed',
+      errorMessage,
       response.status,
       typeof data.code === 'string' ? parseInt(data.code) : data.code
     )

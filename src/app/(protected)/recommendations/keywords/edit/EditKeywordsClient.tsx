@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useRecommendKeywords } from '@/hooks/useRecommendKeywords'
 import { KeywordCandidatesResponse } from '@/hooks/useRecommendKeywordCandidates'
-import { useSnackbar } from '@/hooks/useSnackbar'
 import { api } from '@/lib/api'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import KeywordStep from '@/components/onboarding/KeywordStep'
@@ -13,7 +13,6 @@ import KeywordStep from '@/components/onboarding/KeywordStep'
 export default function EditKeywordsClient() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { showSuccess, showError } = useSnackbar()
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1)
 
   // 선택된 키워드 IDs
@@ -73,12 +72,12 @@ export default function EditKeywordsClient() {
     onSuccess: () => {
       // 추천 키워드 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['recommend', 'keywords'] })
-      showSuccess('키워드가 성공적으로 변경되었습니다')
+      toast.success('키워드가 성공적으로 변경되었습니다')
       router.push('/home?tab=recommendations')
     },
     onError: error => {
       console.error('키워드 저장 오류:', error)
-      showError('키워드 저장 중 오류가 발생했습니다')
+      // API 에러는 api.ts에서 자동으로 토스트 표시
     },
   })
 

@@ -1,10 +1,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { ExchangedBook } from '@/types/home'
 import { BookCard } from '@/components/books/BookCard'
 import { GridBook } from '@/types/bookCard'
-import { useSnackbar } from '@/contexts/SnackbarContext'
 
 interface ExchangedBooksSectionProps {
   books: ExchangedBook[]
@@ -22,13 +22,12 @@ export default function ExchangedBooksSection({
   isLoading,
 }: ExchangedBooksSectionProps) {
   const router = useRouter()
-  const { showInfo } = useSnackbar()
 
   const handleBookClick = (book: ExchangedBook) => {
     if (book.chatRoomId) {
       router.push(`/chat/${book.chatRoomId}`)
     } else {
-      showInfo('채팅방이 생성되면 이동할 수 있습니다')
+      toast('채팅방이 생성되면 이동할 수 있습니다')
     }
   }
 

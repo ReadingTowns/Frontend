@@ -6,16 +6,14 @@ import {
   useBookReviewActions,
 } from '@/hooks/useLibrary'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
-import { useSnackbar } from '@/hooks/useSnackbar'
 import { BookCard } from '@/components/books/BookCard'
 import { GridBook } from '@/types/bookCard'
 import { BookReviewModal } from '@/components/library/BookReviewModal'
-import Link from 'next/link'
 import { BookOpenIcon } from '@heroicons/react/24/outline'
 import { api } from '@/lib/api'
+import Link from 'next/link'
 
 export default function LibraryPageClient() {
-  const { showError } = useSnackbar()
   const [selectedBook, setSelectedBook] = useState<{
     id: string
     title: string
@@ -78,7 +76,7 @@ export default function LibraryPageClient() {
         await api.delete(`/api/v1/bookhouse/books/${bookId}`)
         refetch() // 삭제 후 목록 새로고침
       } catch {
-        showError('책 삭제에 실패했습니다.')
+        // API 에러는 api.ts에서 자동으로 토스트 표시
       }
     }
   }
@@ -193,13 +191,6 @@ export default function LibraryPageClient() {
           </>
         )}
       </section>
-
-      {/* Floating Add Button - 회색 톤으로 변경 */}
-      <Link href="/library/add">
-        <button className="fixed bottom-24 right-4 w-16 h-16 bg-gray-200 text-gray-800 rounded-full shadow-xl hover:bg-gray-300 transition-all flex items-center justify-center text-3xl font-light">
-          +
-        </button>
-      </Link>
 
       {/* Book Review Modal */}
       <BookReviewModal
