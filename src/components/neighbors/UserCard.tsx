@@ -6,7 +6,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { useSnackbar } from '@/hooks/useSnackbar'
 import FollowButton from './FollowButton'
 import LibraryButton from './LibraryButton'
 
@@ -40,7 +39,6 @@ export default function UserCard({
 }: UserCardProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { showError } = useSnackbar()
   const userId = user.memberId || user.id || 0
   const [isFollowing, setIsFollowing] = useState(
     user.followed ?? user.following ?? user.isFollowing ?? false
@@ -92,8 +90,7 @@ export default function UserCard({
       // 로컬 상태 롤백
       setIsFollowing(!isFollowing)
 
-      // 사용자에게 에러 알림
-      showError('팔로우 처리에 실패했습니다. 다시 시도해주세요.')
+      // API 에러는 api.ts에서 자동으로 토스트 표시
     },
     onSettled: () => {
       // 성공/실패 관계없이 최종적으로 서버 데이터 재조회 (데이터 일관성 보장)

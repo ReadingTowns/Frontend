@@ -6,7 +6,6 @@ import { LibraryBooksGrid } from '@/components/library/LibraryBooksGrid'
 import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
 import { useUserRating } from '@/hooks/useUserRating'
-import { useSnackbar } from '@/hooks/useSnackbar'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useState } from 'react'
 import RatingModal from '@/components/user/RatingModal'
@@ -24,7 +23,6 @@ export default function UserLibraryPage() {
   const router = useRouter()
   const userId = params.userId as string
   const { user: currentUser } = useAuth()
-  const { showError } = useSnackbar()
 
   const { data: profile, isLoading: profileLoading } = useUserProfile(userId)
   const { data: userRating } = useUserRating(userId)
@@ -84,13 +82,21 @@ export default function UserLibraryPage() {
       },
       {
         onSuccess: data => {
+          // ✅ FIX: 방어 코드 - data 검증
+          if (!data?.chatroomId) {
+            console.error('Invalid chatroom data:', data)
+            // API 에러는 api.ts에서 자동으로 토스트 표시
+            setShowExchangeModal(false)
+            return
+          }
+
           setShowExchangeModal(false)
           // Next.js Router로 채팅방 이동 (SPA 방식)
           router.push(`/chat/${data.chatroomId}`)
         },
         onError: error => {
           console.error('Failed to create chatroom:', error)
-          showError('교환 신청에 실패했습니다. 다시 시도해주세요.')
+          // API 에러는 api.ts에서 자동으로 토스트 표시
         },
       }
     )

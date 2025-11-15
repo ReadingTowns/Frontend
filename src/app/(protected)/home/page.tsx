@@ -116,7 +116,7 @@ function MyTownTab({
 
       {/* 2. 이웃과 교환한 도서 섹션 */}
       <section>
-        <h2 className="text-xl font-bold mb-4">이웃과 교환한 도서</h2>
+        <h2 className="text-xl font-bold mb-4">교환중인 도서</h2>
         <ExchangedBooksSection
           books={exchangedBooks || []}
           isLoading={isLoadingExchanges}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import {
   useChatRoomMessages,
@@ -81,7 +82,7 @@ export default function ChatRoomClient({
       router.push('/social')
     } catch (error) {
       console.error('Failed to exit chat room:', error)
-      alert('채팅방 나가기에 실패했습니다.')
+      toast.error('채팅방 나가기에 실패했습니다.')
     }
   }, [chatroomId, deleteChatRoomMutation, router])
 
@@ -181,7 +182,7 @@ export default function ChatRoomClient({
         scrollToBottom()
       } catch (error) {
         console.error('Failed to send message:', error)
-        alert('메시지 전송에 실패했습니다. 연결 상태를 확인해주세요.')
+        toast.error('메시지 전송에 실패했습니다. 연결 상태를 확인해주세요.')
       }
     }
   }

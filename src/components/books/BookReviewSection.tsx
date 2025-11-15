@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useSnackbar } from '@/hooks/useSnackbar'
+import toast from 'react-hot-toast'
 import { Modal } from '@/components/common/Modal'
 import type { MyBookReview } from '@/types/book'
 import {
@@ -23,7 +23,6 @@ export default function BookReviewSection({
   myReview,
   isLoading,
 }: BookReviewSectionProps) {
-  const { showWarning, showError } = useSnackbar()
   const [isEditing, setIsEditing] = useState(false)
   const [reviewContent, setReviewContent] = useState(myReview?.content || '')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -34,7 +33,7 @@ export default function BookReviewSection({
 
   const handleSave = async () => {
     if (!reviewContent.trim()) {
-      showWarning('감상평을 입력해주세요.')
+      toast('감상평을 입력해주세요.', { icon: '⚠️' })
       return
     }
 
@@ -47,7 +46,7 @@ export default function BookReviewSection({
       setIsEditing(false)
     } catch (error) {
       console.error('Failed to save review:', error)
-      showError('감상평 저장에 실패했습니다.')
+      // API 에러는 api.ts에서 자동으로 토스트 표시
     }
   }
 
@@ -58,7 +57,7 @@ export default function BookReviewSection({
       setReviewContent('')
     } catch (error) {
       console.error('Failed to delete review:', error)
-      showError('감상평 삭제에 실패했습니다.')
+      // API 에러는 api.ts에서 자동으로 토스트 표시
     }
   }
 

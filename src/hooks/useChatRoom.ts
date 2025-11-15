@@ -155,7 +155,17 @@ export const useCreateChatRoom = () => {
         })
       } catch (error) {
         console.error('Failed to create exchange request:', error)
-        // 교환 요청 실패해도 채팅룸 ID는 반환 (채팅방은 생성됨)
+
+        // ✅ FIX: 교환 요청 실패 시 생성된 채팅방 삭제 (롤백)
+        try {
+          await deleteChatRoom(chatroomResponse.chatroomId)
+          console.log('Chatroom rolled back successfully')
+        } catch (rollbackError) {
+          console.error('Failed to rollback chatroom:', rollbackError)
+          // 롤백 실패 시에도 원래 에러를 전파
+        }
+
+        throw new Error('교환 요청 생성에 실패했습니다. 다시 시도해주세요.')
       }
 
       return chatroomResponse

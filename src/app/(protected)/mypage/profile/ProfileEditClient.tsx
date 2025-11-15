@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
-import { useSnackbar } from '@/hooks/useSnackbar'
+import toast from 'react-hot-toast'
 import NicknameInput from '@/components/common/NicknameInput'
 import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { api } from '@/lib/api'
@@ -23,7 +23,6 @@ interface UserProfile {
 export default function ProfileEditClient() {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { showWarning, showError, showInfo } = useSnackbar()
 
   const [nickname, setNickname] = useState('')
   const [availableTime, setAvailableTime] = useState('')
@@ -71,7 +70,7 @@ export default function ProfileEditClient() {
     },
     onError: error => {
       console.error('프로필 수정 오류:', error)
-      showError('프로필 수정 중 오류가 발생했습니다')
+      // API 에러는 api.ts에서 자동으로 토스트 표시
     },
   })
 
@@ -79,7 +78,7 @@ export default function ProfileEditClient() {
     e.preventDefault()
 
     if (!nicknameValid) {
-      showWarning('닉네임 중복 확인을 해주세요')
+      toast('닉네임 중복 확인을 해주세요', { icon: '⚠️' })
       return
     }
 
@@ -118,7 +117,7 @@ export default function ProfileEditClient() {
             <button
               type="button"
               className="text-primary-600 text-sm font-medium"
-              onClick={() => showInfo('이미지 업로드 기능은 준비 중입니다')}
+              onClick={() => toast('이미지 업로드 기능은 준비 중입니다')}
             >
               프로필 사진 변경
             </button>

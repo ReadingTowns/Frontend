@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import toast from 'react-hot-toast'
 import { ChevronLeftIcon, StarIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -17,7 +18,6 @@ import {
   getChatRoomList,
 } from '@/services/chatRoomService'
 import { useMyBookhouse } from '@/hooks/useBookhouse'
-import { useSnackbar } from '@/hooks/useSnackbar'
 import type { BookSearchResult, BookhouseOwner } from '@/types/exchange'
 import type { CreateChatRoomRequest } from '@/types/chatroom'
 
@@ -34,7 +34,6 @@ export function ConfirmCreateStep({
 }: ConfirmCreateStepProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { showError, showWarning } = useSnackbar()
   const [selectedMyBook, setSelectedMyBook] = useState<BookSearchResult | null>(
     null
   )
@@ -88,13 +87,13 @@ export function ConfirmCreateStep({
     },
     onError: error => {
       console.error('Failed to create chatroom:', error)
-      showError('채팅방 생성에 실패했습니다. 다시 시도해주세요.')
+      // API 에러는 api.ts에서 자동으로 토스트 표시
     },
   })
 
   const handleCreate = () => {
     if (!selectedMyBook) {
-      showWarning('교환할 내 책을 선택해주세요')
+      toast('교환할 내 책을 선택해주세요', { icon: '⚠️' })
       return
     }
 

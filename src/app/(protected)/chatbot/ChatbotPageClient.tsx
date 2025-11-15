@@ -102,11 +102,7 @@ export default function ChatbotPageClient() {
       scrollToBottom()
     } catch (error) {
       console.error('Failed to send message:', error)
-      // API 에러 메시지 토스트 표시
-      const errorMessage =
-        (error as { message?: string })?.message ||
-        '메시지 전송에 실패했습니다.'
-      toast.error(errorMessage)
+      // API 에러는 api.ts에서 자동으로 토스트 표시
     } finally {
       setIsTyping(false)
     }

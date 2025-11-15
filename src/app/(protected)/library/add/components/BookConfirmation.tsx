@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { BookCard } from '@/components/books/BookCard'
 import { Book } from '@/types/bookCard'
 import { useAddBookById } from '@/hooks/useLibrary'
-import { useSnackbar } from '@/hooks/useSnackbar'
 import type { BookSearchResult } from '@/types/book'
 
 interface BookConfirmationProps {
@@ -19,7 +18,6 @@ export default function BookConfirmation({
 }: BookConfirmationProps) {
   const router = useRouter()
   const addBookMutation = useAddBookById()
-  const { showError } = useSnackbar()
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleConfirm = async () => {
@@ -32,7 +30,7 @@ export default function BookConfirmation({
       router.push('/library')
     } catch (error) {
       console.error('Failed to add book:', error)
-      showError('책 등록에 실패했습니다. 다시 시도해주세요.')
+      // API 에러는 api.ts에서 자동으로 토스트 표시
       setIsSubmitting(false)
     }
   }
