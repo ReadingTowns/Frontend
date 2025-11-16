@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
 import { CameraIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { useProfileImageUpload } from '@/hooks/useProfileImage'
@@ -34,6 +34,11 @@ export default function ProfileImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [previewUrl, setPreviewUrl] = useState<string | undefined>(currentImage)
   const { uploadProfileImage, isUploading } = useProfileImageUpload()
+
+  // Sync previewUrl with currentImage prop changes
+  useEffect(() => {
+    setPreviewUrl(currentImage)
+  }, [currentImage])
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -118,21 +123,6 @@ export default function ProfileImageUpload({
         ) : (
           <div className="w-full h-full flex items-center justify-center">
             <UserCircleIcon className={`${iconSizeClass} text-gray-400`} />
-          </div>
-        )}
-
-        {/* Upload Overlay */}
-        {editable && (
-          <div
-            className={`absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-40 transition-all duration-200 flex items-center justify-center ${
-              isUploading ? 'bg-opacity-60' : ''
-            }`}
-          >
-            {isUploading ? (
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white" />
-            ) : (
-              <CameraIcon className="w-8 h-8 text-white opacity-0 hover:opacity-100 transition-opacity" />
-            )}
           </div>
         )}
       </div>
