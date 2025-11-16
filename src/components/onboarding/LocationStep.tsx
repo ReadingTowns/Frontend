@@ -9,6 +9,7 @@ export default function LocationStep({
   longitude,
   onLocationChange,
   onBack,
+  onSkip,
 }: LocationStepProps) {
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     latitude && longitude ? { lat: latitude, lng: longitude } : null
@@ -116,6 +117,11 @@ export default function LocationStep({
           className="btn-secondary"
         >
           {isLoading ? '위치 확인 중...' : '현재 위치로 설정'}
+        </button>
+
+        {/* 건너뛰기 버튼 */}
+        <button onClick={onSkip} className="btn-ghost mt-3 w-full">
+          나중에 설정하기
         </button>
       </div>
     </div>

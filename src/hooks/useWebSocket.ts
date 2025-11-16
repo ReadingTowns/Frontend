@@ -144,22 +144,8 @@ export const useWebSocket = ({
       isConnecting.current = true
 
       try {
-        // 연결 시도 (실패해도 핸들러는 등록해야 함)
-        if (!websocketService.isConnected()) {
-          try {
-            await websocketService.connect(chatroomId)
-          } catch (connectError) {
-            // 연결 실패해도 계속 진행 (자동 재연결이 처리함)
-            console.warn(
-              'Initial WebSocket connect failed, will retry automatically'
-            )
-          }
-        }
-
-        // 실제 WebSocket 연결 상태 기반으로 설정
-        setIsConnected(websocketService.isConnected())
-
-        // 메시지 수신 핸들러 등록 (연결 실패해도 등록하여 재연결 시 동작하도록)
+        // ✅ FIX: 핸들러를 먼저 등록해야 연결 시 메시지를 받을 수 있음
+        // 메시지 수신 핸들러 등록
         cleanupMessage = websocketService.onMessage(handleMessageReceived)
 
         // 에러 핸들러 등록 (ref를 통해 최신 버전 호출)
@@ -179,6 +165,21 @@ export const useWebSocket = ({
           setIsConnected(false)
           onDisconnectRef.current?.()
         })
+
+        // 핸들러 등록 후 연결 시도
+        if (!websocketService.isConnected()) {
+          try {
+            await websocketService.connect(chatroomId)
+          } catch (connectError) {
+            // 연결 실패해도 계속 진행 (자동 재연결이 처리함)
+            console.warn(
+              'Initial WebSocket connect failed, will retry automatically'
+            )
+          }
+        }
+
+        // 실제 WebSocket 연결 상태 기반으로 설정
+        setIsConnected(websocketService.isConnected())
       } catch (error) {
         console.error('Failed to connect WebSocket:', error)
         setIsConnected(false)

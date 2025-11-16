@@ -171,8 +171,8 @@ export default function OnboardingPage() {
     try {
       await api.post('/api/v1/members/onboarding/complete', {
         phoneNumber: onboardingData.phoneNumber,
-        latitude: onboardingData.latitude,
-        longitude: onboardingData.longitude,
+        latitude: onboardingData.latitude || null,
+        longitude: onboardingData.longitude || null,
         nickname: onboardingData.nickname,
         profileImage: onboardingData.profileImage,
         availableTime:
@@ -200,7 +200,8 @@ export default function OnboardingPage() {
       case 'profile':
         return !!onboardingData.nickname && isNicknameValid
       case 'location':
-        return !!(onboardingData.latitude && onboardingData.longitude)
+        // 선택적 입력: 위치 설정 또는 건너뛰기 가능
+        return true
       case 'preferences':
         // 선택적 입력: 항상 다음 단계로 진행 가능
         return true
@@ -272,6 +273,7 @@ export default function OnboardingPage() {
               setOnboardingData(prev => ({ ...prev, latitude, longitude }))
             }
             onBack={handleBackButton}
+            onSkip={() => setCurrentStep('preferences')}
           />
         )
 

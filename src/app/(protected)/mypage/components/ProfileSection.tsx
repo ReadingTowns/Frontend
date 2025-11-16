@@ -16,8 +16,6 @@ interface ProfileSectionProps {
 }
 
 export default function ProfileSection({ profile }: ProfileSectionProps) {
-  const defaultProfileImage = '/default-avatar.svg'
-
   const renderStars = (rating: number = 0) => {
     const stars = []
     const fullStars = Math.floor(rating)
@@ -53,13 +51,9 @@ export default function ProfileSection({ profile }: ProfileSectionProps) {
         {/* 프로필 이미지 */}
         <div className="relative w-24 h-24 mb-4">
           <img
-            src={profile.profileImage || defaultProfileImage}
+            src={profile.profileImage}
             alt={profile.nickname}
             className="w-full h-full rounded-full object-cover bg-gray-100"
-            onError={e => {
-              const target = e.target as HTMLImageElement
-              target.src = defaultProfileImage
-            }}
           />
         </div>
 

@@ -42,6 +42,7 @@ export interface LocationStepProps {
   longitude?: number
   onLocationChange: (latitude: number, longitude: number) => void
   onBack: () => void
+  onSkip: () => void
 }
 
 export interface PreferencesStepProps {
