@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { showSuccess } from '@/lib/toast'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { useRecommendKeywords } from '@/hooks/useRecommendKeywords'
 import { KeywordCandidatesResponse } from '@/hooks/useRecommendKeywordCandidates'
@@ -72,7 +72,7 @@ export default function EditKeywordsClient() {
     onSuccess: () => {
       // 추천 키워드 캐시 무효화
       queryClient.invalidateQueries({ queryKey: ['recommend', 'keywords'] })
-      toast.success('키워드가 성공적으로 변경되었습니다')
+      showSuccess('키워드가 성공적으로 변경되었습니다')
       router.push('/home?tab=recommendations')
     },
     onError: error => {

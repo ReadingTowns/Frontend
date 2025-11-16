@@ -34,17 +34,35 @@ export interface RecommendedBook {
  * 백엔드 API 응답 구조 (실제 API 응답)
  */
 export interface ExchangeApiResponse {
-  chatRoomId: number | null
+  chatroomId: number | null
   myBook: {
     bookhouseId: number
     bookName: string
     bookImage: string
   } | null
-  yourBook: {
+  partnerBook: {
     bookhouseId: number
     bookName: string
     bookImage: string
   } | null
+}
+
+/**
+ * 교환 쌍 (Exchange Pair) - UI 표시용
+ * API 응답을 그대로 사용하여 교환 관계를 명확히 표현
+ */
+export interface ExchangePair {
+  chatroomId: number | null
+  myBook: {
+    bookhouseId: number
+    bookName: string
+    bookImage: string
+  }
+  partnerBook: {
+    bookhouseId: number
+    bookName: string
+    bookImage: string
+  }
 }
 
 /**

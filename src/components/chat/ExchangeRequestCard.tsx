@@ -12,7 +12,7 @@
 
 import { useState, useMemo } from 'react'
 import Image from 'next/image'
-import toast from 'react-hot-toast'
+import { showError } from '@/lib/toast'
 import type { ExchangeBookInfo, Message } from '@/types/chatroom'
 import {
   useCreateExchangeRequest,
@@ -551,7 +551,7 @@ export function ExchangeRequestCard({
                   const errorMessage =
                     (error as { message?: string })?.message ||
                     '교환 요청 생성에 실패했습니다.'
-                  toast.error(errorMessage)
+                  showError(errorMessage)
                   // 모달은 닫지 않음 (다른 책 선택 가능)
                 }
               }}

@@ -9,7 +9,7 @@ import { useChatbotHistory } from '@/hooks/useChatbotHistory'
 import { useSendChatbotMessage } from '@/hooks/useSendChatbotMessage'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { MessageType } from '@/types/exchange'
-import toast from 'react-hot-toast'
+import { showError } from '@/lib/toast'
 
 export default function ChatbotPageClient() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -38,7 +38,7 @@ export default function ChatbotPageClient() {
       const errorMessage =
         (historyError as { message?: string })?.message ||
         '채팅 기록을 불러오는데 실패했습니다.'
-      toast.error(errorMessage)
+      showError(errorMessage)
     }
   }, [historyError])
 

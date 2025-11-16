@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { showSuccess } from '@/lib/toast'
 import { useQuery } from '@tanstack/react-query'
 import BookCoverUpload from './BookCoverUpload'
 import { fetchBookByISBN } from '@/lib/isbnService'
@@ -92,7 +92,7 @@ export default function BookForm({
   // 책 등록 성공 시 처리
   useEffect(() => {
     if (addBookMutation.isSuccess) {
-      toast.success('책이 성공적으로 등록되었습니다!')
+      showSuccess('책이 성공적으로 등록되었습니다!')
       router.push('/library')
     }
   }, [addBookMutation.isSuccess, router])

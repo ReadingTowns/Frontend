@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { ExchangedBook, ExchangeApiResponse } from '@/types/home'
+import { ExchangePair, ExchangeApiResponse } from '@/types/home'
 
 const exchangedBooksKeys = {
   all: ['exchangedBooks'] as const,
@@ -10,49 +10,29 @@ const exchangedBooksKeys = {
 }
 
 /**
- * API 응답을 프론트엔드 타입으로 변환
+ * API 응답을 ExchangePair로 변환
+ * myBook과 partnerBook이 모두 있는 완전한 교환만 반환
  */
 function transformExchangeResponse(
   apiResponse: ExchangeApiResponse[]
-): ExchangedBook[] {
-  const books: ExchangedBook[] = []
-
-  apiResponse.forEach(item => {
-    const chatRoomId = item.chatRoomId
-
-    // myBook: 내가 빌려준 책
-    if (item.myBook) {
-      books.push({
-        exchangeId: item.myBook.bookhouseId,
-        bookTitle: item.myBook.bookName,
-        bookCoverImage: item.myBook.bookImage,
-        chatRoomId,
-        isMyBook: true,
-      })
-    }
-
-    // yourBook: 내가 빌린 책
-    if (item.yourBook) {
-      books.push({
-        exchangeId: item.yourBook.bookhouseId,
-        bookTitle: item.yourBook.bookName,
-        bookCoverImage: item.yourBook.bookImage,
-        chatRoomId,
-        isMyBook: false,
-      })
-    }
-  })
-
-  return books
+): ExchangePair[] {
+  return apiResponse
+    .filter(item => item.myBook && item.partnerBook) // 완전한 교환만 필터링
+    .map(item => ({
+      chatroomId: item.chatroomId,
+      myBook: item.myBook!,
+      partnerBook: item.partnerBook!,
+    }))
 }
 
 /**
  * 교환한 도서 목록을 가져오는 훅
+ * ExchangePair 배열을 반환하여 교환 단위로 그룹화
  */
 export function useExchangedBooks() {
   return useQuery({
     queryKey: exchangedBooksKeys.list(),
-    queryFn: async (): Promise<ExchangedBook[]> => {
+    queryFn: async (): Promise<ExchangePair[]> => {
       const apiResponse = await api.get<ExchangeApiResponse[]>(
         '/api/v1/members/me/exchanges'
       )
