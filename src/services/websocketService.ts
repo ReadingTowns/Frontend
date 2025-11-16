@@ -116,6 +116,29 @@ export class WebSocketService {
         // ✅ FIX: 연결 시작 플래그 설정
         this.isConnecting = true
 
+        // ✅ FIX: 기존 socket이 있으면 명시적으로 정리
+        if (this.socket) {
+          console.log(
+            '🧹 [CONNECT] Cleaning up existing socket before new connection'
+          )
+          const oldSocket = this.socket
+          this.socket = null // 먼저 null로 설정하여 새 연결과 분리
+
+          // 기존 socket의 이벤트 리스너 제거
+          oldSocket.onopen = null
+          oldSocket.onmessage = null
+          oldSocket.onerror = null
+          oldSocket.onclose = null
+
+          // 연결되어 있으면 닫기
+          if (
+            oldSocket.readyState === WebSocket.OPEN ||
+            oldSocket.readyState === WebSocket.CONNECTING
+          ) {
+            oldSocket.close()
+          }
+        }
+
         const wsUrl = process.env.NEXT_PUBLIC_WS_URL
 
         if (!wsUrl) {
@@ -537,10 +560,10 @@ export class WebSocketService {
   /**
    * 연결 종료
    *
-   * ✅ FIX: 비동기 close 처리 개선
-   * - WebSocket.close()는 비동기이므로 즉시 null 처리하지 않음
-   * - onclose 이벤트에서 cleanup 처리
-   * - isDisconnecting 플래그로 중복 disconnect 방지
+   * ✅ FIX: Pure Effect Pattern 준수
+   * - roomHandlers는 절대 건드리지 않음 (구독 정보 보존)
+   * - messageHandlers만 정리 (활성 핸들러)
+   * - this.socket은 connect()에서 정리
    */
   disconnect(): void {
     if (this.isDisconnecting) {
@@ -548,36 +571,29 @@ export class WebSocketService {
       return
     }
 
+    console.log('🔌 [DISCONNECT] Starting disconnect')
     this.isDisconnecting = true
-    this.stopHeartbeat() // Stop heartbeat before closing connection
+    this.stopHeartbeat()
+
+    // ✅ FIX: roomHandlers는 보존, messageHandlers만 정리
+    this.messageHandlers.clear()
+    console.log(
+      '🧹 [DISCONNECT] Cleared active message handlers (roomHandlers preserved)'
+    )
+
+    // 이벤트 핸들러는 정리 (재등록될 것)
+    this.errorHandlers.clear()
+    this.connectHandlers.clear()
+    this.disconnectHandlers.clear()
 
     if (this.socket) {
-      // WebSocket close 완료 리스너 추가
-      const originalOnClose = this.socket.onclose
-      const socketRef = this.socket // ✅ FIX: null 할당 전에 참조 저장
-
-      this.socket.onclose = event => {
-        console.log('🧹 [DISCONNECT] WebSocket close event received')
-        this.socket = null
-        this.isDisconnecting = false
-        this.isConnecting = false
-        this.messageHandlers.clear()
-        this.errorHandlers.clear()
-        this.connectHandlers.clear()
-        this.disconnectHandlers.clear()
-
-        // 원래 onclose 핸들러도 실행 (저장된 참조 사용)
-        if (originalOnClose) {
-          originalOnClose.call(socketRef, event)
-        }
-      }
-
-      console.log('🔌 [DISCONNECT] Calling WebSocket.close()')
+      console.log('🔌 [DISCONNECT] Closing WebSocket')
       this.socket.close()
-    } else {
-      this.isDisconnecting = false
-      this.isConnecting = false
+      // ❌ this.socket = null 하지 않음 (connect()에서 처리)
     }
+
+    this.isDisconnecting = false
+    this.isConnecting = false
   }
 
   /**
