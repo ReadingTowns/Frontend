@@ -60,6 +60,9 @@ export class WebSocketService {
   private disconnectHandlers: Set<ConnectionHandler> = new Set()
   private currentRoomId!: number // 재연결을 위한 roomId 저장
 
+  // ✅ FIX: 채팅방별 핸들러 관리
+  private roomHandlers = new Map<number, Set<MessageHandler>>()
+
   // Heartbeat mechanism to keep connection alive
   private heartbeatInterval: NodeJS.Timeout | null = null
   private heartbeatIntervalMs = 25000 // 25초마다 ping (서버 30초 timeout보다 짧게 설정)
@@ -155,6 +158,64 @@ export class WebSocketService {
   }
 
   /**
+   * 채팅방 전환 (재연결 + 핸들러 재등록)
+   * ✅ FIX: 새 채팅방 핸들러를 보존하면서 안전하게 전환
+   * @param newRoomId 새 채팅방 ID
+   */
+  async switchRoom(newRoomId: number): Promise<void> {
+    if (this.currentRoomId === newRoomId && this.isConnected()) {
+      console.log(`⏭️ Already in room ${newRoomId}, skipping reconnection`)
+      return
+    }
+
+    console.log(
+      `🔄 [DEBUG] Switching room: ${this.currentRoomId} → ${newRoomId}`
+    )
+
+    // ✅ FIX: 기존 연결만 정리 (새 room의 핸들러는 보존)
+    if (this.socket) {
+      console.log(`🔌 [DEBUG] Disconnecting from room ${this.currentRoomId}`)
+
+      // WebSocket만 닫고 핸들러는 보존
+      this.stopHeartbeat()
+      this.socket.close()
+      this.socket = null
+
+      // ✅ active handlers만 정리 (roomHandlers는 유지)
+      this.messageHandlers.clear()
+      this.errorHandlers.clear()
+      this.connectHandlers.clear()
+      this.disconnectHandlers.clear()
+
+      // 완전한 연결 해제를 위한 짧은 대기
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+
+    // 새 채팅방 연결
+    this.currentRoomId = newRoomId
+    console.log(`🔌 [DEBUG] Connecting to room ${newRoomId}`)
+    await this.connect(newRoomId)
+
+    // ✅ 새 채팅방의 핸들러 재등록
+    const roomHandlers = this.roomHandlers.get(newRoomId)
+    if (roomHandlers && roomHandlers.size > 0) {
+      console.log(
+        `✅ [DEBUG] Re-registering ${roomHandlers.size} handlers for room ${newRoomId}`
+      )
+      roomHandlers.forEach(handler => this.messageHandlers.add(handler))
+    } else {
+      console.log(`⚠️ [DEBUG] No handlers found for room ${newRoomId}`)
+    }
+  }
+
+  /**
+   * 현재 채팅방 ID 반환
+   */
+  getCurrentRoomId(): number | null {
+    return this.currentRoomId
+  }
+
+  /**
    * 메시지 전송
    *
    * @param chatroomId 채팅방 ID
@@ -198,11 +259,141 @@ export class WebSocketService {
   }
 
   /**
-   * 메시지 수신 핸들러 등록
+   * 메시지 수신 핸들러 등록 (채팅방별)
+   * @deprecated Use subscribe() for Pure Effect pattern
+   * @param roomId 채팅방 ID
+   * @param handler 메시지 핸들러
+   * @returns cleanup 함수
    */
-  onMessage(handler: MessageHandler): () => void {
-    this.messageHandlers.add(handler)
-    return () => this.messageHandlers.delete(handler)
+  onMessage(roomId: number, handler: MessageHandler): () => void {
+    console.log(`🟢 [DEBUG] Registering handler for room ${roomId}`)
+
+    // 채팅방별 핸들러 저장
+    if (!this.roomHandlers.has(roomId)) {
+      this.roomHandlers.set(roomId, new Set())
+    }
+    this.roomHandlers.get(roomId)!.add(handler)
+
+    // 현재 활성 채팅방이면 즉시 등록
+    if (roomId === this.currentRoomId) {
+      this.messageHandlers.add(handler)
+      console.log(`✅ [DEBUG] Handler immediately registered (current room)`)
+    }
+
+    // cleanup 함수
+    return () => {
+      console.log(`🧹 [DEBUG] Cleaning up handler for room ${roomId}`)
+      const handlers = this.roomHandlers.get(roomId)
+      if (handlers) {
+        handlers.delete(handler)
+        if (handlers.size === 0) {
+          this.roomHandlers.delete(roomId)
+          console.log(`🗑️ [DEBUG] All handlers removed for room ${roomId}`)
+        }
+      }
+      this.messageHandlers.delete(handler)
+    }
+  }
+
+  /**
+   * Pure Effect 패턴: 순수 구독 메서드
+   * 연결 상태와 무관하게 roomHandlers에만 등록
+   * React Strict Mode 안전
+   *
+   * @param roomId 채팅방 ID
+   * @param handler 메시지 핸들러
+   * @returns unsubscribe 메서드를 가진 구독 객체
+   *
+   * @example
+   * const subscription = websocketService.subscribe(roomId, handleMessage)
+   * // cleanup에서:
+   * subscription.unsubscribe()
+   */
+  subscribe(roomId: number, handler: MessageHandler) {
+    console.log(`📝 [PURE] Subscribing to room ${roomId}`)
+
+    // roomHandlers에만 등록 (순수 구독)
+    if (!this.roomHandlers.has(roomId)) {
+      this.roomHandlers.set(roomId, new Set())
+    }
+    this.roomHandlers.get(roomId)!.add(handler)
+
+    console.log(
+      `✅ [PURE] Handler subscribed (roomHandlers size: ${this.roomHandlers.get(roomId)?.size})`
+    )
+
+    // Pure cleanup: 해당 구독만 제거
+    return {
+      unsubscribe: () => {
+        console.log(`🧹 [PURE] Unsubscribing from room ${roomId}`)
+        const handlers = this.roomHandlers.get(roomId)
+        if (handlers) {
+          handlers.delete(handler)
+          if (handlers.size === 0) {
+            this.roomHandlers.delete(roomId)
+            console.log(
+              `🗑️ [PURE] All subscriptions removed for room ${roomId}`
+            )
+          }
+        }
+      },
+    }
+  }
+
+  /**
+   * Pure Effect 패턴: 멱등적 연결 메서드
+   * 이미 연결되어 있으면 즉시 반환
+   * 연결 완료 후 해당 room의 핸들러 자동 활성화
+   *
+   * @param roomId 채팅방 ID
+   * @returns Promise<void>
+   *
+   * @example
+   * await websocketService.ensureConnected(roomId)
+   * // 여러 번 호출해도 안전 (멱등성)
+   */
+  async ensureConnected(roomId: number): Promise<void> {
+    console.log(`🔌 [PURE] Ensuring connection to room ${roomId}`)
+
+    // 이미 같은 방에 연결되어 있으면 즉시 반환 (멱등성)
+    if (this.currentRoomId === roomId && this.isConnected()) {
+      console.log(`✅ [PURE] Already connected to room ${roomId}`)
+      this.activateHandlers(roomId) // 핸들러 활성화
+      return
+    }
+
+    // 다른 방에 연결되어 있으면 전환
+    if (this.currentRoomId !== roomId) {
+      console.log(`🔄 [PURE] Switching room: ${this.currentRoomId} → ${roomId}`)
+      await this.switchRoom(roomId)
+      return
+    }
+
+    // 연결되지 않은 경우 새로 연결
+    console.log(`🆕 [PURE] Creating new connection to room ${roomId}`)
+    await this.connect(roomId)
+    this.activateHandlers(roomId)
+  }
+
+  /**
+   * Private: roomHandlers → messageHandlers 활성화
+   * subscribe()로 등록된 핸들러들을 messageHandlers에 복사하여 실제로 메시지를 받도록 함
+   *
+   * @param roomId 채팅방 ID
+   */
+  private activateHandlers(roomId: number): void {
+    const roomHandlers = this.roomHandlers.get(roomId)
+    if (roomHandlers && roomHandlers.size > 0) {
+      console.log(
+        `⚡ [PURE] Activating ${roomHandlers.size} handlers for room ${roomId}`
+      )
+      roomHandlers.forEach(handler => this.messageHandlers.add(handler))
+      console.log(
+        `✅ [PURE] Active handlers count: ${this.messageHandlers.size}`
+      )
+    } else {
+      console.log(`⚠️ [PURE] No handlers to activate for room ${roomId}`)
+    }
   }
 
   /**

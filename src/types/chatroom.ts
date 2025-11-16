@@ -16,6 +16,7 @@ import { MessageType } from './exchange'
 export interface ChatRoomListItem {
   chatroomId: number // API returns lowercase 'r'
   partnerName: string
+  profileImage?: string
   myBookImage?: string
   partnerBookImage?: string
   lastMessage?: string | null
