@@ -28,9 +28,9 @@ interface BookRecommendationRaw {
 }
 
 /**
- * TanStack Query keys
+ * TanStack Query keys (internal use only)
  */
-export const bookRecommendationKeys = {
+const bookRecommendationKeys = {
   all: ['bookRecommendations'] as const,
   list: () => [...bookRecommendationKeys.all, 'list'] as const,
 }

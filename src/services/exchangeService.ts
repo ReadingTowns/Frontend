@@ -33,108 +33,83 @@ const EXCHANGE_API = {
 } as const
 
 /**
- * Exchange Service Class
+ * Create a new exchange request
+ * POST /api/v1/exchange-requests
  */
-export class ExchangeService {
-  /**
-   * Create a new exchange request
-   * POST /api/v1/exchange-requests
-   *
-   * @param payload - { chatroomId, bookhouseId }
-   *   - chatroomId: The chatroom ID
-   *   - bookhouseId: The partner's book ID (not both books)
-   */
-  static async createRequest(
-    payload: CreateExchangeRequestRequest
-  ): Promise<ExchangeRequestResponse> {
-    return api.post<ExchangeRequestResponse>(
-      EXCHANGE_API.CREATE_REQUEST,
-      payload
-    )
-  }
-
-  /**
-   * Accept an exchange request
-   * PATCH /api/v1/exchange-requests/{exchangeId}/accept
-   */
-  static async acceptRequest(
-    exchangeId: number
-  ): Promise<ExchangeStatusResponse> {
-    return api.patch<ExchangeStatusResponse>(
-      EXCHANGE_API.ACCEPT_REQUEST(exchangeId)
-    )
-  }
-
-  /**
-   * Reject an exchange request
-   * PATCH /api/v1/exchange-requests/{exchangeId}/reject
-   */
-  static async rejectRequest(
-    exchangeId: number
-  ): Promise<ExchangeStatusResponse> {
-    return api.patch<ExchangeStatusResponse>(
-      EXCHANGE_API.REJECT_REQUEST(exchangeId)
-    )
-  }
-
-  /**
-   * Cancel an exchange request (requester only)
-   * DELETE /api/v1/exchange-requests/{exchangeId}/cancel
-   */
-  static async cancelRequest(
-    exchangeId: number
-  ): Promise<ExchangeStatusResponse> {
-    return api.delete<ExchangeStatusResponse>(
-      EXCHANGE_API.CANCEL_REQUEST(exchangeId)
-    )
-  }
-
-  /**
-   * Complete an exchange (mark as completed)
-   * PATCH /api/v1/chatrooms/{chatroomId}/exchange/complete
-   */
-  static async completeExchange(
-    chatroomId: number
-  ): Promise<ExchangeStatusResponse> {
-    return api.patch<ExchangeStatusResponse>(
-      EXCHANGE_API.COMPLETE_EXCHANGE(chatroomId)
-    )
-  }
-
-  /**
-   * Return an exchanged book
-   * PATCH /api/v1/exchange-requests/{exchangeId}/return
-   */
-  static async returnExchange(
-    exchangeId: number
-  ): Promise<ExchangeStatusResponse> {
-    return api.patch<ExchangeStatusResponse>(
-      EXCHANGE_API.RETURN_EXCHANGE(exchangeId)
-    )
-  }
-
-  /**
-   * Get available books for exchange in a chatroom
-   * GET /api/v1/chatrooms/{chatroomId}/books
-   */
-  static async getAvailableBooks(
-    chatroomId: number
-  ): Promise<AvailableBooksResponse> {
-    return api.get<AvailableBooksResponse>(
-      EXCHANGE_API.GET_AVAILABLE_BOOKS(chatroomId)
-    )
-  }
+export async function createRequest(
+  payload: CreateExchangeRequestRequest
+): Promise<ExchangeRequestResponse> {
+  return api.post<ExchangeRequestResponse>(EXCHANGE_API.CREATE_REQUEST, payload)
 }
 
 /**
- * Export individual functions for easier imports
+ * Accept an exchange request
+ * PATCH /api/v1/exchange-requests/{exchangeId}/accept
  */
-export const {
-  createRequest,
-  acceptRequest,
-  rejectRequest,
-  cancelRequest,
-  completeExchange,
-  returnExchange,
-  getAvailableBooks,
-} = ExchangeService
+export async function acceptRequest(
+  exchangeId: number
+): Promise<ExchangeStatusResponse> {
+  return api.patch<ExchangeStatusResponse>(
+    EXCHANGE_API.ACCEPT_REQUEST(exchangeId)
+  )
+}
+
+/**
+ * Reject an exchange request
+ * PATCH /api/v1/exchange-requests/{exchangeId}/reject
+ */
+export async function rejectRequest(
+  exchangeId: number
+): Promise<ExchangeStatusResponse> {
+  return api.patch<ExchangeStatusResponse>(
+    EXCHANGE_API.REJECT_REQUEST(exchangeId)
+  )
+}
+
+/**
+ * Cancel an exchange request (requester only)
+ * DELETE /api/v1/exchange-requests/{exchangeId}/cancel
+ */
+export async function cancelRequest(
+  exchangeId: number
+): Promise<ExchangeStatusResponse> {
+  return api.delete<ExchangeStatusResponse>(
+    EXCHANGE_API.CANCEL_REQUEST(exchangeId)
+  )
+}
+
+/**
+ * Complete an exchange (mark as completed)
+ * PATCH /api/v1/chatrooms/{chatroomId}/exchange/complete
+ */
+export async function completeExchange(
+  chatroomId: number
+): Promise<ExchangeStatusResponse> {
+  return api.patch<ExchangeStatusResponse>(
+    EXCHANGE_API.COMPLETE_EXCHANGE(chatroomId)
+  )
+}
+
+/**
+ * Return an exchanged book (internal use only - used by chatRoomService)
+ * PATCH /api/v1/exchange-requests/{exchangeId}/return
+ */
+export async function returnExchange(
+  exchangeId: number
+): Promise<ExchangeStatusResponse> {
+  return api.patch<ExchangeStatusResponse>(
+    EXCHANGE_API.RETURN_EXCHANGE(exchangeId)
+  )
+}
+
+/**
+ * Get available books for exchange in a chatroom
+ * GET /api/v1/chatrooms/{chatroomId}/books
+ */
+export async function getAvailableBooks(
+  chatroomId: number
+): Promise<AvailableBooksResponse> {
+  return api.get<AvailableBooksResponse>(
+    EXCHANGE_API.GET_AVAILABLE_BOOKS(chatroomId)
+  )
+}

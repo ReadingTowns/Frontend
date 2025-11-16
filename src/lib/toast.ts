@@ -93,35 +93,3 @@ export const showError = (
     ...options,
   })
 }
-
-/**
- * 카테고리별 toast - 같은 카테고리의 toast는 업데이트됨
- *
- * @param category - 카테고리 ID (같은 카테고리는 하나만 표시됨)
- * @param message - 표시할 메시지
- * @param options - 추가 옵션
- * @returns toast ID
- *
- * @example
- * // 네트워크 상태 toast - 여러 번 호출해도 하나만 표시됨
- * showCategoryToast('network', '연결 중...', { icon: '🔄' })
- * showCategoryToast('network', '연결되었습니다', { icon: '✅' })
- *
- * // 업로드 진행 상태 - 같은 카테고리로 업데이트됨
- * showCategoryToast('upload', '업로드 중... 10%')
- * showCategoryToast('upload', '업로드 중... 50%')
- * showCategoryToast('upload', '업로드 완료!', { icon: '✅' })
- */
-export const showCategoryToast = (
-  category: string,
-  message: string,
-  options?: {
-    icon?: string
-    duration?: number
-  }
-) => {
-  return toast(message, {
-    id: category,
-    ...options,
-  })
-}

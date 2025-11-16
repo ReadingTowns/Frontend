@@ -49,12 +49,10 @@ export function shouldIntegrateIntoCard(messageType?: MessageType): boolean {
 }
 
 /**
- * 별도 메시지로 유지할 타입인지 판단
+ * 별도 메시지로 유지할 타입인지 판단 (internal use only)
  * RESERVED, COMPLETED, RETURNED는 시스템 메시지로 유지
  */
-export function shouldRenderAsSeparateMessage(
-  messageType?: MessageType
-): boolean {
+function shouldRenderAsSeparateMessage(messageType?: MessageType): boolean {
   if (!messageType) return false
 
   return [

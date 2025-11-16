@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { ChevronLeftIcon, StarIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { useBookOwners } from '@/hooks/useBookhouse'
+import { getAbsoluteImageUrl } from '@/lib/imageUtils'
 import type { BookSearchResult, BookhouseOwner } from '@/types/exchange'
 
 interface OwnerSelectStepProps {
@@ -101,7 +102,7 @@ export function OwnerSelectStep({
                 <div className="relative w-12 h-12 flex-shrink-0">
                   {owner.profileImage ? (
                     <Image
-                      src={owner.profileImage}
+                      src={getAbsoluteImageUrl(owner.profileImage) || ''}
                       alt={owner.memberName}
                       fill
                       className="object-cover rounded-full"

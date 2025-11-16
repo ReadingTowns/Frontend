@@ -40,9 +40,9 @@ export interface ApiResponse<T = unknown> {
 }
 
 /**
- * API Error class
+ * API Error class (internal use only)
  */
-export class ApiError extends Error {
+class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
@@ -278,8 +278,3 @@ export const api = {
   delete: <T = unknown>(path: string) =>
     apiClient<T>(path, { method: 'DELETE' }),
 }
-
-/**
- * Export for advanced use cases
- */
-export { apiClient }

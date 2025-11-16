@@ -2,18 +2,6 @@ import type { TownInfo, UpdateTownRequest } from '@/types/town'
 import { api } from '@/lib/api'
 
 /**
- * Get current town information
- */
-export async function getTownInfo(): Promise<TownInfo> {
-  try {
-    return await api.get<TownInfo>('/api/v1/members/town')
-  } catch (error) {
-    console.error('Get town info error:', error)
-    throw error
-  }
-}
-
-/**
  * Get town name by coordinates (latitude, longitude)
  */
 export async function getTownByCoordinates(
