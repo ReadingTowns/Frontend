@@ -142,9 +142,17 @@ export default function ChatList({ selectedId }: ChatListProps) {
               >
                 <div className="flex items-start gap-3">
                   {/* Profile Image */}
-                  <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    <UserCircleIcon className="w-7 h-7 text-gray-400" />
-                  </div>
+                  {chatRoom.profileImage ? (
+                    <img
+                      src={chatRoom.profileImage}
+                      alt={`${chatRoom.partnerName} 프로필`}
+                      className="w-12 h-12 rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
+                      <UserCircleIcon className="w-7 h-7 text-gray-400" />
+                    </div>
+                  )}
 
                   {/* Content */}
                   <div className="flex-1 min-w-0">

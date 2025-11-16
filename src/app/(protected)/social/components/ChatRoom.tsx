@@ -16,9 +16,14 @@ import {
 interface ChatRoomProps {
   conversationId: string
   onBack?: () => void
+  partnerProfileImage?: string
 }
 
-export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
+export default function ChatRoom({
+  conversationId,
+  onBack,
+  partnerProfileImage,
+}: ChatRoomProps) {
   const queryClient = useQueryClient()
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const [isTyping, setIsTyping] = useState(false)
@@ -190,6 +195,7 @@ export default function ChatRoom({ conversationId, onBack }: ChatRoomProps) {
                   index === 0 ||
                   dateMessages[index - 1]?.senderId !== message.senderId
                 }
+                partnerProfileImage={partnerProfileImage}
               />
             ))}
           </div>

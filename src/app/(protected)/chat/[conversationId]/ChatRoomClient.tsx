@@ -253,6 +253,7 @@ export default function ChatRoomClient({
                   }
                   partnerName={partner?.nickname}
                   partnerId={partner?.memberId.toString()}
+                  partnerProfileImage={partner?.profileImage}
                   exchangeBooks={exchangeBooks}
                   chatroomId={chatroomId}
                   myMemberId={myMemberId}

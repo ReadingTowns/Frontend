@@ -20,7 +20,6 @@ export const useWebSocket = ({
   onDisconnect,
 }: UseWebSocketOptions) => {
   const queryClient = useQueryClient()
-  const isConnecting = useRef(false)
   const [isConnected, setIsConnected] = useState(false)
 
   // ✅ FIX: useRef로 안정적인 콜백 참조 유지 (의존성 체인 끊기)
@@ -131,74 +130,61 @@ export const useWebSocket = ({
   )
 
   /**
-   * WebSocket 연결
+   * WebSocket 연결 - Pure Effect 패턴
+   * ✅ React Strict Mode 안전
+   * ✅ 구독과 연결의 분리
+   * ✅ 멱등적 연결
    */
   useEffect(() => {
-    let cleanupMessage: (() => void) | undefined
-    let cleanupError: (() => void) | undefined
-    let cleanupConnect: (() => void) | undefined
-    let cleanupDisconnect: (() => void) | undefined
+    console.log(`🔌 [PURE EFFECT] Mounting for room ${chatroomId}`)
 
-    const connectWebSocket = async () => {
-      if (isConnecting.current) return
-      isConnecting.current = true
+    // 1️⃣ 순수 구독 (동기적, roomHandlers에만 등록)
+    const subscription = websocketService.subscribe(
+      chatroomId,
+      handleMessageReceived
+    )
 
-      try {
-        // ✅ FIX: 핸들러를 먼저 등록해야 연결 시 메시지를 받을 수 있음
-        // 메시지 수신 핸들러 등록
-        cleanupMessage = websocketService.onMessage(handleMessageReceived)
+    // 2️⃣ 에러/연결 핸들러 등록
+    const cleanupError = websocketService.onError(error => {
+      console.error('WebSocket error:', error)
+      onErrorRef.current?.(error)
+    })
 
-        // 에러 핸들러 등록 (ref를 통해 최신 버전 호출)
-        cleanupError = websocketService.onError(error => {
-          console.error('WebSocket error:', error)
-          onErrorRef.current?.(error)
-        })
+    const cleanupConnect = websocketService.onConnect(() => {
+      console.log('✅ [PURE EFFECT] Connected')
+      setIsConnected(true)
+      onConnectRef.current?.()
+    })
 
-        // 연결 핸들러 등록 (ref를 통해 최신 버전 호출)
-        cleanupConnect = websocketService.onConnect(() => {
-          setIsConnected(true)
-          onConnectRef.current?.()
-        })
+    const cleanupDisconnect = websocketService.onDisconnect(() => {
+      console.log('🔌 [PURE EFFECT] Disconnected')
+      setIsConnected(false)
+      onDisconnectRef.current?.()
+    })
 
-        // 연결 해제 핸들러 등록 (ref를 통해 최신 버전 호출)
-        cleanupDisconnect = websocketService.onDisconnect(() => {
-          setIsConnected(false)
-          onDisconnectRef.current?.()
-        })
-
-        // 핸들러 등록 후 연결 시도
-        if (!websocketService.isConnected()) {
-          try {
-            await websocketService.connect(chatroomId)
-          } catch (connectError) {
-            // 연결 실패해도 계속 진행 (자동 재연결이 처리함)
-            console.warn(
-              'Initial WebSocket connect failed, will retry automatically'
-            )
-          }
-        }
-
-        // 실제 WebSocket 연결 상태 기반으로 설정
+    // 3️⃣ 멱등적 연결 보장 (비동기)
+    websocketService
+      .ensureConnected(chatroomId)
+      .then(() => {
+        console.log('✅ [PURE EFFECT] ensureConnected completed')
         setIsConnected(websocketService.isConnected())
-      } catch (error) {
-        console.error('Failed to connect WebSocket:', error)
+      })
+      .catch(error => {
+        console.error('❌ [PURE EFFECT] ensureConnected failed:', error)
         setIsConnected(false)
-      } finally {
-        isConnecting.current = false
-      }
-    }
+      })
 
-    connectWebSocket()
-
-    // Cleanup
+    // 4️⃣ Pure cleanup (해당 구독만 제거)
     return () => {
-      cleanupMessage?.()
-      cleanupError?.()
-      cleanupConnect?.()
-      cleanupDisconnect?.()
+      console.log(`🧹 [PURE EFFECT] Cleanup for room ${chatroomId}`)
+      subscription.unsubscribe()
+      cleanupError()
+      cleanupConnect()
+      cleanupDisconnect()
+      websocketService.disconnect()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chatroomId]) // ✅ FIX: handleMessageReceived 제거하여 불필요한 재연결 방지
+  }, [chatroomId]) // ✅ handleMessageReceived는 의존성에서 제외 (useRef 사용)
 
   /**
    * 메시지 전송

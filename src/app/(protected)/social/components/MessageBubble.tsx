@@ -8,6 +8,7 @@ interface MessageBubbleProps {
   isOwn: boolean
   showAvatar: boolean
   partnerName?: string
+  partnerProfileImage?: string
 }
 
 export default function MessageBubble({
@@ -15,6 +16,7 @@ export default function MessageBubble({
   isOwn,
   showAvatar,
   partnerName,
+  partnerProfileImage,
 }: MessageBubbleProps) {
   const formatTime = (timestamp: string) => {
     return new Date(timestamp).toLocaleTimeString('ko-KR', {
@@ -33,9 +35,19 @@ export default function MessageBubble({
           className={`w-8 h-8 flex-shrink-0 ${showAvatar ? '' : 'invisible'}`}
         >
           {showAvatar && (
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <UserCircleIcon className="w-5 h-5 text-gray-500" />
-            </div>
+            <>
+              {partnerProfileImage ? (
+                <img
+                  src={partnerProfileImage}
+                  alt={partnerName || '상대방'}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                  <UserCircleIcon className="w-5 h-5 text-gray-500" />
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

@@ -24,6 +24,7 @@ interface MessageBubbleProps {
   showAvatar: boolean
   partnerName?: string
   partnerId?: string
+  partnerProfileImage?: string
   exchangeBooks?: ExchangeBooksResponse
   chatroomId?: number
   myMemberId?: number
@@ -36,6 +37,7 @@ export default function MessageBubble({
   showAvatar,
   partnerName,
   partnerId,
+  partnerProfileImage,
   exchangeBooks,
   chatroomId,
   myMemberId,
@@ -132,6 +134,7 @@ export default function MessageBubble({
           currentUserId={myMemberId}
           partnerId={partnerId}
           partnerName={partnerName}
+          partnerProfileImage={partnerProfileImage}
           relatedExchangeStatusId={message.relatedExchangeStatusId}
           showAvatar={showAvatar}
           messages={messages}
@@ -170,9 +173,19 @@ export default function MessageBubble({
               className={`w-8 h-8 flex-shrink-0 ${showAvatar ? '' : 'invisible'}`}
             >
               {showAvatar && (
-                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                  <UserCircleIcon className="w-5 h-5 text-gray-500" />
-                </div>
+                <>
+                  {partnerProfileImage ? (
+                    <img
+                      src={partnerProfileImage}
+                      alt={partnerName || '상대방'}
+                      className="w-8 h-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                      <UserCircleIcon className="w-5 h-5 text-gray-500" />
+                    </div>
+                  )}
+                </>
               )}
             </div>
           )}

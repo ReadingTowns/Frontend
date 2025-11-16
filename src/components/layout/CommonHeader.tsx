@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeftIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { BookOpenIcon } from '@heroicons/react/24/solid'
 import { useRouter } from 'next/navigation'
 import { useHeader } from '@/contexts/HeaderContext'
@@ -98,18 +98,31 @@ export default function CommonHeader() {
               const chatConfig = headerConfig as ChatHeaderConfig
               return (
                 <>
-                  <div className="flex-1 min-w-0">
-                    <h1 className={HEADER_STYLES.title}>
-                      {chatConfig.partner.nickname}
-                    </h1>
-                    {chatConfig.bookInfo && (
-                      <p className="text-xs text-primary-600 flex items-center gap-1 mt-0.5">
-                        <BookOpenIcon className="w-3 h-3 flex-shrink-0" />
-                        <span className="truncate">
-                          {chatConfig.bookInfo.bookName}
-                        </span>
-                      </p>
+                  <div className="flex-1 min-w-0 flex items-center gap-2">
+                    {/* Profile Image */}
+                    {chatConfig.partner.profileImage ? (
+                      <img
+                        src={chatConfig.partner.profileImage}
+                        alt={`${chatConfig.partner.nickname} 프로필`}
+                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                      />
+                    ) : (
+                      <UserCircleIcon className="w-8 h-8 text-gray-400 flex-shrink-0" />
                     )}
+
+                    <div className="flex-1 min-w-0">
+                      <h1 className={HEADER_STYLES.title}>
+                        {chatConfig.partner.nickname}
+                      </h1>
+                      {chatConfig.bookInfo && (
+                        <p className="text-xs text-primary-600 flex items-center gap-1 mt-0.5">
+                          <BookOpenIcon className="w-3 h-3 flex-shrink-0" />
+                          <span className="truncate">
+                            {chatConfig.bookInfo.bookName}
+                          </span>
+                        </p>
+                      )}
+                    </div>
                   </div>
                   <div className="flex items-center gap-3">
                     {/* WebSocket 연결 상태 */}
