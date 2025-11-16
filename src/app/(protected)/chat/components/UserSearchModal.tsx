@@ -10,7 +10,7 @@ import {
   UserGroupIcon,
 } from '@heroicons/react/24/outline'
 import { Modal } from '@/components/common/Modal'
-import UserSearchInput from './UserSearchInput'
+import { SearchInput } from '@/components/common/SearchInput'
 import UserResultCard from './UserResultCard'
 import { searchUsers, createChatRoom } from '@/services/userSearchService'
 import type { SearchUser, CreateChatRequest } from '@/types/userSearch'
@@ -101,12 +101,12 @@ export default function UserSearchModal({
     >
       {/* Search Input */}
       <div className="p-4 border-b border-gray-200">
-        <UserSearchInput
+        <SearchInput
           value={searchQuery}
           onChange={setSearchQuery}
           placeholder="닉네임으로 사용자 검색..."
           isLoading={isSearching}
-          onClear={() => setSearchQuery('')}
+          autoFocus={true}
         />
         {searchQuery.length > 0 && searchQuery.length < 2 && (
           <p className="text-sm text-gray-500 mt-2">
