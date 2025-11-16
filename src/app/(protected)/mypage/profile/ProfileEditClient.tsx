@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
-import toast from 'react-hot-toast'
+import { showWarning, showToast } from '@/lib/toast'
 import NicknameInput from '@/components/common/NicknameInput'
 import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
 import { api } from '@/lib/api'
@@ -78,7 +78,7 @@ export default function ProfileEditClient() {
     e.preventDefault()
 
     if (!nicknameValid) {
-      toast('닉네임 중복 확인을 해주세요', { icon: '⚠️' })
+      showWarning('닉네임 중복 확인을 해주세요')
       return
     }
 
@@ -117,7 +117,7 @@ export default function ProfileEditClient() {
             <button
               type="button"
               className="text-primary-600 text-sm font-medium"
-              onClick={() => toast('이미지 업로드 기능은 준비 중입니다')}
+              onClick={() => showToast('이미지 업로드 기능은 준비 중입니다')}
             >
               프로필 사진 변경
             </button>

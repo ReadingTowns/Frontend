@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import Providers from './providers'
-import { Toaster } from 'react-hot-toast'
+import CustomToaster from '@/components/common/CustomToaster'
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -68,7 +68,7 @@ export default function RootLayout({
           <div className="w-full max-w-[430px] bg-white shadow-lg min-h-screen-safe">
             {children}
           </div>
-          <Toaster position="top-center" />
+          <CustomToaster />
         </Providers>
       </body>
     </html>

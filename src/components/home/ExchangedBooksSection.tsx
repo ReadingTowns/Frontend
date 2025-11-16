@@ -1,51 +1,49 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
-import { ExchangedBook } from '@/types/home'
-import { BookCard } from '@/components/books/BookCard'
-import { GridBook } from '@/types/bookCard'
+import { showToast } from '@/lib/toast'
+import { ExchangePair } from '@/types/home'
+import { ExchangeCard } from './ExchangeCard'
 
 interface ExchangedBooksSectionProps {
-  books: ExchangedBook[]
+  exchanges: ExchangePair[]
   isLoading?: boolean
 }
 
 /**
  * 교환한 도서 섹션 컴포넌트
- * - 최근 교환한 도서 3권 표시
- * - 책 표지, 제목, 교환 상대 닉네임, 교환 날짜 표시
- * - chatRoomId가 있으면 채팅방으로 이동, 없으면 안내 메시지 표시
+ * - 최근 교환 3건 표시
+ * - 교환 단위로 그룹화하여 내 책과 상대방 책을 함께 표시
+ * - chatroomId가 있으면 채팅방으로 이동, 없으면 안내 메시지 표시
  */
 export default function ExchangedBooksSection({
-  books,
+  exchanges,
   isLoading,
 }: ExchangedBooksSectionProps) {
   const router = useRouter()
 
-  const handleBookClick = (book: ExchangedBook) => {
-    if (book.chatRoomId) {
-      router.push(`/chat/${book.chatRoomId}`)
+  const handleExchangeClick = (exchange: ExchangePair) => {
+    if (exchange.chatroomId) {
+      router.push(`/chat/${exchange.chatroomId}`)
     } else {
-      toast('채팅방이 생성되면 이동할 수 있습니다')
+      showToast('채팅방이 생성되면 이동할 수 있습니다')
     }
   }
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-3 gap-4">
+      <div className="flex gap-4 overflow-x-auto pb-4">
         {[1, 2, 3].map(i => (
-          <div key={i} className="animate-pulse">
-            <div className="aspect-[3/4] bg-gray-200 rounded-lg mb-2" />
-            <div className="h-4 bg-gray-200 rounded mb-1" />
-            <div className="h-3 bg-gray-200 rounded w-2/3" />
-          </div>
+          <div
+            key={i}
+            className="flex-shrink-0 w-[280px] animate-pulse bg-gray-200 rounded-lg h-64"
+          />
         ))}
       </div>
     )
   }
 
-  if (!books || books.length === 0) {
+  if (!exchanges || exchanges.length === 0) {
     return (
       <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
         <p className="text-gray-500 text-sm">아직 교환한 도서가 없습니다</p>
@@ -53,29 +51,13 @@ export default function ExchangedBooksSection({
     )
   }
 
-  // 최근 3권만 표시
-  const displayBooks = books.slice(0, 3)
-
   return (
-    <div className="grid grid-cols-3 gap-4">
-      {displayBooks.map(book => (
-        <BookCard
-          key={book.exchangeId}
-          variant="grid"
-          book={
-            {
-              bookId: book.exchangeId,
-              bookTitle: book.bookTitle,
-              bookCoverImage: book.bookCoverImage,
-              author: '',
-              partnerNickname: book.partnerNickname,
-            } as GridBook
-          }
-          onClick={() => handleBookClick(book)}
-          columns={3}
-          compact={true}
-          aspectRatio="3/4"
-          showPartner={true}
+    <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory -mx-4 px-4">
+      {exchanges.map((exchange, index) => (
+        <ExchangeCard
+          key={`${exchange.myBook.bookhouseId}-${exchange.partnerBook.bookhouseId}-${index}`}
+          exchange={exchange}
+          onClick={() => handleExchangeClick(exchange)}
         />
       ))}
     </div>

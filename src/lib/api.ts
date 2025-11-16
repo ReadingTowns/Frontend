@@ -2,7 +2,7 @@
  * API Client - Centralized fetch wrapper with authentication
  */
 
-import toast from 'react-hot-toast'
+import { showError } from './toast'
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL || 'https://api.readingtown.site'
@@ -135,7 +135,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorMessage = data.message || 'Request failed'
     // ✅ 자동 에러 토스트 표시
-    toast.error(errorMessage)
+    showError(errorMessage)
     throw new ApiError(errorMessage, response.status, data.code)
   }
 
@@ -144,7 +144,7 @@ async function parseResponse<T>(response: Response): Promise<T> {
   if (!successCodes.includes(data.code)) {
     const errorMessage = data.message || 'Request failed'
     // ✅ 자동 에러 토스트 표시
-    toast.error(errorMessage)
+    showError(errorMessage)
     throw new ApiError(
       errorMessage,
       response.status,

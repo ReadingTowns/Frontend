@@ -2,7 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import Image from 'next/image'
-import toast from 'react-hot-toast'
+import { showWarning } from '@/lib/toast'
 import {
   BookOpenIcon,
   CameraIcon,
@@ -36,13 +36,13 @@ export default function BookCoverUpload({
 
     // 파일 크기 체크 (5MB)
     if (file.size > 5 * 1024 * 1024) {
-      toast('파일 크기는 5MB 이하여야 합니다.', { icon: '⚠️' })
+      showWarning('파일 크기는 5MB 이하여야 합니다.')
       return
     }
 
     // 이미지 파일 타입 체크
     if (!file.type.startsWith('image/')) {
-      toast('이미지 파일만 업로드 가능합니다.', { icon: '⚠️' })
+      showWarning('이미지 파일만 업로드 가능합니다.')
       return
     }
 

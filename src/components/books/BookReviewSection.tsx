@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { showWarning } from '@/lib/toast'
 import { Modal } from '@/components/common/Modal'
 import type { MyBookReview } from '@/types/book'
 import {
@@ -33,7 +33,7 @@ export default function BookReviewSection({
 
   const handleSave = async () => {
     if (!reviewContent.trim()) {
-      toast('감상평을 입력해주세요.', { icon: '⚠️' })
+      showWarning('감상평을 입력해주세요.')
       return
     }
 

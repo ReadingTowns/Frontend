@@ -8,7 +8,7 @@
 import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import toast from 'react-hot-toast'
+import { showWarning } from '@/lib/toast'
 import { ChevronLeftIcon, StarIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -93,7 +93,7 @@ export function ConfirmCreateStep({
 
   const handleCreate = () => {
     if (!selectedMyBook) {
-      toast('교환할 내 책을 선택해주세요', { icon: '⚠️' })
+      showWarning('교환할 내 책을 선택해주세요')
       return
     }
 

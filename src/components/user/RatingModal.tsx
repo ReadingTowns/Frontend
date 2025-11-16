@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import toast from 'react-hot-toast'
+import { showWarning, showSuccess } from '@/lib/toast'
 import { StarIcon } from '@heroicons/react/24/solid'
 import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 import { useSubmitRating } from '@/hooks/useUserRating'
@@ -26,17 +26,17 @@ export default function RatingModal({
 
   const handleSubmit = async () => {
     if (selectedRating === 0) {
-      toast('별점을 선택해주세요.', { icon: '⚠️' })
+      showWarning('별점을 선택해주세요.')
       return
     }
 
     try {
       await submitRatingMutation.mutateAsync(selectedRating)
-      toast.success('별점이 제출되었습니다.')
+      showSuccess('별점이 제출되었습니다.')
       onClose()
     } catch (error) {
       if (error instanceof Error && error.message.includes('본인')) {
-        toast('본인에게는 별점을 남길 수 없습니다.', { icon: '⚠️' })
+        showWarning('본인에게는 별점을 남길 수 없습니다.')
       } else {
         // API 에러는 api.ts에서 자동으로 토스트 표시
       }

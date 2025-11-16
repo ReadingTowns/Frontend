@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import toast from 'react-hot-toast'
+import { showError } from '@/lib/toast'
 import { LocationStepProps } from '@/types/onboarding'
 import { MapPinIcon, MapIcon } from '@heroicons/react/24/solid'
 import { getTownByCoordinates } from '@/services/townService'
@@ -20,7 +20,7 @@ export default function LocationStep({
     setIsLoading(true)
 
     if (!navigator.geolocation) {
-      toast('위치 서비스를 지원하지 않는 브라우저입니다', { icon: '❌' })
+      showError('위치 서비스를 지원하지 않는 브라우저입니다')
       setIsLoading(false)
       return
     }
@@ -59,7 +59,7 @@ export default function LocationStep({
             break
         }
 
-        toast(errorMessage, { icon: '❌' })
+        showError(errorMessage)
         setIsLoading(false)
       },
       {
