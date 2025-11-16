@@ -49,21 +49,17 @@ export const useWebSocket = ({
       // 커스텀 핸들러 실행 (ref를 통해 최신 버전 호출)
       onMessageReceivedRef.current?.(message)
 
-      console.log('🟢 [DEBUG] Before setQueryData')
-      // TanStack Query 캐시 업데이트 (Optimistic UI)
+      // ✅ FIX: WebSocket 메시지를 신뢰하여 캐시에만 추가 (실시간성 우선)
+      // invalidateQueries 제거로 불필요한 API 호출 방지 및 중복 메시지 해결
       queryClient.setQueryData<{
         pages: MessagesResponse[]
         pageParams: (number | undefined)[]
       }>(chatRoomKeys.messages(chatroomId), oldData => {
-        console.log('🟢 [DEBUG] Inside setQueryData updater')
-        console.log('🟢 [DEBUG] oldData:', oldData)
         if (!oldData) {
-          console.log('⚠️ [DEBUG] No oldData, returning')
+          console.warn('⚠️ No cache data available, skipping message update')
           return oldData
         }
 
-        // ✅ FIX: 음수 타임스탬프로 고유 ID 보장 (React Key 중복 방지)
-        // 음수를 사용하여 백엔드 ID(양수)와 구분, Date.now()로 고유성 보장
         const newMessage: Message = {
           messageId: message.messageId || -Date.now(),
           senderId: message.senderId,
@@ -74,7 +70,7 @@ export const useWebSocket = ({
           relatedExchangeStatusId: message.relatedExchangeStatusId,
         }
 
-        console.log('🟢 [DEBUG] Created newMessage:', newMessage)
+        console.log('💬 Adding message to cache:', newMessage.messageId)
 
         // 마지막 페이지에 메시지 추가
         const lastPageIndex = oldData.pages.length - 1
@@ -84,23 +80,11 @@ export const useWebSocket = ({
           message: [...updatedPages[lastPageIndex].message, newMessage],
         }
 
-        console.log(
-          '🟢 [DEBUG] Updated pages, message count:',
-          updatedPages[lastPageIndex].message.length
-        )
-        console.log('🟢 [DEBUG] Returning updated data')
         return {
           ...oldData,
           pages: updatedPages,
         }
       })
-
-      console.log('🟢 [DEBUG] Before invalidateQueries')
-      // ✅ FIX: 캐시 무효화로 리렌더링 트리거
-      queryClient.invalidateQueries({
-        queryKey: chatRoomKeys.messages(chatroomId),
-      })
-      console.log('🟢 [DEBUG] After invalidateQueries')
 
       // ✨ NEW: 교환 상태 변경 메시지면 /books 캐시 무효화
       const exchangeStatusTypes = [
