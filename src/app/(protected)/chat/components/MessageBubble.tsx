@@ -119,6 +119,7 @@ export default function MessageBubble({
             isOwn={isOwn}
             showAvatar={showAvatar}
             partnerName={partnerName}
+            partnerProfileImage={partnerProfileImage}
             chatroomId={chatroomId}
             messages={messages}
           />
@@ -155,6 +156,7 @@ export default function MessageBubble({
           isOwn={isOwn}
           showAvatar={showAvatar}
           partnerName={partnerName}
+          partnerProfileImage={partnerProfileImage}
           chatroomId={chatroomId}
           messages={messages}
         />

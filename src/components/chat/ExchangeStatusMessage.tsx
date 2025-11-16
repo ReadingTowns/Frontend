@@ -27,6 +27,7 @@ interface ExchangeStatusMessageProps {
   isOwn: boolean
   showAvatar: boolean
   partnerName?: string
+  partnerProfileImage?: string
   chatroomId?: number
   messages?: Message[]
 }
@@ -123,6 +124,7 @@ export function ExchangeStatusMessage({
   isOwn,
   showAvatar,
   partnerName,
+  partnerProfileImage,
   chatroomId,
   messages = [],
 }: ExchangeStatusMessageProps) {
@@ -299,9 +301,19 @@ export function ExchangeStatusMessage({
           className={`w-8 h-8 flex-shrink-0 ${showAvatar ? '' : 'invisible'}`}
         >
           {showAvatar && (
-            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-              <UserCircleIcon className="w-5 h-5 text-gray-500" />
-            </div>
+            <>
+              {partnerProfileImage && partnerProfileImage.trim() !== '' ? (
+                <img
+                  src={partnerProfileImage}
+                  alt={partnerName || '상대방'}
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                  <UserCircleIcon className="w-5 h-5 text-gray-500" />
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

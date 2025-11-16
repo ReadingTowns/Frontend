@@ -63,6 +63,10 @@ export class WebSocketService {
   // ✅ FIX: 채팅방별 핸들러 관리
   private roomHandlers = new Map<number, Set<MessageHandler>>()
 
+  // ✅ FIX: React Strict Mode 중복 연결 방지 가드
+  private isConnecting = false
+  private isDisconnecting = false
+
   // Heartbeat mechanism to keep connection alive
   private heartbeatInterval: NodeJS.Timeout | null = null
   private heartbeatIntervalMs = 25000 // 25초마다 ping (서버 30초 timeout보다 짧게 설정)
@@ -70,13 +74,52 @@ export class WebSocketService {
   /**
    * WebSocket 연결
    * @param roomId 채팅방 ID (필수)
+   *
+   * ✅ FIX: React Strict Mode 중복 연결 방지
+   * - isConnecting 가드로 동시 연결 요청 차단
+   * - 이미 연결 중이면 기존 연결 재사용
    */
   connect(roomId: number): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
+        // ✅ FIX: 이미 연결 중이거나 연결되어 있으면 재사용
+        if (this.isConnecting) {
+          console.log('⏳ [GUARD] Connection already in progress, waiting...')
+          // 기존 연결이 완료될 때까지 대기 (최대 3초)
+          const checkInterval = setInterval(() => {
+            if (
+              !this.isConnecting &&
+              this.socket?.readyState === WebSocket.OPEN
+            ) {
+              clearInterval(checkInterval)
+              console.log('✅ [GUARD] Reusing existing connection')
+              resolve()
+            }
+          }, 100)
+          setTimeout(() => {
+            clearInterval(checkInterval)
+            if (!this.socket || this.socket.readyState !== WebSocket.OPEN) {
+              reject(new Error('Connection timeout'))
+            }
+          }, 3000)
+          return
+        }
+
+        if (this.socket?.readyState === WebSocket.OPEN) {
+          console.log(
+            '✅ [GUARD] Already connected, reusing existing connection'
+          )
+          resolve()
+          return
+        }
+
+        // ✅ FIX: 연결 시작 플래그 설정
+        this.isConnecting = true
+
         const wsUrl = process.env.NEXT_PUBLIC_WS_URL
 
         if (!wsUrl) {
+          this.isConnecting = false
           throw new Error('NEXT_PUBLIC_WS_URL environment variable is not set')
         }
 
@@ -96,6 +139,7 @@ export class WebSocketService {
             this.messageHandlers.size
           )
           this.reconnectAttempts = 0
+          this.isConnecting = false // ✅ FIX: 연결 완료 플래그 해제
           this.startHeartbeat() // Start heartbeat to keep connection alive
           this.connectHandlers.forEach(handler => handler())
           resolve()
@@ -124,6 +168,7 @@ export class WebSocketService {
 
         this.socket.onerror = event => {
           console.error('❌ WebSocket error:', event)
+          this.isConnecting = false // ✅ FIX: 에러 시 플래그 해제
           this.errorHandlers.forEach(handler => handler(event))
           reject(event)
         }
@@ -379,9 +424,18 @@ export class WebSocketService {
    * Private: roomHandlers → messageHandlers 활성화
    * subscribe()로 등록된 핸들러들을 messageHandlers에 복사하여 실제로 메시지를 받도록 함
    *
+   * ✅ FIX: 멱등성 보장 - 기존 핸들러를 제거하고 현재 room의 핸들러만 활성화
+   * React Strict Mode에서 여러 번 호출되어도 중복 등록 방지
+   *
    * @param roomId 채팅방 ID
    */
   private activateHandlers(roomId: number): void {
+    // ✅ FIX: 기존 메시지 핸들러 모두 제거 (멱등성 보장)
+    this.messageHandlers.clear()
+    console.log(
+      '🧹 [PURE] Cleared all message handlers for idempotent activation'
+    )
+
     const roomHandlers = this.roomHandlers.get(roomId)
     if (roomHandlers && roomHandlers.size > 0) {
       console.log(
@@ -482,17 +536,48 @@ export class WebSocketService {
 
   /**
    * 연결 종료
+   *
+   * ✅ FIX: 비동기 close 처리 개선
+   * - WebSocket.close()는 비동기이므로 즉시 null 처리하지 않음
+   * - onclose 이벤트에서 cleanup 처리
+   * - isDisconnecting 플래그로 중복 disconnect 방지
    */
   disconnect(): void {
-    this.stopHeartbeat() // Stop heartbeat before closing connection
-    if (this.socket) {
-      this.socket.close()
-      this.socket = null
+    if (this.isDisconnecting) {
+      console.log('⏳ [GUARD] Disconnect already in progress')
+      return
     }
-    this.messageHandlers.clear()
-    this.errorHandlers.clear()
-    this.connectHandlers.clear()
-    this.disconnectHandlers.clear()
+
+    this.isDisconnecting = true
+    this.stopHeartbeat() // Stop heartbeat before closing connection
+
+    if (this.socket) {
+      // WebSocket close 완료 리스너 추가
+      const originalOnClose = this.socket.onclose
+      const socketRef = this.socket // ✅ FIX: null 할당 전에 참조 저장
+
+      this.socket.onclose = event => {
+        console.log('🧹 [DISCONNECT] WebSocket close event received')
+        this.socket = null
+        this.isDisconnecting = false
+        this.isConnecting = false
+        this.messageHandlers.clear()
+        this.errorHandlers.clear()
+        this.connectHandlers.clear()
+        this.disconnectHandlers.clear()
+
+        // 원래 onclose 핸들러도 실행 (저장된 참조 사용)
+        if (originalOnClose) {
+          originalOnClose.call(socketRef, event)
+        }
+      }
+
+      console.log('🔌 [DISCONNECT] Calling WebSocket.close()')
+      this.socket.close()
+    } else {
+      this.isDisconnecting = false
+      this.isConnecting = false
+    }
   }
 
   /**
