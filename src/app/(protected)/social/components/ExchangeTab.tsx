@@ -43,7 +43,7 @@ export default function ExchangeTab() {
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-white">
+    <div className="flex-1 flex flex-col bg-gray-50">
       {currentStep === 'search' && (
         <BookSearchStep onBookSelect={handleBookSelect} />
       )}
