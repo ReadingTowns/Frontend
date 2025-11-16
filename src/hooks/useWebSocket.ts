@@ -42,17 +42,26 @@ export const useWebSocket = ({
    */
   const handleMessageReceived = useCallback(
     (message: ChatMessage) => {
+      console.log('🟢 [DEBUG] handleMessageReceived called')
+      console.log('🟢 [DEBUG] Message:', message)
+      console.log('🟢 [DEBUG] chatroomId:', chatroomId)
       console.log('📨 Handling received message:', message)
 
       // 커스텀 핸들러 실행 (ref를 통해 최신 버전 호출)
       onMessageReceivedRef.current?.(message)
 
+      console.log('🟢 [DEBUG] Before setQueryData')
       // TanStack Query 캐시 업데이트 (Optimistic UI)
       queryClient.setQueryData<{
         pages: MessagesResponse[]
         pageParams: (number | undefined)[]
       }>(chatRoomKeys.messages(chatroomId), oldData => {
-        if (!oldData) return oldData
+        console.log('🟢 [DEBUG] Inside setQueryData updater')
+        console.log('🟢 [DEBUG] oldData:', oldData)
+        if (!oldData) {
+          console.log('⚠️ [DEBUG] No oldData, returning')
+          return oldData
+        }
 
         // ✅ FIX: 음수 타임스탬프로 고유 ID 보장 (React Key 중복 방지)
         // 음수를 사용하여 백엔드 ID(양수)와 구분, Date.now()로 고유성 보장
@@ -66,6 +75,8 @@ export const useWebSocket = ({
           relatedExchangeStatusId: message.relatedExchangeStatusId,
         }
 
+        console.log('🟢 [DEBUG] Created newMessage:', newMessage)
+
         // 마지막 페이지에 메시지 추가
         const lastPageIndex = oldData.pages.length - 1
         const updatedPages = [...oldData.pages]
@@ -74,11 +85,23 @@ export const useWebSocket = ({
           message: [...updatedPages[lastPageIndex].message, newMessage],
         }
 
+        console.log(
+          '🟢 [DEBUG] Updated pages, message count:',
+          updatedPages[lastPageIndex].message.length
+        )
+        console.log('🟢 [DEBUG] Returning updated data')
         return {
           ...oldData,
           pages: updatedPages,
         }
       })
+
+      console.log('🟢 [DEBUG] Before invalidateQueries')
+      // ✅ FIX: 캐시 무효화로 리렌더링 트리거
+      queryClient.invalidateQueries({
+        queryKey: chatRoomKeys.messages(chatroomId),
+      })
+      console.log('🟢 [DEBUG] After invalidateQueries')
 
       // ✨ NEW: 교환 상태 변경 메시지면 /books 캐시 무효화
       const exchangeStatusTypes = [
@@ -124,7 +147,7 @@ export const useWebSocket = ({
         // 연결 시도 (실패해도 핸들러는 등록해야 함)
         if (!websocketService.isConnected()) {
           try {
-            await websocketService.connect()
+            await websocketService.connect(chatroomId)
           } catch (connectError) {
             // 연결 실패해도 계속 진행 (자동 재연결이 처리함)
             console.warn(

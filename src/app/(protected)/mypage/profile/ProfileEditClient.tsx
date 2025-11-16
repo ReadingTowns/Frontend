@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
-import { showWarning, showToast } from '@/lib/toast'
+import { showWarning } from '@/lib/toast'
 import NicknameInput from '@/components/common/NicknameInput'
-import { ClockIcon, UserCircleIcon } from '@heroicons/react/24/outline'
+import ProfileImageUpload from '@/components/profile/ProfileImageUpload'
+import { ClockIcon } from '@heroicons/react/24/outline'
 import { api } from '@/lib/api'
 
 interface UserProfile {
@@ -103,24 +104,12 @@ export default function ProfileEditClient() {
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
           {/* 프로필 이미지 */}
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 bg-gray-200 rounded-full flex items-center justify-center mb-4">
-              {profileImage ? (
-                <img
-                  src={profileImage}
-                  alt="프로필"
-                  className="w-full h-full rounded-full object-cover"
-                />
-              ) : (
-                <UserCircleIcon className="w-16 h-16 text-gray-400" />
-              )}
-            </div>
-            <button
-              type="button"
-              className="text-primary-600 text-sm font-medium"
-              onClick={() => showToast('이미지 업로드 기능은 준비 중입니다')}
-            >
-              프로필 사진 변경
-            </button>
+            <ProfileImageUpload
+              currentImage={profileImage}
+              onImageChange={setProfileImage}
+              size="large"
+              editable={true}
+            />
           </div>
 
           {/* 닉네임 */}
