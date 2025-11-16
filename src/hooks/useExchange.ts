@@ -18,9 +18,9 @@ import type { CreateExchangeRequestRequest } from '@/types/chatroom'
 import { chatRoomKeys } from './useChatRoom'
 
 /**
- * Query Keys
+ * Query Keys (internal use only)
  */
-export const exchangeKeys = {
+const exchangeKeys = {
   all: ['exchange'] as const,
   availableBooks: (chatroomId: number) =>
     [...exchangeKeys.all, 'books', chatroomId] as const,

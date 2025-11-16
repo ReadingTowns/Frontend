@@ -63,32 +63,3 @@ async function fetchFromAladin(isbn: string): Promise<BookInfo | null> {
     throw new Error('알 수 없는 오류가 발생했습니다.')
   }
 }
-
-/**
- * ISBN 형식 검증
- * @param isbn - 검증할 ISBN
- * @returns 유효 여부
- */
-export function isValidISBN(isbn: string): boolean {
-  const cleanedISBN = isbn.replace(/[-\s]/g, '')
-  return cleanedISBN.length === 10 || cleanedISBN.length === 13
-}
-
-/**
- * ISBN 포맷팅 (하이픈 추가)
- * @param isbn - 포맷팅할 ISBN
- * @returns 포맷팅된 ISBN
- */
-export function formatISBN(isbn: string): string {
-  const cleanedISBN = isbn.replace(/[-\s]/g, '')
-
-  if (cleanedISBN.length === 13) {
-    // 978-89-1234-567-8 형식
-    return `${cleanedISBN.slice(0, 3)}-${cleanedISBN.slice(3, 5)}-${cleanedISBN.slice(5, 9)}-${cleanedISBN.slice(9, 12)}-${cleanedISBN.slice(12)}`
-  } else if (cleanedISBN.length === 10) {
-    // 89-1234-567-8 형식
-    return `${cleanedISBN.slice(0, 2)}-${cleanedISBN.slice(2, 6)}-${cleanedISBN.slice(6, 9)}-${cleanedISBN.slice(9)}`
-  }
-
-  return isbn
-}

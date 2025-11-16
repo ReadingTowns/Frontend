@@ -37,41 +37,23 @@ function hasFinalConsonant(str: string): boolean {
 }
 
 /**
- * 이/가 조사 선택
- * @param name 주어 (예: "홍길동", "내")
- * @returns "이" 또는 "가"
- *
- * @example
- * josa_i_ga('홍길동') // "이"
- * josa_i_ga('내')     // "가"
+ * 이/가 조사 선택 (internal use only)
  */
-export function josa_i_ga(name: string): string {
+function josa_i_ga(name: string): string {
   return hasFinalConsonant(name) ? '이' : '가'
 }
 
 /**
- * 을/를 조사 선택
- * @param name 목적어
- * @returns "을" 또는 "를"
- *
- * @example
- * josa_eul_reul('홍길동') // "을"
- * josa_eul_reul('내')     // "를"
+ * 을/를 조사 선택 (internal use only)
  */
-export function josa_eul_reul(name: string): string {
+function josa_eul_reul(name: string): string {
   return hasFinalConsonant(name) ? '을' : '를'
 }
 
 /**
- * 은/는 조사 선택
- * @param name 주제어
- * @returns "은" 또는 "는"
- *
- * @example
- * josa_eun_neun('홍길동') // "은"
- * josa_eun_neun('내')     // "는"
+ * 은/는 조사 선택 (internal use only)
  */
-export function josa_eun_neun(name: string): string {
+function josa_eun_neun(name: string): string {
   return hasFinalConsonant(name) ? '은' : '는'
 }
 

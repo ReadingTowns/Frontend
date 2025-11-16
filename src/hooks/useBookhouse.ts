@@ -11,9 +11,9 @@ import {
 } from '@/services/bookhouseService'
 
 /**
- * Query Keys
+ * Query Keys (internal use only)
  */
-export const bookhouseKeys = {
+const bookhouseKeys = {
   all: ['bookhouse'] as const,
   search: (query: string) => [...bookhouseKeys.all, 'search', query] as const,
   owners: (bookId: number) => [...bookhouseKeys.all, 'owners', bookId] as const,
