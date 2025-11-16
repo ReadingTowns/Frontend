@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ProfileStepProps } from '@/types/onboarding'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import NicknameInput from '@/components/common/NicknameInput'
+import ProfileImageUpload from '@/components/profile/ProfileImageUpload'
 import { api } from '@/lib/api'
 
 export default function ProfileStep({
@@ -57,6 +58,11 @@ export default function ProfileStep({
     onNicknameValidationChange(isValid)
   }
 
+  const handleImageChange = (url: string) => {
+    setLocalProfileImage(url)
+    onProfileImageChange(url)
+  }
+
   return (
     <div className="px-4 py-8">
       {/* 이전 버튼 */}
@@ -75,17 +81,15 @@ export default function ProfileStep({
 
       {/* 프로필 이미지 */}
       <div className="flex justify-center mb-6">
-        <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={
-              localProfileImage ||
-              'https://readingtown.s3.ap-northeast-2.amazonaws.com/readingtown_profile_gray.png'
-            }
-            alt="프로필 이미지"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        <ProfileImageUpload
+          currentImage={
+            localProfileImage ||
+            'https://readingtown.s3.ap-northeast-2.amazonaws.com/readingtown_profile_gray.png'
+          }
+          onImageChange={handleImageChange}
+          size="large"
+          editable={true}
+        />
       </div>
 
       {/* 닉네임 입력 */}

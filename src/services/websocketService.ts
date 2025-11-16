@@ -58,6 +58,7 @@ export class WebSocketService {
   private errorHandlers: Set<ErrorHandler> = new Set()
   private connectHandlers: Set<ConnectionHandler> = new Set()
   private disconnectHandlers: Set<ConnectionHandler> = new Set()
+  private currentRoomId!: number // 재연결을 위한 roomId 저장
 
   // Heartbeat mechanism to keep connection alive
   private heartbeatInterval: NodeJS.Timeout | null = null
@@ -65,8 +66,9 @@ export class WebSocketService {
 
   /**
    * WebSocket 연결
+   * @param roomId 채팅방 ID (필수)
    */
-  connect(): Promise<void> {
+  connect(roomId: number): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
         const wsUrl = process.env.NEXT_PUBLIC_WS_URL
@@ -75,11 +77,21 @@ export class WebSocketService {
           throw new Error('NEXT_PUBLIC_WS_URL environment variable is not set')
         }
 
-        console.log('🔌 Connecting to WebSocket:', wsUrl)
-        this.socket = new WebSocket(wsUrl)
+        // roomId를 쿼리 파라미터로 추가
+        const urlWithRoomId = `${wsUrl}?roomId=${roomId}`
+        this.currentRoomId = roomId // 재연결을 위해 저장
+
+        console.log('🔌 Connecting to WebSocket:', urlWithRoomId)
+        this.socket = new WebSocket(urlWithRoomId)
 
         this.socket.onopen = () => {
           console.log('✅ WebSocket connected')
+          console.log('🔵 [DEBUG] Socket readyState:', this.socket?.readyState)
+          console.log('🔵 [DEBUG] Socket URL:', this.socket?.url)
+          console.log(
+            '🔵 [DEBUG] Message handlers count:',
+            this.messageHandlers.size
+          )
           this.reconnectAttempts = 0
           this.startHeartbeat() // Start heartbeat to keep connection alive
           this.connectHandlers.forEach(handler => handler())
@@ -87,12 +99,23 @@ export class WebSocketService {
         }
 
         this.socket.onmessage = event => {
+          console.log('🔵 [DEBUG] onmessage event fired:', event)
+          console.log('🔵 [DEBUG] Raw event.data:', event.data)
           try {
             const data: ChatMessage = JSON.parse(event.data)
+            console.log('✅ [DEBUG] Successfully parsed message:', data)
             console.log('📨 Message received:', data)
+            console.log(
+              '🔵 [DEBUG] Calling handlers, count:',
+              this.messageHandlers.size
+            )
             this.messageHandlers.forEach(handler => handler(data))
           } catch (error) {
-            console.error('Failed to parse WebSocket message:', error)
+            console.error(
+              '❌ [DEBUG] Failed to parse WebSocket message:',
+              error
+            )
+            console.error('❌ [DEBUG] Raw data was:', event.data)
           }
         }
 
@@ -225,7 +248,7 @@ export class WebSocketService {
       )
 
       setTimeout(() => {
-        this.connect().catch(error => {
+        this.connect(this.currentRoomId).catch(error => {
           console.error('Reconnection failed:', error)
         })
       }, delay)
