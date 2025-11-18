@@ -4,13 +4,24 @@ import { useRecommendBooks } from '@/hooks/useRecommendBooks'
 import { BookCard } from '@/components/books/BookCard'
 import { GridBook } from '@/types/bookCard'
 
-export default function BookRecommendations() {
+interface BookRecommendationsProps {
+  title?: string
+  description?: string
+}
+
+export default function BookRecommendations({
+  title = '책 추천',
+  description,
+}: BookRecommendationsProps) {
   const { data, isLoading, error } = useRecommendBooks()
 
   if (isLoading) {
     return (
       <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">책 추천</h2>
+        <h2 className="text-xl font-bold mb-4">{title}</h2>
+        {description && (
+          <p className="text-sm text-gray-600 mb-4">{description}</p>
+        )}
         <div className="flex gap-4 overflow-x-auto pb-4">
           {[...Array(5)].map((_, i) => (
             <div
@@ -26,7 +37,10 @@ export default function BookRecommendations() {
   if (error) {
     return (
       <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">책 추천</h2>
+        <h2 className="text-xl font-bold mb-4">{title}</h2>
+        {description && (
+          <p className="text-sm text-gray-600 mb-4">{description}</p>
+        )}
         <p className="text-gray-500">책 추천을 불러올 수 없습니다</p>
       </div>
     )
@@ -35,7 +49,10 @@ export default function BookRecommendations() {
   if (!data || data.length === 0) {
     return (
       <div className="p-4">
-        <h2 className="text-xl font-bold mb-4">책 추천</h2>
+        <h2 className="text-xl font-bold mb-4">{title}</h2>
+        {description && (
+          <p className="text-sm text-gray-600 mb-4">{description}</p>
+        )}
         <p className="text-gray-500">추천 도서가 없습니다</p>
       </div>
     )
@@ -43,7 +60,10 @@ export default function BookRecommendations() {
 
   return (
     <div className="p-4 bg-white">
-      <h2 className="text-xl font-bold mb-4">책 추천</h2>
+      <h2 className="text-xl font-bold mb-4">{title}</h2>
+      {description && (
+        <p className="text-sm text-gray-600 mb-4">{description}</p>
+      )}
 
       <div className="flex gap-4 overflow-x-auto pb-4">
         {data.map(book => (

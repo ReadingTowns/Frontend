@@ -12,7 +12,17 @@ import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 
 type FilterType = 'taste' | 'local'
 
-export default function UserRecommendations() {
+interface UserRecommendationsProps {
+  title?: string
+  linkPath?: 'social' | 'library'
+  emptyMessage?: string
+}
+
+export default function UserRecommendations({
+  title = '사용자 추천',
+  linkPath = 'library',
+  emptyMessage = '추천 사용자가 없습니다',
+}: UserRecommendationsProps) {
   const [filter, setFilter] = useState<FilterType>('taste')
   const { data, isLoading, error } = useRecommendUsers(filter)
 
@@ -20,7 +30,7 @@ export default function UserRecommendations() {
     return (
       <div className="p-4 bg-white">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">사용자 추천</h2>
+          <h2 className="text-xl font-bold">{title}</h2>
           <FilterButtons filter={filter} setFilter={setFilter} />
         </div>
         <div className="flex gap-4 overflow-x-auto pb-4">
@@ -39,7 +49,7 @@ export default function UserRecommendations() {
     return (
       <div className="p-4 bg-white">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">사용자 추천</h2>
+          <h2 className="text-xl font-bold">{title}</h2>
           <FilterButtons filter={filter} setFilter={setFilter} />
         </div>
         <p className="text-gray-500">사용자 추천을 불러올 수 없습니다</p>
@@ -52,10 +62,10 @@ export default function UserRecommendations() {
     return (
       <div className="p-4 bg-white">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">사용자 추천</h2>
+          <h2 className="text-xl font-bold">{title}</h2>
           <FilterButtons filter={filter} setFilter={setFilter} />
         </div>
-        <p className="text-gray-500">추천 사용자가 없습니다</p>
+        <p className="text-gray-500">{emptyMessage}</p>
       </div>
     )
   }
@@ -63,7 +73,7 @@ export default function UserRecommendations() {
   return (
     <div className="p-4 bg-white">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-bold">사용자 추천</h2>
+        <h2 className="text-xl font-bold">{title}</h2>
         <FilterButtons filter={filter} setFilter={setFilter} />
       </div>
 
@@ -71,7 +81,7 @@ export default function UserRecommendations() {
         {data.map(user => (
           <Link
             key={user.memberId}
-            href={`/library/${user.memberId}`}
+            href={`/${linkPath}/${user.memberId}`}
             className="flex-shrink-0 w-48 border border-gray-200 bg-white rounded-lg hover:shadow-md transition-shadow"
           >
             <div className="p-4 flex flex-col h-[320px]">

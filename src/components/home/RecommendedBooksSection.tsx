@@ -1,6 +1,6 @@
 'use client'
 
-import { useBookRecommendations } from '@/hooks/useBookRecommendations'
+import { useRecommendBooks } from '@/hooks/useRecommendBooks'
 import { BookCard } from '@/components/books/BookCard'
 import { GridBook } from '@/types/bookCard'
 
@@ -35,11 +35,7 @@ export default function RecommendedBooksSection({
   showMoreButton = false,
   onMoreClick,
 }: RecommendedBooksSectionProps) {
-  const {
-    data: recommendations = [],
-    isLoading,
-    error,
-  } = useBookRecommendations()
+  const { data: recommendations = [], isLoading, error } = useRecommendBooks()
 
   // 표시할 책 목록 (limit이 있으면 제한)
   const displayBooks = limit ? recommendations.slice(0, limit) : recommendations
@@ -112,7 +108,15 @@ export default function RecommendedBooksSection({
           <BookCard
             key={book.bookId}
             variant="grid"
-            book={book as GridBook}
+            book={
+              {
+                ...book,
+                bookTitle: book.bookName,
+                bookCoverImage: book.bookImage,
+                relatedUserKeywords: book.relatedUserKeywords,
+                similarity: book.similarity,
+              } as GridBook
+            }
             columns={3}
             compact={true}
             aspectRatio="2/3"

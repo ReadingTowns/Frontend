@@ -28,7 +28,7 @@ import {
   completeExchange,
   returnExchange,
 } from '@/services/chatRoomService'
-import type { CreateChatRoomResponse } from '@/types/chatroom'
+import type { CreateChatRoomResponse, ChatRoomListItem } from '@/types/chatroom'
 
 // ============================================================================
 // Query Keys
@@ -179,17 +179,43 @@ export const useCreateChatRoom = () => {
 
 /**
  * 채팅룸 나가기 (삭제)
+ * - 낙관적 업데이트: 캐시에서 즉시 제거하여 에러 방지
+ * - 채팅룸 리스트 재조회로 서버 상태 동기화
  */
 export const useDeleteChatRoom = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (chatroomId: number) => deleteChatRoom(chatroomId),
-    onSuccess: (_, chatroomId) => {
-      // 채팅룸 리스트 갱신
-      queryClient.invalidateQueries({ queryKey: chatRoomKeys.list() })
-      // 해당 채팅룸 상세 캐시 제거
+    onMutate: async chatroomId => {
+      // 진행 중인 리스트 조회 취소 (race condition 방지)
+      await queryClient.cancelQueries({ queryKey: chatRoomKeys.list() })
+
+      // 이전 캐시 백업 (롤백용)
+      const previousList = queryClient.getQueryData<ChatRoomListItem[]>(
+        chatRoomKeys.list()
+      )
+
+      // 낙관적 업데이트: 해당 채팅방을 리스트에서 즉시 제거
+      queryClient.setQueryData<ChatRoomListItem[]>(
+        chatRoomKeys.list(),
+        old => old?.filter(room => room.chatroomId !== chatroomId) || []
+      )
+
+      // 해당 채팅룸 상세 캐시 제거 (에러 방지)
       queryClient.removeQueries({ queryKey: chatRoomKeys.detail(chatroomId) })
+
+      return { previousList }
+    },
+    onError: (_error, _chatroomId, context) => {
+      // 에러 발생 시 이전 캐시로 롤백
+      if (context?.previousList) {
+        queryClient.setQueryData(chatRoomKeys.list(), context.previousList)
+      }
+    },
+    onSuccess: () => {
+      // 서버 상태 동기화: 채팅룸 리스트 재조회
+      queryClient.invalidateQueries({ queryKey: chatRoomKeys.list() })
     },
   })
 }

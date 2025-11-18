@@ -5,7 +5,7 @@ import { useEffect, useMemo } from 'react'
 import BottomNavigation from '@/components/navigation/BottomNavigation'
 import CommonHeader from '@/components/layout/CommonHeader'
 import { FloatingButton } from '@/components/layout/FloatingButton'
-import { SparklesIcon } from '@heroicons/react/24/solid'
+import { RobotIcon } from '@/components/icons/RobotIcon'
 import { useHeader } from '@/contexts/HeaderContext'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -59,7 +59,7 @@ export default function ProtectedLayoutClient({
     const buttons: Array<{
       id: string
       variant: 'primary' | 'secondary' | 'neutral'
-      icon?: typeof SparklesIcon
+      icon?: React.ComponentType<{ className?: string }>
       text?: string
       href?: string
       ariaLabel: string
@@ -84,7 +84,8 @@ export default function ProtectedLayoutClient({
       buttons.push({
         id: 'chatbot',
         variant: 'primary',
-        icon: SparklesIcon,
+        icon: RobotIcon,
+        text: 'AI 챗봇',
         href: '/chatbot',
         ariaLabel: 'AI 챗봇 열기',
       })
@@ -108,7 +109,7 @@ export default function ProtectedLayoutClient({
       {floatingButtons.length > 0 && (
         <div className="fixed bottom-0 right-0 left-0 z-50 pointer-events-none">
           <div className="max-w-[430px] mx-auto relative h-0 pointer-events-none">
-            <div className="absolute bottom-20 right-4 flex flex-col-reverse space-y-3 space-y-reverse pointer-events-auto">
+            <div className="absolute bottom-28 right-4 flex flex-col-reverse space-y-3 space-y-reverse pointer-events-auto">
               {floatingButtons.map(button => (
                 <FloatingButton key={button.id} {...button} />
               ))}

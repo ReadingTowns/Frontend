@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useCreateChatRoom } from '@/hooks/useChatRoom'
 import { useUserRating } from '@/hooks/useUserRating'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import RatingModal from '@/components/user/RatingModal'
 import { Modal } from '@/components/common/Modal'
 import { ProfileSkeleton } from '@/components/ui/Skeleton'
@@ -17,6 +17,9 @@ import {
   MapPinIcon,
   StarIcon,
 } from '@heroicons/react/24/outline'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '@/lib/api'
+import FollowButton from '@/components/neighbors/FollowButton'
 
 export default function UserLibraryPage() {
   const params = useParams()
@@ -56,6 +59,70 @@ export default function UserLibraryPage() {
 
   // 별점 모달 상태 관리
   const [showRatingModal, setShowRatingModal] = useState(false)
+
+  // 팔로우 상태 관리
+  const queryClient = useQueryClient()
+  const [isFollowing, setIsFollowing] = useState(false)
+
+  // profile.following 값으로 초기화
+  useEffect(() => {
+    if (profile) {
+      setIsFollowing(profile.following ?? false)
+    }
+  }, [profile])
+
+  // 팔로우/언팔로우 Mutation (낙관적 업데이트 적용)
+  const followMutation = useMutation({
+    mutationFn: async (follow: boolean) => {
+      if (follow) {
+        return await api.post(`/api/v1/members/${userId}/follow`)
+      } else {
+        return await api.delete(`/api/v1/members/${userId}/follow`)
+      }
+    },
+    onMutate: async follow => {
+      // 진행 중인 쿼리 취소 (낙관적 업데이트와 충돌 방지)
+      await queryClient.cancelQueries({
+        queryKey: ['user', 'profile', userId],
+      })
+
+      // 이전 데이터 스냅샷 저장 (롤백용)
+      const previousData = queryClient.getQueryData(['user', 'profile', userId])
+
+      // 낙관적 업데이트: 프로필 데이터의 팔로우 상태 즉시 변경
+      queryClient.setQueryData(['user', 'profile', userId], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old
+        return {
+          ...old,
+          following: follow,
+          followed: follow,
+          isFollowing: follow,
+        }
+      })
+
+      // 로컬 상태도 즉시 업데이트 (빠른 UI 반응)
+      setIsFollowing(follow)
+
+      return { previousData }
+    },
+    onError: (_error, _follow, context) => {
+      // 에러 발생 시 이전 데이터로 롤백
+      if (context?.previousData) {
+        queryClient.setQueryData(
+          ['user', 'profile', userId],
+          context.previousData
+        )
+      }
+      // 로컬 상태 롤백
+      setIsFollowing(!isFollowing)
+
+      // API 에러는 api.ts에서 자동으로 토스트 표시
+    },
+    onSettled: () => {
+      // 성공/실패 관계없이 최종적으로 서버 데이터 재조회 (데이터 일관성 보장)
+      queryClient.invalidateQueries({ queryKey: ['user', 'profile', userId] })
+    },
+  })
 
   // 교환 신청 (채팅룸 생성) mutation
   const createChatRoomMutation = useCreateChatRoom()
@@ -165,12 +232,15 @@ export default function UserLibraryPage() {
           </div>
           {!isOwnLibrary && (
             <div className="flex flex-col gap-2">
-              <button className="px-4 py-2 bg-primary-100 text-primary-700 rounded-lg text-sm font-medium hover:bg-primary-200 transition-colors">
-                {profile.following ? '팔로잉' : '팔로우'}
-              </button>
+              <FollowButton
+                isFollowing={isFollowing}
+                isLoading={followMutation.isPending}
+                onClick={() => followMutation.mutate(!isFollowing)}
+                size="md"
+              />
               <button
                 onClick={() => setShowRatingModal(true)}
-                className="px-4 py-2 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1"
+                className="px-4 py-1.5 bg-yellow-50 text-yellow-700 rounded-lg text-sm font-medium hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1"
               >
                 <StarIcon className="w-4 h-4" />
                 별점 남기기

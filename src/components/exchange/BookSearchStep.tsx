@@ -81,13 +81,13 @@ export function BookSearchStep({ onBookSelect }: BookSearchStepProps) {
         data &&
         Array.isArray(data) &&
         data.length > 0 && (
-          <div className="divide-y divide-border">
+          <div className="p-4 space-y-3">
             {data.map(book => (
               <button
                 key={book.bookId}
                 onClick={() => onBookSelect(book)}
-                className="w-full px-4 py-3 flex gap-3 hover:bg-gray-50
-                         transition-colors text-left"
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md
+                         transition-all flex gap-3 text-left"
               >
                 {/* 책 표지 */}
                 <div className="relative w-12 h-16 flex-shrink-0">

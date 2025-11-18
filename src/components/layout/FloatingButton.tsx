@@ -35,28 +35,43 @@ export function FloatingButton({
     }
   )
 
-  const content = (
+  const buttonContent = (
     <>
       {Icon && <Icon className="h-7 w-7" />}
-      {text && <span className="text-3xl font-light">{text}</span>}
+      {text && !Icon && <span className="text-3xl font-light">{text}</span>}
     </>
   )
 
-  if (href) {
+  const button = href ? (
+    <Link href={href} aria-label={ariaLabel}>
+      <button className={baseClasses} aria-label={ariaLabel}>
+        {buttonContent}
+      </button>
+    </Link>
+  ) : (
+    <button onClick={onClick} className={baseClasses} aria-label={ariaLabel}>
+      {buttonContent}
+    </button>
+  )
+
+  // 아이콘과 텍스트가 모두 있는 경우 라벨을 버튼 위에 말풍선 스타일로 표시
+  if (Icon && text) {
     return (
-      <Link href={href} aria-label={ariaLabel}>
-        <button className={baseClasses} aria-label={ariaLabel}>
-          {content}
-        </button>
-      </Link>
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative">
+          {/* 말풍선 본체 */}
+          <div className="bg-primary-400 text-white text-xs font-semibold px-3 py-1 rounded-lg shadow-md whitespace-nowrap">
+            {text}
+          </div>
+          {/* 말풍선 화살표 (아래쪽) */}
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-primary-400 rotate-45" />
+        </div>
+        {button}
+      </div>
     )
   }
 
-  return (
-    <button onClick={onClick} className={baseClasses} aria-label={ariaLabel}>
-      {content}
-    </button>
-  )
+  return button
 }
 
 FloatingButton.displayName = 'FloatingButton'
