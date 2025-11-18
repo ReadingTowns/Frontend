@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import { useAuth } from '@/hooks/useAuth'
 import StartStep from '@/components/onboarding/StartStep'
@@ -29,6 +30,7 @@ const steps: OnboardingStep[] = [
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { isAuthenticated, isOnboardingCompleted, isLoading } = useAuth()
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('start')
   const [onboardingData, setOnboardingData] = useState<OnboardingData>({})
@@ -181,6 +183,10 @@ export default function OnboardingPage() {
             : onboardingData.availableTime,
         keywordIdList: onboardingData.keywordIds || [],
       })
+
+      // 온보딩 완료 후 인증 상태 쿼리 무효화
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'onboarding'] })
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'me'] })
 
       router.push('/home')
     } catch (error) {
