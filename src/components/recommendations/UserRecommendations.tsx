@@ -7,7 +7,6 @@ import {
   MapPinIcon,
   ClockIcon,
   BookOpenIcon,
-  StarIcon,
 } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 
@@ -72,7 +71,7 @@ export default function UserRecommendations() {
         {data.map(user => (
           <Link
             key={user.memberId}
-            href={`/social/${user.memberId}`}
+            href={`/library/${user.memberId}`}
             className="flex-shrink-0 w-48 border border-gray-200 bg-white rounded-lg hover:shadow-md transition-shadow"
           >
             <div className="p-4 flex flex-col h-[320px]">
