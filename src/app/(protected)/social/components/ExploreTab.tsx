@@ -8,7 +8,7 @@ import { SearchInput } from '@/components/common/SearchInput'
 import { TabContainer, TabEmptyState, TabLoadingState } from './common'
 import { socialKeys } from '@/types/social'
 import { api } from '@/lib/api'
-import SocialUserRecommendations from '@/components/social/SocialUserRecommendations'
+import UserRecommendations from '@/components/recommendations/UserRecommendations'
 
 interface User {
   memberId: number
@@ -48,7 +48,13 @@ export default function ExploreTab() {
       }
     >
       {/* 검색어 없을 때: 추천 이웃 표시 */}
-      {!searchQuery && <SocialUserRecommendations />}
+      {!searchQuery && (
+        <UserRecommendations
+          title="🎯 추천 이웃"
+          linkPath="library"
+          emptyMessage="아직 추천 이웃이 없습니다. 독서 키워드를 설정하면 취향 맞는 이웃을 추천해드려요."
+        />
+      )}
 
       {/* 검색 중 */}
       {searchQuery && searchLoading && <TabLoadingState />}

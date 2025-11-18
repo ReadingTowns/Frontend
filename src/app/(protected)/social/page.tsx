@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { Suspense } from 'react'
 import SocialClient from './SocialClient'
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 }
 
 export default function SocialPage() {
-  return <SocialClient />
+  return (
+    <Suspense fallback={<div>로딩 중...</div>}>
+      <SocialClient />
+    </Suspense>
+  )
 }

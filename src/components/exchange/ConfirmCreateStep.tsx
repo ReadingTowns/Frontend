@@ -5,10 +5,8 @@
  * Step 3: 확인 및 채팅방/교환요청 생성
  */
 
-import { useState } from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { showWarning } from '@/lib/toast'
 import { ChevronLeftIcon, StarIcon } from '@heroicons/react/24/outline'
 import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -17,7 +15,6 @@ import {
   createExchangeRequest,
   getChatRoomList,
 } from '@/services/chatRoomService'
-import { useMyBookhouse } from '@/hooks/useBookhouse'
 import type { BookSearchResult, BookhouseOwner } from '@/types/exchange'
 import type { CreateChatRoomRequest } from '@/types/chatroom'
 
@@ -34,15 +31,6 @@ export function ConfirmCreateStep({
 }: ConfirmCreateStepProps) {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const [selectedMyBook, setSelectedMyBook] = useState<BookSearchResult | null>(
-    null
-  )
-
-  // 내 서재 책 목록 조회
-  const { data: myBooks, isLoading: isLoadingMyBooks } = useMyBookhouse({
-    page: 0,
-    size: 50,
-  })
 
   // 채팅방 생성 mutation
   const createChatRoomMutation = useMutation({
@@ -92,14 +80,9 @@ export function ConfirmCreateStep({
   })
 
   const handleCreate = () => {
-    if (!selectedMyBook) {
-      showWarning('교환할 내 책을 선택해주세요')
-      return
-    }
-
     createChatRoomMutation.mutate({
       memberId: selectedOwner.memberId,
-      bookId: selectedMyBook.bookId,
+      bookId: selectedBook.bookId,
     })
   }
 
@@ -195,56 +178,27 @@ export function ConfirmCreateStep({
           </div>
         </div>
 
-        {/* 내 책 선택 */}
-        <div className="px-4 py-3">
-          <p className="text-xs text-gray-500 mb-2">교환할 내 책 선택</p>
-          {isLoadingMyBooks ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-400" />
-            </div>
-          ) : !myBooks || myBooks.content.length === 0 ? (
-            <div className="text-center py-8 text-gray-400">
-              <p className="text-sm">등록된 책이 없습니다</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {myBooks.content.map(book => (
-                <button
-                  key={book.bookId}
-                  onClick={() => setSelectedMyBook(book)}
-                  className={`w-full px-3 py-2 flex gap-3 rounded-lg border transition-all
-                    ${
-                      selectedMyBook?.bookId === book.bookId
-                        ? 'border-primary-400 bg-primary-50'
-                        : 'border-gray-200 hover:bg-gray-50'
-                    }`}
-                >
-                  <div className="relative w-10 h-14 flex-shrink-0">
-                    {book.bookImage ? (
-                      <Image
-                        src={book.bookImage}
-                        alt={book.bookName}
-                        fill
-                        className="object-cover rounded shadow-sm"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-                        <span className="text-gray-400 text-xs">📖</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0 text-left">
-                    <p className="text-sm font-medium text-gray-900 line-clamp-2">
-                      {book.bookName}
-                    </p>
-                    <p className="text-xs text-gray-500 mt-1 truncate">
-                      {book.author}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+        {/* 교환 확인 메시지 */}
+        <div className="px-4 py-6 flex-1 flex flex-col items-center justify-center">
+          <div className="max-w-sm text-center space-y-4">
+            <p className="text-base text-gray-700">
+              <span className="font-semibold text-gray-900">
+                {selectedOwner.memberName}
+              </span>
+              님에게
+            </p>
+            <p className="text-lg font-semibold text-primary-600">
+              &quot;{selectedBook.bookName}&quot;
+            </p>
+            <p className="text-base text-gray-700">
+              책의 교환을 신청하시겠습니까?
+            </p>
+            <p className="text-sm text-gray-500 pt-2">
+              교환 신청 시 채팅방이 생성되며,
+              <br />
+              상대방과 대화를 시작할 수 있습니다.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -252,7 +206,7 @@ export function ConfirmCreateStep({
       <div className="px-4 py-3 border-t border-border">
         <button
           onClick={handleCreate}
-          disabled={!selectedMyBook || createChatRoomMutation.isPending}
+          disabled={createChatRoomMutation.isPending}
           className="w-full px-4 py-3 bg-primary-400 hover:bg-primary-500
                    text-white rounded-lg font-medium
                    disabled:opacity-50 disabled:cursor-not-allowed

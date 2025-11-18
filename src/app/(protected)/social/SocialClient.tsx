@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useQueryClient } from '@tanstack/react-query'
 import { useHeaderConfig } from '@/hooks/useHeaderConfig'
 import SocialTabs from './components/SocialTabs'
@@ -12,8 +13,17 @@ import ExchangeTab from './components/ExchangeTab'
 import { socialKeys } from '@/types/social'
 import type { SocialTab } from '@/types/social'
 
+const VALID_TABS: SocialTab[] = [
+  'messages',
+  'following',
+  'followers',
+  'explore',
+  'exchange',
+]
+
 export default function SocialClient() {
-  const [activeTab, setActiveTab] = useState<SocialTab>('messages')
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const queryClient = useQueryClient()
 
   useHeaderConfig({
@@ -21,10 +31,24 @@ export default function SocialClient() {
     title: '소셜',
   })
 
-  const handleTabChange = (tab: SocialTab) => {
-    setActiveTab(tab)
+  // URL에서 탭 상태 읽기
+  const tabParam = searchParams.get('tab')
+  const activeTab: SocialTab = VALID_TABS.includes(tabParam as SocialTab)
+    ? (tabParam as SocialTab)
+    : 'messages'
 
-    // 탭 전환 시 즉시 데이터 fetch (refetchQueries로 변경)
+  // 잘못된 탭 값이면 기본 탭으로 리다이렉트
+  useEffect(() => {
+    if (tabParam && !VALID_TABS.includes(tabParam as SocialTab)) {
+      router.replace('/social?tab=messages', { scroll: false })
+    }
+  }, [tabParam, router])
+
+  // 탭 전환 시 URL 업데이트 및 데이터 fetch
+  const handleTabChange = (tab: SocialTab) => {
+    router.push(`/social?tab=${tab}`, { scroll: false })
+
+    // 탭 전환 시 즉시 데이터 fetch
     switch (tab) {
       case 'messages':
         queryClient.refetchQueries({ queryKey: socialKeys.conversations() })
@@ -42,27 +66,6 @@ export default function SocialClient() {
         break
     }
   }
-
-  // 초기 마운트 시 (뒤로가기 등) 현재 활성 탭의 데이터 즉시 fetch
-  useEffect(() => {
-    switch (activeTab) {
-      case 'messages':
-        queryClient.refetchQueries({ queryKey: socialKeys.conversations() })
-        break
-      case 'following':
-        queryClient.refetchQueries({ queryKey: socialKeys.following() })
-        break
-      case 'followers':
-        queryClient.refetchQueries({ queryKey: socialKeys.followers() })
-        break
-      case 'explore':
-        queryClient.refetchQueries({
-          queryKey: socialKeys.recommendations(),
-        })
-        break
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []) // 마운트 시 1회만 실행
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50">
